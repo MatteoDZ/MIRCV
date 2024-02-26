@@ -66,5 +66,7 @@ public class BlockReader {
 
         return docIds;
     }
+
+    // COMMENTO DI TEST
 }
 
