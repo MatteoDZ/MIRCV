@@ -135,6 +135,7 @@ public class Preprocess {
     public static String removeStopwords(String text) {
         String[] words = text.split("\\s+");
         StringBuilder filteredText = new StringBuilder();
+        System.out.println(stopwords);
         for (String word : words) {
             if (!stopwords.contains(word)) {
                 filteredText.append(word).append(" ");
@@ -206,7 +207,7 @@ public class Preprocess {
      * Set path of stopwords file for test
      * @param stopwords path of stopwords
      */
-    public static  void setPathStopwordsTest(String stopwords) {
+    public static void setPathStopwordsTest(String stopwords) {
         PATH_STOPWORDS = stopwords;
     }
 

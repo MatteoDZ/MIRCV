@@ -1,6 +1,6 @@
-package it.unipi.dii.aide.mircv.index;
+package test.java.it.unipi.dii.aide.mircv.index;
 
-import junit.framework.Test;
+import org.testng.annotations.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
@@ -25,7 +25,7 @@ public class AppTest
      */
     public static Test suite()
     {
-        return new TestSuite( AppTest.class );
+        return (Test) new TestSuite( AppTest.class );
     }
 
     /**
