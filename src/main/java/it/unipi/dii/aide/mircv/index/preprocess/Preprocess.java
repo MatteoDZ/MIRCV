@@ -135,7 +135,6 @@ public class Preprocess {
     public static String removeStopwords(String text) {
         String[] words = text.split("\\s+");
         StringBuilder filteredText = new StringBuilder();
-        System.out.println(stopwords);
         for (String word : words) {
             if (!stopwords.contains(word)) {
                 filteredText.append(word).append(" ");
