@@ -2,6 +2,7 @@ package it.unipi.dii.aide.mircv.index.binary;
 
 
 import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
+import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
 import it.unipi.dii.aide.mircv.index.posting.Term_PostingList;
 
 import java.io.*;
@@ -29,7 +30,7 @@ public class BinaryFile {
             MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(),inv.calculateDimensionByte(2,4,2)); // errore nella scelta della dimensione . non dovrebbe avere il +10000. con +10000 da ancora errore quindi il tasso di errore Ã¨ molto alto. indagare
             List<String> sorted_keys=inv.sort();
             for(String key: sorted_keys){
-                Term_PostingList tpl=inv.searchTerm(key);
+                PostingIndex tpl=inv.searchTerm(key);
                 String termine=tpl.getTerm();
                 List<Integer> doc_ids=tpl.getDocIds();
                 List<Integer> freqs=tpl.getFrequencies();
@@ -68,8 +69,8 @@ public class BinaryFile {
      * @return The list of Term_PostingList objects read from the file.
      * @throws RuntimeException if an error occurs while reading the file.
      */
-    public static List<Term_PostingList> readBlock(String path) {
-        List<Term_PostingList> invertedIndexBlock = new ArrayList<>();
+    public static List<PostingIndex> readBlock(String path) {
+        List<PostingIndex> invertedIndexBlock = new ArrayList<>();
         try (InputStream input = new FileInputStream(path);
              DataInputStream inputStream = new DataInputStream(input)) {
             while(inputStream.available()>0){
@@ -96,7 +97,7 @@ public class BinaryFile {
                 }
 
                 // Create a new Term_PostingList object and add it to the list
-                invertedIndexBlock.add(new Term_PostingList(termBuilder.toString(), docIds, frequencies));
+                invertedIndexBlock.add(new PostingIndex(termBuilder.toString(), docIds, frequencies));
                 // System.out.println(new Term_PostingList(termBuilder.toString(), docIds, frequencies).toString());
             }
             return invertedIndexBlock;

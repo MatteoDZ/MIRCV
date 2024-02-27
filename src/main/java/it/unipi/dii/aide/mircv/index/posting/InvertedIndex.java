@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class InvertedIndex {
-    private final HashMap<String, Term_PostingList> Block;
-    public HashMap<String, Term_PostingList> getInvertedIndexBlock() {
+    private final HashMap<String, PostingIndex> Block;
+    public HashMap<String, PostingIndex> getInvertedIndexBlock() {
         return Block;
     }
     public InvertedIndex(){
@@ -21,11 +21,16 @@ public class InvertedIndex {
      */
     public void add(List<String> words, int doc_id){
         for(String term : words) {
-            Term_PostingList tpl = searchTerm(term);
+            /*Term_PostingList tpl = searchTerm(term);
             if (tpl == null) {
                 Block.put(term, new Term_PostingList(term, doc_id, 1));
             } else {
                 tpl.addPosting(doc_id);
+            }*/
+            if (Block.containsKey(term)) {
+                Block.get(term).addPosting(doc_id);
+            } else {
+                Block.put(term, new PostingIndex(term));
             }
         }
     }
@@ -54,7 +59,7 @@ public class InvertedIndex {
      * @param  term  the term to search for
      * @return       the posting list associated with the term
      */
-    public Term_PostingList searchTerm(String term){
+    public PostingIndex searchTerm(String term){
         return Block.get(term);
     }
 

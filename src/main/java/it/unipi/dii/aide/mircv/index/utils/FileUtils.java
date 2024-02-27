@@ -1,6 +1,8 @@
 package it.unipi.dii.aide.mircv.index.utils;
 
 import it.unipi.dii.aide.mircv.index.config.Configuration;
+import it.unipi.dii.aide.mircv.index.posting.Posting;
+import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
 import it.unipi.dii.aide.mircv.index.posting.Term_PostingList;
 
 import java.io.*;
@@ -140,7 +142,7 @@ public class FileUtils {
      * @param  path  the file path to write the Term_PostingList to
      * @param  term  the Term_PostingList to write
      */
-    public static void writeTerm(String path, Term_PostingList term) {
+    public static void writeTerm(String path, PostingIndex term) {
         try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(path), StandardOpenOption.APPEND)) {
             writer.write(term.toString());
             writer.newLine();
@@ -155,14 +157,14 @@ public class FileUtils {
      * @param  path  the path of the file to be read
      * @return       a list of Term_PostingList objects
      */
-    public static List<Term_PostingList> read(String path) {
-        List<Term_PostingList> list = new ArrayList<>();
+    public static List<PostingIndex> read(String path) {
+        List<PostingIndex> list = new ArrayList<>();
         try(BufferedReader reader = Files.newBufferedReader(Paths.get(path))) {
             for (String line; (line = reader.readLine()) != null; ) {
                 String term = line.split("\t")[0];
                 List<Integer> docIds = Arrays.stream(line.split(" ")[1].replace("[", "").replace("]", "").split(",")).map(Integer::parseInt).toList();
                 List<Integer> frequencies = Arrays.stream(line.split(" ")[2].replace("[", "").replace("]", "").split(",")).map(Integer::parseInt).toList();
-                list.add(new Term_PostingList(term, docIds, frequencies));
+                list.add(new PostingIndex(term, docIds, frequencies));
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
