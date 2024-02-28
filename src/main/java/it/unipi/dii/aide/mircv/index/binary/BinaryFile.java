@@ -40,6 +40,7 @@ public class BinaryFile {
             //mbb.putInt(0); // esperimento per vedere se da ancora errore in lettura
 
         } catch (IOException e) {
+            System.out.println(e);
             throw new RuntimeException("An error occurred while writing to the binary file.");
         }
     }

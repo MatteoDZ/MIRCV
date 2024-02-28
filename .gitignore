@@ -1,4 +1,4 @@
 # Project exclude paths
 /target/
-collection.tar.gz
+data/collection.tar.gz
 config.properties

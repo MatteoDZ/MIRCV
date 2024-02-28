@@ -8,10 +8,8 @@ import it.unipi.dii.aide.mircv.index.preprocess.Preprocess;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+
+import java.io.*;
 import java.util.List;
 import java.util.Objects;
 
@@ -25,6 +23,10 @@ public class Main {
     public static void main(String[] args) throws IOException {
         //FileUtils.deleteDirectory(Configuration.DIRECTORY_TEMP_FILES);
         //FileUtils.createDirectory(Configuration.DIRECTORY_TEMP_FILES);
+
+        if (!FileUtils.searchIfExists(Configuration.DIRECTORY_TEMP_FILES)) {
+            FileUtils.createDirectory(Configuration.DIRECTORY_TEMP_FILES);
+        }
 
         System.out.println(FileUtils.getNumberFiles(Configuration.DIRECTORY_TEMP_FILES));
 
