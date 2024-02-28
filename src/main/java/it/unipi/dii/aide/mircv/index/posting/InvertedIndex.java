@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 public class InvertedIndex {
     private final HashMap<String, PostingIndex> Block;
+
     public HashMap<String, PostingIndex> getInvertedIndexBlock() {
         return Block;
     }
@@ -21,16 +22,10 @@ public class InvertedIndex {
      */
     public void add(List<String> words, int doc_id){
         for(String term : words) {
-            /*Term_PostingList tpl = searchTerm(term);
-            if (tpl == null) {
-                Block.put(term, new Term_PostingList(term, doc_id, 1));
-            } else {
-                tpl.addPosting(doc_id);
-            }*/
-            if (Block.containsKey(term)) {
+            if (isPresent(term)) {
                 Block.get(term).addPosting(doc_id);
             } else {
-                Block.put(term, new PostingIndex(term));
+                Block.put(term, new PostingIndex(term, doc_id));
             }
         }
     }
@@ -59,7 +54,7 @@ public class InvertedIndex {
      * @param  term  the term to search for
      * @return       the posting list associated with the term
      */
-    public PostingIndex searchTerm(String term){
+    public PostingIndex searchTerm(String term) throws NullPointerException{
         return Block.get(term);
     }
 
@@ -69,9 +64,7 @@ public class InvertedIndex {
      * @param  term  the term to check
      * @return       true if the term is present, false otherwise
      */
-    public boolean isPresent(String term){
-        return Block.containsKey(term);
-    }
+    public boolean isPresent(String term) {return Block.containsKey(term);}
 
     /**
      * Calculates the size of the inverted index block.

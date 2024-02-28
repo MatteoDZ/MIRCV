@@ -62,6 +62,11 @@ public class PostingIndex {
         this.term = term;
     }
 
+    public PostingIndex(String term, Integer docId) {
+        this.term = term;
+        addPosting(docId);
+    }
+
     /**
      * Gets the currently active posting.
      *
