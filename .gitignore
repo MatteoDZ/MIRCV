@@ -2,3 +2,5 @@
 /target/
 data/collection.tar.gz
 config.properties
+/.vscode/
+/.idea/
