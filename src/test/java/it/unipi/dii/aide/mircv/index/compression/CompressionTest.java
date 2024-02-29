@@ -11,7 +11,23 @@ class CompressionTest {
 
 
     @Test
-    void VariableByteTest() {
-        //assertEquals(VariableByteCompressor.encode([824, 5]), [6, 184, 133])
+    void VariableByteEncodeTest() {
+        byte[] arr = new byte[]{6, (byte) 184, (byte) 133};
+        byte[] arr2 = VariableByteCompressor.encode(List.of(824, 5));
+
+        for (int i = 0; i < arr.length; i++) {
+            assertEquals(arr[i], arr2[i]);
+        }
+    }
+
+    @Test
+    void VariableByteDecodeTest() {
+        Integer[] arr = new Integer[]{824, 5};
+        byte[] tbd = new byte[]{(byte) 6, (byte) 184, (byte) 133};
+        List<Integer> arr2 = VariableByteCompressor.decode(tbd);
+
+        for (int i = 0; i < arr.length; i++) {
+            assertEquals(arr[i], arr2.get(i));
+        }
     }
 }

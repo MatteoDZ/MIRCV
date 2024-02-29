@@ -1,4 +1,4 @@
-package test.java.it.unipi.dii.aide.mircv.index;
+package it.unipi.dii.aide.mircv.index;
 
 import org.testng.annotations.Test;
 import junit.framework.TestCase;
