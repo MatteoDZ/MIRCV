@@ -3,21 +3,39 @@ package it.unipi.dii.aide.mircv.index.compression;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CompressionTest {
 
 
     @Test
-    void VariableByteEncodeTest() {
-        byte[] arr = new byte[]{6, (byte) 184, (byte) 133};
-        byte[] arr2 = VariableByteCompressor.encode(List.of(824, 5));
+    public void testConvertToUnary() {
+        int[] input = {1, 5, 10, 15, 20};
+        byte[] expected = {(byte) 0b01111011, (byte) 0b11111110, (byte) 0b11111111,
+                (byte) 0b11111101, (byte) 0b11111111, (byte) 0b11111111, (byte) 0b11000000};
+        byte[] result = UnaryCompressor.integerArrayCompression(input);
+        assertArrayEquals(expected, result);
+    }
 
-        assertArrayEquals(arr, arr2);
+    @Test
+    public void testConvertFromUnary() {
+        byte[] input = {(byte) 0b01111011, (byte) 0b11111110, (byte) 0b11111111,
+                (byte) 0b11111101, (byte) 0b11111111, (byte) 0b11111111, (byte) 0b11111110};
+        assertEquals(List.of((short)1, (short)5, (short)10, (short)15, (short)25)
+                , UnaryCompressor.integerArrayDecompression(input));
+    }
+
+
+    @Test
+    void VariableByteEncodeTest() {
 
         int[] input = {1, 127, 128, 255, 256, 16383, 16384};
         byte[][] expected = {
@@ -29,36 +47,62 @@ class CompressionTest {
                 {(byte) 0b01111111, (byte) 0b11111111},
                 {(byte) 0b00000001, (byte) 0b10000000, (byte) 0b10000000}
         };
+        byte[] expectedA = {
+                (byte) 0b00000001,
+                (byte) 0b01111111,
+                (byte) 0b00000001, (byte) 0b10000000,
+                (byte) 0b00000001, (byte) 0b11111111,
+                (byte) 0b00000010, (byte) 0b10000000,
+                (byte) 0b01111111, (byte) 0b11111111,
+                (byte) 0b00000001, (byte) 0b10000000, (byte) 0b10000000
+        };
+
+        assertArrayEquals(expectedA,
+                VariableByteCompressor.encode(List.of(1, 127, 128, 255, 256, 16383, 16384)));
+
         for (int i = 0; i < input.length; i++) {
             byte[] result = VariableByteCompressor.encode(Collections.singletonList(input[i]));
             assertArrayEquals(expected[i], result);
         }
+
     }
 
     @Test
     void VariableByteDecodeTest() {
-        Integer[] arr = new Integer[]{824, 5};
-        byte[] tbd = new byte[]{(byte) 6, (byte) 184, (byte) 133};
-        List<Integer> arr2 = VariableByteCompressor.decode(tbd);
-
-        assertArrayEquals(arr, arr2.toArray());
-
-        byte[][] input = {
-                {(byte) 0b00000001},
-                {(byte) 0b01111111},
-                {(byte) 0b00000001, (byte) 0b10000000},
-                {(byte) 0b00000001, (byte) 0b11111111},
-                {(byte) 0b00000010, (byte) 0b10000000},
-                {(byte) 0b01111111, (byte) 0b11111111},
-                {(byte) 0b00000001, (byte) 0b10000000, (byte) 0b10000000}
+        byte[] inputA = {
+                (byte) 0b00000001,
+                (byte) 0b01111111,
+                (byte) 0b00000001, (byte) 0b10000000,
+                (byte) 0b00000001, (byte) 0b11111111,
+                (byte) 0b00000010, (byte) 0b10000000,
+                (byte) 0b01111111, (byte) 0b11111111,
+                (byte) 0b00000001, (byte) 0b10000000, (byte) 0b10000000
         };
-        int[] expected = {1, 127, 128, 255, 256, 16383, 16384};
 
-        for (int i = 0; i < input.length; i++) {
-            System.out.println(Arrays.toString(input[i]));
-            List<Integer> result = VariableByteCompressor.decode(input[i]);
-            System.out.println(result);
-            assertEquals(expected[i], result.get(i));
-        }
+        int[] expected = {1, 127, 128, 255, 256, 16383, 16384};
+        assertEquals(List.of(1, 127, 128, 255, 256, 16383, 16384),
+                VariableByteCompressor.decompressArray(inputA));
     }
+
+
+
+
+    @Test
+    //test the variable byte compressor
+    public void testVariableByteCompressor(){
+        //test compressInt
+        byte[] expected = {5, 2, -72, 4, -125, -48}; //expected outputs
+        assertArrayEquals(expected, VariableByteCompressor.encode(List.of(5, 312, 66000)));
+
+        //test compressInt
+        byte[] expected2 = {5, 2, -72, 4, -125, -48, 1, -127, 2, -128, -126}; //expected outputs
+        assertArrayEquals(expected2, VariableByteCompressor.encode(List.of(5, 312, 66000, 129, 32770)));
+
+        //test compressArrayInt
+        assertEquals(List.of(5, 312, 66000, 129, 32770),
+                VariableByteCompressor.decompressArray(new byte[]{5, 2, -72, 4, -125, -48, 1, -127, 2, -128, -126}));
+    }
+
+
+
 }

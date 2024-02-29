@@ -1,6 +1,5 @@
 # Project exclude paths
 /target/
 data/collection.tar.gz
-config.properties
 /.vscode/
 /.idea/

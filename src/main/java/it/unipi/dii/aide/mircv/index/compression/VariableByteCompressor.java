@@ -12,6 +12,7 @@ public class VariableByteCompressor {
 
 
 
+
     public static List<Integer> integerArrayDecompressionGiusta(byte[] toBeDecompressed){
 
         List<Integer> decompressedArray=new ArrayList<Integer>();
@@ -66,7 +67,7 @@ public class VariableByteCompressor {
      * @param n the number to be encoded
      * @return the encoded byte array
      */
-    private static byte[] encodeNumber(int n) {
+    public static byte[] encodeNumber(int n) {
         // If the number is 0, return a byte array with a single element 0
         if (n == 0) {
             return new byte[]{0};
@@ -83,12 +84,17 @@ public class VariableByteCompressor {
 
         // Encode the number by dividing it by 128 and storing the remainder in the byte array
         do {
-            rv[j--] = (byte) (n % 128);
+            byte currentByte = (byte) (n % 128);
             n /= 128;
+            if(j>0){
+                // Add 128 to the last element of the byte array to indicate the end of the encoded number
+                currentByte |= (byte) 128;
+            }
+            rv[j] = currentByte;
+            j--;
         } while (j >= 0);
 
-        // Add 128 to the last element of the byte array to indicate the end of the encoded number
-        rv[i - 1] += (byte) 128;
+
 
         // Return the encoded byte array
         return rv;
@@ -170,6 +176,33 @@ public class VariableByteCompressor {
 
         return numbers;
     }
+
+
+    public static List<Integer> decompressArray(byte[] compressedData){
+
+        ArrayList<Integer> decompressedArray = new ArrayList<>();
+
+        int i = 0; //index of the current byte
+        int number = 0; //number to decompress
+
+        while (i<compressedData.length) {
+            if (compressedData[i] >= 0) {
+                if(i>0){ //if the current byte is positive, and it is not the first byte, we have to add the number to the array, because it is the first byte of the next number
+                    decompressedArray.add(number); //add the number to the array
+                    number = 0; //reset the number
+                }
+                number = 128 * number + compressedData[i]; //multiply the number by 128 and add the current byte
+
+            } else {
+                number = 128 * number + (compressedData[i] + 128); //multiply the number by 128 and add the current byte, adding 128 because the current byte is negative
+            }
+            i++;
+        }
+        decompressedArray.add(number); //the last values is not been added in the cycle for, so we add it here
+
+        return decompressedArray;
+    }
+
 
 
 }
