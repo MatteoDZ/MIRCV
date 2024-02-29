@@ -78,8 +78,6 @@ class CompressionTest {
                 (byte) 0b01111111, (byte) 0b11111111,
                 (byte) 0b00000001, (byte) 0b10000000, (byte) 0b10000000
         };
-
-        int[] expected = {1, 127, 128, 255, 256, 16383, 16384};
         assertEquals(List.of(1, 127, 128, 255, 256, 16383, 16384),
                 VariableByteCompressor.decompressArray(inputA));
     }
@@ -101,6 +99,22 @@ class CompressionTest {
         //test compressArrayInt
         assertEquals(List.of(5, 312, 66000, 129, 32770),
                 VariableByteCompressor.decompressArray(new byte[]{5, 2, -72, 4, -125, -48, 1, -127, 2, -128, -126}));
+    }
+
+
+    @Test
+    public void testCoherence(){
+        assertEquals(List.of(5, 312, 66000),
+                VariableByteCompressor.decompressArray(VariableByteCompressor.encode(List.of(5, 312, 66000))));
+        assertEquals(List.of(1, 127, 128, 255, 256, 16383, 16384),
+                VariableByteCompressor.decompressArray(VariableByteCompressor.encode(List.of(1, 127, 128, 255, 256, 16383, 16384))));
+
+
+        assertEquals(List.of(5, 312, 66000),
+                UnaryCompressor.integerArrayDecompression(UnaryCompressor.integerArrayCompression(new int[]{5, 312, 66000})));
+        assertEquals(List.of(1, 127, 128, 255, 256, 16383, 16384),
+                UnaryCompressor.integerArrayDecompression(UnaryCompressor.integerArrayCompression(new int[]{1, 127, 128, 255, 256, 16383, 16384})));
+
     }
 
 

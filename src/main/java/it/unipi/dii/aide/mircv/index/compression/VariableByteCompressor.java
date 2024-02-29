@@ -11,8 +11,6 @@ import static java.lang.Math.log;
 public class VariableByteCompressor {
 
 
-
-
     public static List<Integer> integerArrayDecompressionGiusta(byte[] toBeDecompressed){
 
         List<Integer> decompressedArray=new ArrayList<Integer>();
