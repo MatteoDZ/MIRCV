@@ -1,7 +1,6 @@
 package it.unipi.dii.aide.mircv.index.compression;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.nio.ByteBuffer;
 
 import static java.lang.Math.log;
@@ -134,8 +133,24 @@ public class VariableByteCompressor {
         List<Integer> numbers = new ArrayList<>();
         int n = 0;
 
+        List<Byte> lst = new ArrayList<>();
+        for (byte b : toBeDecompressed) {
+            lst.add(b);
+        }
+
+        Iterator<Byte> it = lst.iterator();
+
+        // TODO: Pensare a tutte le casisitiche per la decompressione degli array di byte
+
+        while(it.hasNext()) {
+            Byte elem = it.next();
+            System.out.println(elem);
+        }
+
+
         // Iterate over each byte in the array
         for (byte b : toBeDecompressed) {
+            System.out.println("STO DECOMPRIMENDO " + b);
             // If the byte is 0 and the current number is 0, add 0 to the numbers list
             if (b == 0 && n == 0) {
                 numbers.add(0);
@@ -143,6 +158,7 @@ public class VariableByteCompressor {
             // If the byte is less than 128, update the current number by multiplying it by 128 and adding the byte value
             else if ((b & 0xff) < 128) {
                 n = 128 * n + b;
+                System.out.println("PRINTANDO N " + n);
             }
             // If the byte is greater than or equal to 128, calculate the decompressed number and add it to the numbers list
             else {
