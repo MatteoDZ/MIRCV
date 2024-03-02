@@ -177,22 +177,22 @@ public class VariableByteCompressor {
 
 
     public static List<Integer> decompressArray(byte[] compressedData){
-
-        ArrayList<Integer> decompressedArray = new ArrayList<>();
-
+        List<Integer> decompressedArray = new ArrayList<>();
         int i = 0; //index of the current byte
         int number = 0; //number to decompress
 
-        while (i<compressedData.length) {
-            if (compressedData[i] >= 0) {
-                if(i>0){ //if the current byte is positive, and it is not the first byte, we have to add the number to the array, because it is the first byte of the next number
+        for (byte b: compressedData) {
+            if (b >= 0) {
+                System.out.println("Positive byte: " + String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0') + " "+ b +" "+i);
+                if(i > 0){ //if the current byte is positive, and it is not the first byte, we have to add the number to the array, because it is the first byte of the next number
                     decompressedArray.add(number); //add the number to the array
                     number = 0; //reset the number
                 }
-                number = 128 * number + compressedData[i]; //multiply the number by 128 and add the current byte
+                number = 128 * number + b; //multiply the number by 128 and add the current byte
 
             } else {
-                number = 128 * number + (compressedData[i] + 128); //multiply the number by 128 and add the current byte, adding 128 because the current byte is negative
+                System.out.println("Negative byte: " + String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0') + " "+ b +" "+i);
+                number = 128 * number + (b + 128); //multiply the number by 128 and add the current byte, adding 128 because the current byte is negative
             }
             i++;
         }
