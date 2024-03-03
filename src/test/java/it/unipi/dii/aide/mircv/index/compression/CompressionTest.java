@@ -30,7 +30,7 @@ class CompressionTest {
         byte[] input = {(byte) 0b01111011, (byte) 0b11111110, (byte) 0b11111111,
                 (byte) 0b11111101, (byte) 0b11111111, (byte) 0b11111111, (byte) 0b11111110};
         assertEquals(List.of((short)1, (short)5, (short)10, (short)15, (short)25)
-                , UnaryCompressor.integerArrayDecompression(input));
+                , UnaryCompressor.integerArrayDecompression(input, 5));
     }
 
 
@@ -79,7 +79,7 @@ class CompressionTest {
                 (byte) 0b00000001, (byte) 0b10000000, (byte) 0b10000000
         };
         assertEquals(List.of(1, 127, 128, 255, 256, 16383, 16384),
-                VariableByteCompressor.decompressArray(inputA));
+                VariableByteCompressor.decode(inputA));
     }
 
 
@@ -98,24 +98,21 @@ class CompressionTest {
 
         //test compressArrayInt
         assertEquals(List.of(5, 312, 66000, 129, 32770),
-                VariableByteCompressor.decompressArray(new byte[]{5, 2, -72, 4, -125, -48, 1, -127, 2, -128, -126}));
+                VariableByteCompressor.decode(new byte[]{5, 2, -72, 4, -125, -48, 1, -127, 2, -128, -126}));
     }
 
 
     @Test
     public void testCoherence(){
         assertEquals(List.of(5, 312, 66000),
-                VariableByteCompressor.decompressArray(VariableByteCompressor.encode(List.of(5, 312, 66000))));
+                VariableByteCompressor.decode(VariableByteCompressor.encode(List.of(5, 312, 66000))));
         assertEquals(List.of(1, 127, 128, 255, 256, 16383, 16384),
-                VariableByteCompressor.decompressArray(VariableByteCompressor.encode(List.of(1, 127, 128, 255, 256, 16383, 16384))));
+                VariableByteCompressor.decode(VariableByteCompressor.encode(List.of(1, 127, 128, 255, 256, 16383, 16384))));
 
-        assertEquals(List.of(5, 824, 5),
-                (VariableByteCompressor.decompressArray(VariableByteCompressor.encode(List.of(5,824, 5)))));
-
-        /*assertEquals(List.of(5, 312, 66000),
-                UnaryCompressor.integerArrayDecompression(UnaryCompressor.integerArrayCompression(new int[]{5, 312, 66000})));
+        assertEquals(List.of(5, 312, 32000),
+                UnaryCompressor.integerArrayDecompression(UnaryCompressor.integerArrayCompression(new int[]{5, 312, 32000}), 3));
         assertEquals(List.of(1, 127, 128, 255, 256, 16383, 16384),
-                UnaryCompressor.integerArrayDecompression(UnaryCompressor.integerArrayCompression(new int[]{1, 127, 128, 255, 256, 16383, 16384})));*/
+                UnaryCompressor.integerArrayDecompression(UnaryCompressor.integerArrayCompression(new int[]{1, 127, 128, 255, 256, 16383, 16384}), 3));
 
     }
 

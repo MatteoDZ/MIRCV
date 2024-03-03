@@ -1,9 +1,7 @@
 package it.unipi.dii.aide.mircv.index.utils;
 
 import it.unipi.dii.aide.mircv.index.config.Configuration;
-import it.unipi.dii.aide.mircv.index.posting.Posting;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
-import it.unipi.dii.aide.mircv.index.posting.Term_PostingList;
 
 import java.io.*;
 import java.nio.file.Files;

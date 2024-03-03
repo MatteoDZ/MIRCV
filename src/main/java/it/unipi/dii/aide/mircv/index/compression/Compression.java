@@ -2,9 +2,9 @@ package it.unipi.dii.aide.mircv.index.compression;
 
 import java.util.List;
 
-public interface Compression {
+public interface Compression<B,I> {
 
-    byte[] encode(List<Integer> input);
+    B[] encode(List<I> input);
 
-    List<Integer>[] decode(byte[] input);
+    List<I>[] decode(B[] input);
 }

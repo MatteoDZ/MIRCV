@@ -108,7 +108,7 @@ public class FrequencyFileWriter {
             byte[] compressed = new byte[(int) (offsetsEnd - offsetsStart)];
             mbb = fc.map(FileChannel.MapMode.READ_ONLY, offsetsStart, offsetsEnd);
             mbb.get(compressed);
-            return UnaryCompressor.integerArrayDecompression(compressed);
+            return UnaryCompressor.integerArrayDecompression(compressed, 1); //TODO: CAMBIARE 1 NEL VALORE REALE
         }
     }
 
@@ -127,14 +127,4 @@ public class FrequencyFileWriter {
         }
         return frequencies;
     }
-
-    /*
-    public int compressedFrequency(List<Integer> block){
-
-    }
-    */
-
-    /*
-    Compressed frequencies (or not).
-     */
 }

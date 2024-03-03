@@ -8,8 +8,7 @@ import java.util.List;
  * BlockReader class reads terms and associated document IDs from a binary file.
  */
 public class BlockReader {
-    private String path; // File path
-    private DataInputStream input; // Input stream for reading data
+    private final DataInputStream input; // Input stream for reading data
     String lastWord; // Last term read from the file
 
     /**
@@ -19,7 +18,7 @@ public class BlockReader {
      * @throws FileNotFoundException If the specified file is not found.
      */
     public BlockReader(String path) throws FileNotFoundException {
-        this.path = path;
+        // File path
         input = new DataInputStream(new FileInputStream(path));
     }
 
@@ -66,7 +65,5 @@ public class BlockReader {
 
         return docIds;
     }
-
-    // COMMENTO DI TEST
 }
 

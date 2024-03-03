@@ -10,55 +10,6 @@ import static java.lang.Math.log;
  */
 public class VariableByteCompressor {
 
-
-    public static List<Integer> integerArrayDecompressionGiusta(byte[] toBeDecompressed){
-
-        List<Integer> decompressedArray=new ArrayList<Integer>();
-        // integer that I'm processing
-        int decompressedNumber = 0;
-
-
-
-        for(byte elem: toBeDecompressed){
-            if((elem & 0xff) < 128) { //elem è un byte. elem può andare da 0 a 255. se elem è minore di 128 vuol dire che ha 0 davanti. IN QUALCHE MODO FA TRUE SE è MAGGIORE
-                // not the termination byte, shift the actual number and insert the new byte
-                //System.out.println("ciao" + (elem & 0xff));
-                decompressedNumber = 128 * decompressedNumber + elem; //in automatico somma il valore letto in elem
-            }else{
-                // termination byte (INIZIA PER 0), remove the 1 at the MSB and then append the byte to the number
-                decompressedNumber =  decompressedNumber+ ((elem - 128) & 0xff);
-                decompressedArray.add(decompressedNumber);
-
-                decompressedNumber=0;
-                // save the number in the output array
-
-
-
-
-                //reset the variable for the next number to decompress
-
-            }
-        }
-        // il primo if riguarda se abbiamo compresso un numero con lunghezza maggiore di 1 byte la seconda parte cerca se l'ultimo numero è uguale a 0.
-//        if (decompressedArray.length > 1 && decompressedArray[decompressedArray.length - 1] == 0) {
-//            decompressedArray = IntStream.concat(IntStream.of(decompressedArray[decompressedArray.length - 1]),
-//                    Arrays.stream(decompressedArray, 0, decompressedArray.length - 1)).toArray();
-//        }
-
-        return decompressedArray;
-    }
-
-
-    //facciamo come sulle slide.
-    public List<Byte> compressor(List<Integer> daComprimere){
-        List<Byte> compressi=new ArrayList<>();
-        for(int numero: daComprimere){
-
-        }
-
-        return compressi;
-    }
-
     /**
      * Encodes a given number into a byte array.
      *
@@ -127,63 +78,13 @@ public class VariableByteCompressor {
         return rv;
     }
 
-    /**
-     * Decompresses an array of bytes into a list of integers.
-     *
-     * @param toBeDecompressed the array of bytes to be decompressed
-     * @return the list of decompressed integers
-     */
-    public static List<Integer> decode(byte[] toBeDecompressed) {
-        List<Integer> numbers = new ArrayList<>();
-        int n = 0;
-
-        List<Byte> lst = new ArrayList<>();
-        for (byte b : toBeDecompressed) {
-            lst.add(b);
-        }
-
-        Iterator<Byte> it = lst.iterator();
-
-        // TODO: Pensare a tutte le casisitiche per la decompressione degli array di byte
-
-        while(it.hasNext()) {
-            Byte elem = it.next();
-            System.out.println(elem);
-        }
-
-
-        // Iterate over each byte in the array
-        for (byte b : toBeDecompressed) {
-            System.out.println("STO DECOMPRIMENDO " + b);
-            // If the byte is 0 and the current number is 0, add 0 to the numbers list
-            if (b == 0 && n == 0) {
-                numbers.add(0);
-            }
-            // If the byte is less than 128, update the current number by multiplying it by 128 and adding the byte value
-            else if ((b & 0xff) < 128) {
-                n = 128 * n + b;
-                System.out.println("PRINTANDO N " + n);
-            }
-            // If the byte is greater than or equal to 128, calculate the decompressed number and add it to the numbers list
-            else {
-                int num = (128 * n + ((b - 128) & 0xff));
-                numbers.add(num);
-                n = 0;
-            }
-        }
-
-        return numbers;
-    }
-
-
-    public static List<Integer> decompressArray(byte[] compressedData){
+    public static List<Integer> decode(byte[] compressedData){
         List<Integer> decompressedArray = new ArrayList<>();
         int i = 0; //index of the current byte
         int number = 0; //number to decompress
 
         for (byte b: compressedData) {
             if (b >= 0) {
-                System.out.println("Positive byte: " + String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0') + " "+ b +" "+i);
                 if(i > 0){ //if the current byte is positive, and it is not the first byte, we have to add the number to the array, because it is the first byte of the next number
                     decompressedArray.add(number); //add the number to the array
                     number = 0; //reset the number
@@ -191,7 +92,6 @@ public class VariableByteCompressor {
                 number = 128 * number + b; //multiply the number by 128 and add the current byte
 
             } else {
-                System.out.println("Negative byte: " + String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0') + " "+ b +" "+i);
                 number = 128 * number + (b + 128); //multiply the number by 128 and add the current byte, adding 128 because the current byte is negative
             }
             i++;

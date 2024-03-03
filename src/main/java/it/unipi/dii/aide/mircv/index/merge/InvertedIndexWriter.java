@@ -14,11 +14,9 @@ public class InvertedIndexWriter {
     private MappedByteBuffer mbb;
     public final FrequencyFileWriter frequencyWriter;
     public final DocIdFileWriter docIdWriter;
-    private final int blockSize;
 
     // Constructor
     public InvertedIndexWriter(String pathInvertedIndex, String pathDocIds, String pathFrequencies, int blockSize) {
-        this.blockSize = blockSize;
         try {
             // Open file channel for reading and writing
             fc = FileChannel.open(Paths.get(pathInvertedIndex),

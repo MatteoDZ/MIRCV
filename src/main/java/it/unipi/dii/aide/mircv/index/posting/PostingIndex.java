@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class PostingIndex {
     private String term;  // Term associated with the postings
-    private ArrayList<Posting> postings = new ArrayList<>();  // List of postings for the term
+    private final ArrayList<Posting> postings = new ArrayList<>();  // List of postings for the term
     private Posting postingActual;  // Currently active posting
     private Iterator<Posting> postingIterator;  // Iterator for postings
     private float upperBound;

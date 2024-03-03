@@ -43,14 +43,13 @@ public class Merger {
         while(!readers.isEmpty()){
 
             termToWrite = getFirst();
-            for(int i=0;i<readers.size();i++){
+            for (BlockReader reader : readers) {
 
-                if(termToWrite.equals(readers.get(i).lastWord)){ //quando indiceFirst è uguale al valore di i, i doc e le freq vengono aggiunte. per cui è gestito anche il caso in cui ci sia un solo blocco con la parola che va inserita e non doppioni
-                    BlockReader b = readers.get(i);
-                    docs.addAll(b.readNumbers()); //dovrebbe unire le liste
-                    freqs.addAll(b.readNumbers());
-                    if(b.readTerm().equals("blocco terminato")){ //con questo si attiva automaticamente il readterm
-                        daRimuovere.add(b); //sennò il metodo è comunque stato chiamato quindi i blocchi si aggiornano
+                if (termToWrite.equals(reader.lastWord)) { //quando indiceFirst è uguale al valore di i, i doc e le freq vengono aggiunte. per cui è gestito anche il caso in cui ci sia un solo blocco con la parola che va inserita e non doppioni
+                    docs.addAll(reader.readNumbers()); //dovrebbe unire le liste
+                    freqs.addAll(reader.readNumbers());
+                    if (reader.readTerm().equals("blocco terminato")) { //con questo si attiva automaticamente il readterm
+                        daRimuovere.add(reader); //sennò il metodo è comunque stato chiamato quindi i blocchi si aggiornano
                     }
                 }
             }
