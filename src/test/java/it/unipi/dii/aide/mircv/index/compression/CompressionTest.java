@@ -109,10 +109,10 @@ class CompressionTest {
         assertEquals(List.of(1, 127, 128, 255, 256, 16383, 16384),
                 VariableByteCompressor.decode(VariableByteCompressor.encode(List.of(1, 127, 128, 255, 256, 16383, 16384))));
 
-        assertEquals(List.of(5, 312, 32000),
+        assertEquals(List.of((short)5, (short)312, (short)32000),
                 UnaryCompressor.integerArrayDecompression(UnaryCompressor.integerArrayCompression(new int[]{5, 312, 32000}), 3));
-        assertEquals(List.of(1, 127, 128, 255, 256, 16383, 16384),
-                UnaryCompressor.integerArrayDecompression(UnaryCompressor.integerArrayCompression(new int[]{1, 127, 128, 255, 256, 16383, 16384}), 3));
+        assertEquals(List.of((short)1, (short)127, (short)128, (short)255, (short)256, (short)16383, (short)16384),
+                UnaryCompressor.integerArrayDecompression(UnaryCompressor.integerArrayCompression(new int[]{1, 127, 128, 255, 256, 16383, 16384}), 7));
 
     }
 
