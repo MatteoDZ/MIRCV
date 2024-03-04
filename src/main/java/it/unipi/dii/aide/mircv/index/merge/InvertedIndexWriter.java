@@ -5,6 +5,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.List;
 
 import static it.unipi.dii.aide.mircv.index.merge.UtilsWriter.*;
@@ -42,6 +43,8 @@ public class InvertedIndexWriter {
         writeShortToBuffer((short) termUpperBounds.size());
         writeIntListToBuffer(termUpperBounds);
         writeLongListToBuffer(docIdsOffsets);
+        System.out.println("DocIDS offsets: " + docIdsOffsets);
+        System.out.println("Frequencies offsets: " + frequenciesOffsets);
         writeLongListToBuffer(frequenciesOffsets);
 
         return termOffset;
@@ -59,9 +62,17 @@ public class InvertedIndexWriter {
         long[] freqsOffsets = readLongRangeFromBuffer(
                 offset + 2L + (4L + 8L * numBlocks) * (numBlocks + 1) + 8L * blockIndex, blockIndex, 8L);
 
+        System.out.println("Doc offsets: " + Arrays.toString(docIdsOffsets));
+        System.out.println("Freq offsets: " + Arrays.toString(freqsOffsets));
+
+        System.out.println("prova" + getOffsetsFreqs(offset, numBlocks, blockIndex));
+
         // Read document IDs and frequencies
         List<Integer> docIdsBlock = docIdWriter.readDocIdsBlock(docIdsOffsets[0], docIdsOffsets[1], compress);
         List<Short> freqsBlock = frequencyWriter.readFreqsBlock(freqsOffsets[0], freqsOffsets[1], compress);
+
+        System.out.println(docIdsBlock);
+        System.out.println(freqsBlock);
 
         int indexDocId = docIdsBlock.indexOf(docId);
         return (indexDocId == -1) ? 0 : freqsBlock.get(indexDocId);
