@@ -87,10 +87,8 @@ public class UnaryCompressor {
                 if ((b & i) == 0) {
                     // i-th bit is set to 0
                     decompressedArray.add(onesCounter);
-
                     // resetting the counter of ones for next integer
                     onesCounter = 1;
-                    System.out.println(lenCounter);
                     lenCounter++;
                     // writing the decompressed number in the array of the results
 
