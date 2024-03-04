@@ -22,7 +22,6 @@ public class InvertedIndexWriterTest {
         FileUtils.createDirectory("data/test");
         InvertedIndexWriter invIndex = new InvertedIndexWriter(pathIndex, pathDoc, pathFreq, 4);
         Long offset = invIndex.write(docIds, freqs,false);
-        //
         assertEquals(freqs.get(0), invIndex.getFreq(offset, docIds.get(0), false));
         assertEquals(freqs.get(1), invIndex.getFreq(offset, docIds.get(1), false));
         assertEquals(freqs.get(2), invIndex.getFreq(offset, docIds.get(2), false));

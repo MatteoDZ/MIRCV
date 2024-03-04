@@ -67,15 +67,15 @@ public class Main {
             long endTime_spimi = System.currentTimeMillis();
             System.out.println(printTime("Spimi", startTime_spimi, endTime_spimi));
         }
-        long startTime_merge = System.currentTimeMillis();
-        System.out.println("Merge is starting....");
-        FileUtils.removeFile(Configuration.PATH_INVERTED_INDEX);
-        Merger merge = new Merger(Objects.requireNonNull(FileUtils.getFilesOfDirectory(Configuration.DIRECTORY_TEMP_FILES)));
-        merge.writeAll(Configuration.PATH_INVERTED_INDEX);
-        long endTime_merge = System.currentTimeMillis();
-        System.out.println(printTime("Merge", startTime_merge, endTime_merge));
+        if(!FileUtils.searchIfExists(Configuration.PATH_INVERTED_INDEX)){
+            long startTime_merge = System.currentTimeMillis();
+            System.out.println("Merge is starting....");
+            Merger merge = new Merger(Objects.requireNonNull(FileUtils.getFilesOfDirectory(Configuration.DIRECTORY_TEMP_FILES)));
+            merge.writeAll(Configuration.PATH_INVERTED_INDEX);
+            long endTime_merge = System.currentTimeMillis();
+            System.out.println(printTime("Merge", startTime_merge, endTime_merge));
+        }
 
-        System.out.println(BinaryFile.readBlock(Configuration.PATH_INVERTED_INDEX).toString());;
 
 
         /*

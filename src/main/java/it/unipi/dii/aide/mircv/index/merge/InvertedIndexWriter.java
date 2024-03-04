@@ -53,26 +53,20 @@ public class InvertedIndexWriter {
     // Get frequency of a document in a given block
     public int getFreq(Long offset, int docId, boolean compress) throws IOException {
         short numBlocks = readShortFromBuffer(offset);
+
         int blockIndex = findBlockIndex(offset, numBlocks, docId);
+        if(blockIndex == -1) return 0;
 
-        if (blockIndex == -1) return 0;
+        //leggiamo i docId
+        List<Integer> docIdsBlock = docIdWriter.readDocIdsBlock(getOffsetsDocIds(offset, numBlocks, blockIndex).get(0),
+                getOffsetsDocIds(offset, numBlocks, blockIndex).get(1),compress);
 
-        // Read offsets for document IDs and frequencies
-        long[] docIdsOffsets = readLongRangeFromBuffer(offset + 2L + 4L * numBlocks, blockIndex, 8L);
-        long[] freqsOffsets = readLongRangeFromBuffer(
-                offset + 2L + (4L + 8L * numBlocks) * (numBlocks + 1) + 8L * blockIndex, blockIndex, 8L);
+        //leggiamo le frequenze
+        List<Short> freqsBlock = frequencyWriter.readFreqsBlock(getOffsetsFreqs(offset, numBlocks, blockIndex).get(0),
+                getOffsetsFreqs(offset, numBlocks, blockIndex).get(1),compress);
 
-        System.out.println("Doc offsets: " + Arrays.toString(docIdsOffsets));
-        System.out.println("Freq offsets: " + Arrays.toString(freqsOffsets));
+        System.out.println("InvertedIndexWriter "  + freqsBlock);
 
-        System.out.println("prova" + getOffsetsFreqs(offset, numBlocks, blockIndex));
-
-        // Read document IDs and frequencies
-        List<Integer> docIdsBlock = docIdWriter.readDocIdsBlock(docIdsOffsets[0], docIdsOffsets[1], compress);
-        List<Short> freqsBlock = frequencyWriter.readFreqsBlock(freqsOffsets[0], freqsOffsets[1], compress);
-
-        System.out.println(docIdsBlock);
-        System.out.println(freqsBlock);
 
         int indexDocId = docIdsBlock.indexOf(docId);
         return (indexDocId == -1) ? 0 : freqsBlock.get(indexDocId);

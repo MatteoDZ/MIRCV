@@ -118,6 +118,12 @@ class CompressionTest {
 
     }
 
+    @Test
+    public void test(){
+        assertEquals(List.of((short)4),
+                UnaryCompressor.integerArrayDecompression(UnaryCompressor.integerArrayCompression(new int[]{4}), 15));
+    }
+
 
 
 }

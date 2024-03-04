@@ -82,7 +82,9 @@ public class UnaryCompressor {
         int lenCounter = 0;
 
         for (byte b : toBeDecompressed) {
+            System.out.println("UnaryDec " + String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0'));
             for (int i = 0x80; i != 0; i >>= 1) {
+                System.out.println("UnaryDec AND " + String.format("%8s", Integer.toBinaryString(i & b & 0xFF)).replace(' ', '0'));
                 // check if the i-th bit is set to 1 or 0
                 if ((b & i) == 0) {
                     // i-th bit is set to 0

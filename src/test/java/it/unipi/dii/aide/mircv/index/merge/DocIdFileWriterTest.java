@@ -15,9 +15,9 @@ public class DocIdFileWriterTest{
     @Test
      void readDocIdsBlockTest() throws IOException {
         List<Integer> docIds = List.of(1, 20, 300, 401, 450, 461, 500, 6000, 70000, 800000, 8000000, 8800000);
-        String path = "../data/test/testWriter.bin";
-        FileUtils.deleteDirectory("../data/test");
-        FileUtils.createDirectory("../data/test");
+        String path = "data/test/testWriter.bin";
+        FileUtils.deleteDirectory("data/test");
+        FileUtils.createDirectory("data/test");
         DocIdFileWriter doc = new DocIdFileWriter(path, 5);
         List<Long> offsets = doc.writeDocIds(docIds,  false);
         assertEquals(List.of(1,20,300,401,450).toString(), doc.readDocIdsBlock(offsets.get(0), offsets.get(1), false).toString());
@@ -32,9 +32,9 @@ public class DocIdFileWriterTest{
     @Test
      void readDocIdsTest() throws IOException {
         List<Integer> docIds = List.of(1, 20, 300, 401, 450, 461, 500, 6000, 70000, 800000, 8000000, 8800000);
-        String path = "../data/test/testWriter.bin";
-        FileUtils.deleteDirectory("../data/test");
-        FileUtils.createDirectory("../data/test");
+        String path = "data/test/testWriter.bin";
+        FileUtils.deleteDirectory("data/test");
+        FileUtils.createDirectory("data/test");
         DocIdFileWriter doc = new DocIdFileWriter(path, 4);
         List<Long> offsets = doc.writeDocIds(docIds,  false);
         System.out.println("offsets "+offsets);
@@ -45,9 +45,9 @@ public class DocIdFileWriterTest{
     @Test
      void calculateTermUpperBoundsTest() throws IOException {
         List<Integer> docIds = List.of(1, 20, 300, 401, 450, 461, 500, 6000, 70000, 800000, 8000000, 8800000);
-        String path = "../data/test/testWriter.bin";
-        FileUtils.deleteDirectory("../data/test");
-        FileUtils.createDirectory("../data/test");
+        String path = "data/test/testWriter.bin";
+        FileUtils.deleteDirectory("data/test");
+        FileUtils.createDirectory("data/test");
         DocIdFileWriter doc = new DocIdFileWriter(path, 5);
         doc.writeDocIds(docIds,  false);
         assertEquals(List.of(450,800000,8800000), doc.getTermUpperBounds());
@@ -59,9 +59,9 @@ public class DocIdFileWriterTest{
     @Test
     void compressionTest() throws IOException{
         List<Integer> docsIds = List.of( 0, 1, 10, 20, 30, 500, 1000, 5000, 10000, 100000, 500000, 700000, 1000000, 5000000, 8000000);
-        String path = "../data/test/testWriter.bin";
-        FileUtils.deleteDirectory("../data/test");
-        FileUtils.createDirectory("../data/test");
+        String path = "data/test/testWriter.bin";
+        FileUtils.deleteDirectory("data/test");
+        FileUtils.createDirectory("data/test");
         DocIdFileWriter doc = new DocIdFileWriter(path, 5);
         List<Long> offsets = doc.writeDocIds(docsIds,true);
         assertEquals(List.of(0, 1, 10, 20, 30).toString(), doc.readDocIdsBlock(offsets.get(0), offsets.get(1), true).toString());
