@@ -1,6 +1,8 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
 import it.unipi.dii.aide.mircv.index.compression.UnaryCompressor;
+import it.unipi.dii.aide.mircv.index.config.Configuration;
+
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -49,7 +51,7 @@ public class FrequencyFileWriter {
 
         for (Integer freq : freqs) {
             block.add(freq);
-            if (block.size() == BLOCK_SIZE) {
+            if (block.size() == Configuration.BLOCK_SIZE) {
                 offsets.add(writeBlock(block, compress));
                 block.clear();
             }

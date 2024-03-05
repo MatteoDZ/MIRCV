@@ -13,6 +13,7 @@ public class Configuration {
     public static final String DIRECTORY_TEMP_FILES = load("directory_temporary_files");
     public static final String PATH_INVERTED_INDEX = load("path_inverted_index");
     public static final String PATH_VOCABULARY = load("path_vocabulary");
+    public static final int BLOCK_SIZE = 512;
 
     /**
      * Loads the value associated with the given key from the configuration properties file.

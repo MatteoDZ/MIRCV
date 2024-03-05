@@ -4,6 +4,7 @@ import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.merge.Merger;
 import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
+import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
 import it.unipi.dii.aide.mircv.index.preprocess.Preprocess;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -67,16 +68,18 @@ public class Main {
             long endTime_spimi = System.currentTimeMillis();
             System.out.println(printTime("Spimi", startTime_spimi, endTime_spimi));
         }
-        if(!FileUtils.searchIfExists(Configuration.PATH_INVERTED_INDEX)){
-            long startTime_merge = System.currentTimeMillis();
-            System.out.println("Merge is starting....");
-            Merger merge = new Merger(Objects.requireNonNull(FileUtils.getFilesOfDirectory(Configuration.DIRECTORY_TEMP_FILES)));
-            merge.writeAll(Configuration.PATH_INVERTED_INDEX);
-            long endTime_merge = System.currentTimeMillis();
-            System.out.println(printTime("Merge", startTime_merge, endTime_merge));
-        }
+        long startTime_merge = System.currentTimeMillis();
+        System.out.println("Merge is starting....");
+        FileUtils.removeFile(Configuration.PATH_INVERTED_INDEX);
+        Merger merge = new Merger(Objects.requireNonNull(FileUtils.getFilesOfDirectory(Configuration.DIRECTORY_TEMP_FILES)));
+        merge.writeAll(Configuration.PATH_INVERTED_INDEX);
+        long endTime_merge = System.currentTimeMillis();
+        System.out.println(printTime("Merge", startTime_merge, endTime_merge));
 
+        List<PostingIndex> lst = BinaryFile.readBlock(Configuration.PATH_INVERTED_INDEX);
+        System.out.println(lst.get(0).toString());
 
+        System.exit(104);
 
         /*
         //soluzione non usata (per ora) per controllare la heap occupata

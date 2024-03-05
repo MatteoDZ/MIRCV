@@ -1,6 +1,8 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
 import it.unipi.dii.aide.mircv.index.compression.VariableByteCompressor;
+import it.unipi.dii.aide.mircv.index.config.Configuration;
+
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -60,7 +62,7 @@ public class DocIdFileWriter {
 
         for (Integer docId : docIds) {
             block.add(docId);
-            if (block.size() == BLOCK_SIZE) {
+            if (block.size() == Configuration.BLOCK_SIZE) {
                 offsets.add(writeBlock(block, compression));
                 termUpperBounds.add(calculateTermUpperBounds(block));
                 block.clear();

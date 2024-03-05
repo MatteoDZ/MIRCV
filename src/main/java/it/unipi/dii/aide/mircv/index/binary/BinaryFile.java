@@ -71,6 +71,7 @@ public class BinaryFile {
      */
     public static List<PostingIndex> readBlock(String path) {
         List<PostingIndex> invertedIndexBlock = new ArrayList<>();
+        int limit = 16;
         try (InputStream input = new FileInputStream(path);
              DataInputStream inputStream = new DataInputStream(input)) {
             while(inputStream.available()>0){
@@ -98,6 +99,9 @@ public class BinaryFile {
 
                 // Create a new Term_PostingList object and add it to the list
                 invertedIndexBlock.add(new PostingIndex(termBuilder.toString(), docIds, frequencies));
+                limit--;
+                if (limit == 0)
+                    break;
                 // System.out.println(new Term_PostingList(termBuilder.toString(), docIds, frequencies).toString());
             }
             return invertedIndexBlock;

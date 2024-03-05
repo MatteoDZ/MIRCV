@@ -71,7 +71,6 @@ public class UnaryCompressor {
         return compressedArray;
     }
 
-
     /**
      * Method to decompress an array of bytes int an array of totNums integers using Unary compression algorithm
      * @return an array containing the decompressed integers
@@ -101,8 +100,6 @@ public class UnaryCompressor {
                     // increment the counter of ones
 
                 }
-                if (lenCounter == len)
-                    break;
             }
         }
 
