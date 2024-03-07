@@ -1,6 +1,7 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
+import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import org.apache.commons.compress.compressors.lz77support.LZ77Compressor;
 
@@ -54,9 +55,7 @@ public class Merger {
                 }
             }
             // inserire qui le cose da fare
-
             BinaryFile.appendToBinaryFile(path, termToWrite, docs, freqs);
-
             //chiamata a oggetto che scrive le freqs e restituisce gli offsets di ciascun blocco. (i metodi di scrittura cerchiamo di tenerli su binaryFile)
             // tiene aperto e gestisce il descrittore del file freqs
 
@@ -74,6 +73,61 @@ public class Merger {
         }
 
     }
+
+
+    public void writeAllNew(String path) throws IOException {
+
+        for (BlockReader reader : readers) {
+            try {
+                reader.readTerm();
+            } catch (IOException e) {
+                System.out.println("blocco assente");
+            }
+
+        }
+
+        List<BlockReader> daRimuovere=new ArrayList<>();
+        List<Integer> docs=new ArrayList<>();
+        List<Integer> freqs=new ArrayList<>();
+        String termToWrite;
+
+        InvertedIndexWriter inv = new InvertedIndexWriter(path, "data/docIds", "data/Freqs", 5);
+
+        while(!readers.isEmpty()){
+
+            termToWrite = getFirst();
+            for (BlockReader reader : readers) {
+
+                if (termToWrite.equals(reader.lastWord)) { //quando indiceFirst è uguale al valore di i, i doc e le freq vengono aggiunte. per cui è gestito anche il caso in cui ci sia un solo blocco con la parola che va inserita e non doppioni
+                    docs.addAll(reader.readNumbers()); //dovrebbe unire le liste
+                    freqs.addAll(reader.readNumbers());
+                    if (reader.readTerm().equals("blocco terminato")) { //con questo si attiva automaticamente il readterm
+                        daRimuovere.add(reader); //sennò il metodo è comunque stato chiamato quindi i blocchi si aggiornano
+                    }
+                }
+            }
+            // inserire qui le cose da fare
+            inv.write(termToWrite, docs, freqs, false);
+            //chiamata a oggetto che scrive le freqs e restituisce gli offsets di ciascun blocco. (i metodi di scrittura cerchiamo di tenerli su binaryFile)
+            // tiene aperto e gestisce il descrittore del file freqs
+
+            //chiamata a oggetto che scrive numero di blocchi,upper bounds, puntatori ai blocchi di doc id, puntatori ai blocchi  di freqs
+            // ottenuti dalla chiamata precedente e ai blocchi di doc ids contenuti nel file. restituisce solo il puntatore al primo
+            //punto di scrittura
+
+            //chiamata a oggetto che scrive sul lexicon termine, offset nell'inv restituito precedentemente, collection freqs and so
+            // on altre statistiche descrittive
+
+            docs.clear();
+            freqs.clear();
+            readers.removeAll(daRimuovere);
+            daRimuovere.clear();
+        }
+
+    }
+
+
+
     String getFirst(){
         String parolaMinima=readers.get(0).lastWord;
         for(BlockReader b: readers){

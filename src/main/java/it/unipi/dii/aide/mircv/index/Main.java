@@ -29,7 +29,7 @@ public class Main {
             FileUtils.createDirectory(Configuration.DIRECTORY_TEMP_FILES);
         }
 
-        System.out.println(FileUtils.getNumberFiles(Configuration.DIRECTORY_TEMP_FILES));
+        System.out.println("Number of files in temporary directory: " + FileUtils.getNumberFiles(Configuration.DIRECTORY_TEMP_FILES));
 
         if (FileUtils.getNumberFiles(Configuration.DIRECTORY_TEMP_FILES) <= 0) {
 
@@ -68,7 +68,7 @@ public class Main {
             long endTime_spimi = System.currentTimeMillis();
             System.out.println(printTime("Spimi", startTime_spimi, endTime_spimi));
         }
-        if(!FileUtils.searchIfExists(Configuration.PATH_INVERTED_INDEX)){
+        /*if(!FileUtils.searchIfExists(Configuration.PATH_INVERTED_INDEX)){
             long startTime_merge = System.currentTimeMillis();
             System.out.println("Merge is starting....");
             FileUtils.removeFile(Configuration.PATH_INVERTED_INDEX);
@@ -76,12 +76,21 @@ public class Main {
             merge.writeAll(Configuration.PATH_INVERTED_INDEX);
             long endTime_merge = System.currentTimeMillis();
             System.out.println(printTime("Merge", startTime_merge, endTime_merge));
+        }*/
+
+        if(!FileUtils.searchIfExists("data/invInd")){
+            long startTime_merge = System.currentTimeMillis();
+            System.out.println("New Merge is starting....");
+            FileUtils.removeFile("data/invInd");
+            Merger merge = new Merger(Objects.requireNonNull(FileUtils.getFilesOfDirectory(Configuration.DIRECTORY_TEMP_FILES)));
+            merge.writeAllNew("data/invInd");
+            long endTime_merge = System.currentTimeMillis();
+            System.out.println(printTime("Merge", startTime_merge, endTime_merge));
         }
 
-        List<PostingIndex> lst = BinaryFile.readBlock(Configuration.PATH_INVERTED_INDEX);
-        System.out.println(lst.get(10).toString());
+        /*List<PostingIndex> lst = BinaryFile.readBlock(Configuration.PATH_INVERTED_INDEX);
+        System.out.println(lst.get(10).toString());*/
 
-        System.exit(104);
 
         /*
         //soluzione non usata (per ora) per controllare la heap occupata

@@ -31,7 +31,7 @@ public class InvertedIndexWriter {
     }
 
     // Write document IDs and frequencies to the file and return the offset of the term
-    public Long write(List<Integer> docIds, List<Integer> freqs, boolean compress) throws IOException {
+    public Long write(String term, List<Integer> docIds, List<Integer> freqs, boolean compress) throws IOException {
         Long termOffset = fc.size();
 
         // Write frequencies and document IDs to their respective files
@@ -40,12 +40,13 @@ public class InvertedIndexWriter {
         List<Integer> termUpperBounds = docIdWriter.getTermUpperBounds();
 
         // Write metadata to the buffer
+        writeStringToBuffer(term);
         writeShortToBuffer((short) termUpperBounds.size());
         writeIntListToBuffer(termUpperBounds);
         writeLongListToBuffer(docIdsOffsets);
-        System.out.println("DocIDS offsets: " + docIdsOffsets);
-        System.out.println("Frequencies offsets: " + frequenciesOffsets);
         writeLongListToBuffer(frequenciesOffsets);
+
+        // System.out.println(term + " " + docIdsOffsets + " " + frequenciesOffsets + " " + termUpperBounds);
 
         return termOffset;
     }
@@ -139,6 +140,14 @@ public class InvertedIndexWriter {
             mbb.putLong(value);
         }
     }
+
+    private void writeStringToBuffer(String term) throws IOException {
+        mbb = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), term.length() * 2L);
+        for(int i=0;i<term.length();i++){
+            mbb.putChar(term.charAt(i));
+        }
+    }
+
 
     // Helper method: Read a range of long values from the buffer
     private long[] readLongRangeFromBuffer(Long offset, int blockIndex, long stride) throws IOException {
