@@ -17,6 +17,7 @@ public class Configuration {
     public static final String PATH_FEQUENCIES = load("path_freqs");
     public static final String PATH_VOCABULARY = load("path_vocabulary");
     public static final int BLOCK_SIZE = 5;
+    public static final boolean COMPRESSION = false;
 
     /**
      * Loads the value associated with the given key from the configuration properties file.

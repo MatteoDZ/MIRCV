@@ -83,7 +83,7 @@ public class Main {
             long startTime_merge = System.currentTimeMillis();
             System.out.println("New Merge is starting....");
             Merger merge = new Merger(Objects.requireNonNull(FileUtils.getFilesOfDirectory(Configuration.DIRECTORY_TEMP_FILES)));
-            merge.writeAllNew(Configuration.PATH_INVERTED_INDEX_OFFSETS, false);
+            merge.writeAllNew(Configuration.PATH_INVERTED_INDEX_OFFSETS, Configuration.COMPRESSION);
             long endTime_merge = System.currentTimeMillis();
             System.out.println(printTime("Merge", startTime_merge, endTime_merge));
         }
