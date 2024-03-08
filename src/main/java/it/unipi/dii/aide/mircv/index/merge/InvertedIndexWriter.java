@@ -1,10 +1,18 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
+import it.unipi.dii.aide.mircv.index.config.Configuration;
+
+import java.io.DataInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -40,8 +48,9 @@ public class InvertedIndexWriter {
         List<Integer> termUpperBounds = docIdWriter.getTermUpperBounds();
 
         // Write metadata to the buffer
+        writeShortToBuffer((short)term.length());
         writeStringToBuffer(term);
-        writeShortToBuffer((short) termUpperBounds.size());
+        // writeShortToBuffer((short) termUpperBounds.size());
         writeIntListToBuffer(termUpperBounds);
         writeLongListToBuffer(docIdsOffsets);
         writeLongListToBuffer(frequenciesOffsets);
@@ -165,4 +174,49 @@ public class InvertedIndexWriter {
         }
         return -1;
     }
+
+
+    public void read() throws IOException{
+        int limit = 16;
+        try (InputStream input = new FileInputStream(Configuration.PATH_INVERTED_INDEX_OFFSETS);
+             DataInputStream inputStream = new DataInputStream(input)) {
+            while (inputStream.available() > 0) {
+                // Read the length of the term
+                short termLength = inputStream.readShort();
+                // Read the characters of the term
+                StringBuilder termBuilder = new StringBuilder();
+                for (int i = 0; i < termLength; i++) {
+                    termBuilder.append(inputStream.readChar());
+                }
+
+                int termUpperBound;
+                List<Integer> termUpperBounds = new ArrayList<>();
+                while ((termUpperBound = inputStream.readInt()) != -1) {
+                    termUpperBounds.add(termUpperBound);
+                }
+
+                // Read the document IDs
+                long docIdOffset;
+                List<Long> docIdsOffsets = new ArrayList<>();
+                while ((docIdOffset = inputStream.readLong()) != -1) {
+                    docIdsOffsets.add(docIdOffset);
+                }
+
+                // Read the frequencies
+                long frequencyOffset;
+                List<Long> frequenciesOffsets = new ArrayList<>();
+                while ((frequencyOffset = inputStream.readLong()) != -1) {
+                    frequenciesOffsets.add(frequencyOffset);
+                }
+
+                // Create a new Term_PostingList object and add it to the list
+                // invertedIndexBlock.add(new PostingIndex(termBuilder.toString(), docIds, frequencies));
+                System.out.println(termBuilder.toString() + " " + termUpperBounds.toString() + " " + docIdsOffsets.toString() + " " + frequenciesOffsets.toString());
+                limit--;
+                if (limit == 0)
+                    break;
+            }
+        }
+    }
+
 }

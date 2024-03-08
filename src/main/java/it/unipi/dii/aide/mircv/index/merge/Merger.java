@@ -75,7 +75,7 @@ public class Merger {
     }
 
 
-    public void writeAllNew(String path) throws IOException {
+    public void writeAllNew(String path, boolean compress) throws IOException {
 
         for (BlockReader reader : readers) {
             try {
@@ -91,7 +91,7 @@ public class Merger {
         List<Integer> freqs=new ArrayList<>();
         String termToWrite;
 
-        InvertedIndexWriter inv = new InvertedIndexWriter(path, "data/docIds", "data/Freqs", 5);
+        InvertedIndexWriter inv = new InvertedIndexWriter(path, Configuration.PATH_DOCIDS, Configuration.PATH_FEQUENCIES, Configuration.BLOCK_SIZE);
 
         while(!readers.isEmpty()){
 

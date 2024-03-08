@@ -110,6 +110,10 @@ public class BinaryFile {
         }
     }
 
+
+
+
+
     /**
      * Retrieves the position of the end of the file specified by the given path.
      *

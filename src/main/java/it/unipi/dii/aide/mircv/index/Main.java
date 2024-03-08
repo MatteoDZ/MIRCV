@@ -2,6 +2,7 @@ package it.unipi.dii.aide.mircv.index;
 
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
+import it.unipi.dii.aide.mircv.index.merge.InvertedIndexWriter;
 import it.unipi.dii.aide.mircv.index.merge.Merger;
 import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
@@ -78,15 +79,17 @@ public class Main {
             System.out.println(printTime("Merge", startTime_merge, endTime_merge));
         }*/
 
-        if(!FileUtils.searchIfExists("data/invInd")){
+        if(!FileUtils.searchIfExists(Configuration.PATH_INVERTED_INDEX_OFFSETS)){
             long startTime_merge = System.currentTimeMillis();
             System.out.println("New Merge is starting....");
-            FileUtils.removeFile("data/invInd");
             Merger merge = new Merger(Objects.requireNonNull(FileUtils.getFilesOfDirectory(Configuration.DIRECTORY_TEMP_FILES)));
-            merge.writeAllNew("data/invInd");
+            merge.writeAllNew(Configuration.PATH_INVERTED_INDEX_OFFSETS, false);
             long endTime_merge = System.currentTimeMillis();
             System.out.println(printTime("Merge", startTime_merge, endTime_merge));
         }
+
+        InvertedIndexWriter invRead = new InvertedIndexWriter(Configuration.PATH_INVERTED_INDEX_OFFSETS, Configuration.PATH_DOCIDS, Configuration.PATH_FEQUENCIES, Configuration.BLOCK_SIZE);
+        invRead.read();
 
         /*List<PostingIndex> lst = BinaryFile.readBlock(Configuration.PATH_INVERTED_INDEX);
         System.out.println(lst.get(10).toString());*/
