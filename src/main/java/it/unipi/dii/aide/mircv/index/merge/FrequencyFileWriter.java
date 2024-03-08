@@ -9,6 +9,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static it.unipi.dii.aide.mircv.index.merge.UtilsWriter.calculateDimensionShort;
@@ -110,8 +111,7 @@ public class FrequencyFileWriter {
             byte[] compressed = new byte[(int) (offsetsEnd - offsetsStart)];
             mbb = fc.map(FileChannel.MapMode.READ_ONLY, offsetsStart, offsetsEnd);
             mbb.get(compressed);
-            System.out.println(compressed.length);
-            return UnaryCompressor.integerArrayDecompression(compressed, 5);
+            return UnaryCompressor.integerArrayDecompression(compressed, BLOCK_SIZE);
         }
     }
 

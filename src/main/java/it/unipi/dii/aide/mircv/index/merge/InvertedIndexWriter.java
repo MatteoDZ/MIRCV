@@ -52,8 +52,11 @@ public class InvertedIndexWriter {
         writeStringToBuffer(term);
         // writeShortToBuffer((short) termUpperBounds.size());
         writeIntListToBuffer(termUpperBounds);
+        writeIntToBuffer((int)-1);
         writeLongListToBuffer(docIdsOffsets);
+        writeLongToBuffer((long)-1);
         writeLongListToBuffer(frequenciesOffsets);
+        writeLongToBuffer((long)-1);
 
         // System.out.println(term + " " + docIdsOffsets + " " + frequenciesOffsets + " " + termUpperBounds);
 
@@ -128,6 +131,16 @@ public class InvertedIndexWriter {
         mbb.putShort(value);
     }
 
+    private void writeIntToBuffer(int value) throws IOException {
+        mbb = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), 4);
+        mbb.putInt(value);
+    }
+
+    private void writeLongToBuffer(long value) throws IOException {
+        mbb = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), 8);
+        mbb.putLong(value);
+    }
+
     // Helper method: Read a short value from the buffer
     private short readShortFromBuffer(Long offset) throws IOException {
         mbb = fc.map(FileChannel.MapMode.READ_ONLY, offset, 2);
@@ -183,6 +196,7 @@ public class InvertedIndexWriter {
             while (inputStream.available() > 0) {
                 // Read the length of the term
                 short termLength = inputStream.readShort();
+
                 // Read the characters of the term
                 StringBuilder termBuilder = new StringBuilder();
                 for (int i = 0; i < termLength; i++) {
