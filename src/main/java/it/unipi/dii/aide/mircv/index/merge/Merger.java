@@ -8,6 +8,7 @@ import org.apache.commons.compress.compressors.lz77support.LZ77Compressor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class Merger {
@@ -92,7 +93,7 @@ public class Merger {
         String termToWrite;
 
         InvertedIndexWriter inv = new InvertedIndexWriter(path, Configuration.PATH_DOCIDS, Configuration.PATH_FEQUENCIES, Configuration.BLOCK_SIZE);
-
+        LexiconWriter lexicon = new LexiconWriter(Configuration.PATH_LEXICON);
         while(!readers.isEmpty()){
 
             termToWrite = getFirst();
@@ -107,7 +108,11 @@ public class Merger {
                 }
             }
             // inserire qui le cose da fare
-            inv.write(termToWrite, docs, freqs, false);
+            long offsetTerm = inv.write(termToWrite, docs, freqs, false);
+
+            //inserire qui le cose da fare
+            lexicon.write(termToWrite, offsetTerm);
+
             //chiamata a oggetto che scrive le freqs e restituisce gli offsets di ciascun blocco. (i metodi di scrittura cerchiamo di tenerli su binaryFile)
             // tiene aperto e gestisce il descrittore del file freqs
 

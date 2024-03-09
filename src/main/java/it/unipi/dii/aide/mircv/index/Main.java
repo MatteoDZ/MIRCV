@@ -3,6 +3,7 @@ package it.unipi.dii.aide.mircv.index;
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.merge.InvertedIndexWriter;
+import it.unipi.dii.aide.mircv.index.merge.LexiconWriter;
 import it.unipi.dii.aide.mircv.index.merge.Merger;
 import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
@@ -12,6 +13,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -89,7 +91,16 @@ public class Main {
         }
 
         InvertedIndexWriter invRead = new InvertedIndexWriter(Configuration.PATH_INVERTED_INDEX_OFFSETS, Configuration.PATH_DOCIDS, Configuration.PATH_FEQUENCIES, Configuration.BLOCK_SIZE);
-        invRead.read();
+        // invRead.read();
+
+        LexiconWriter lexicon = new LexiconWriter(Configuration.PATH_LEXICON);
+        lexicon.read(Configuration.PATH_LEXICON);
+        HashMap<String, Long> map = lexicon.getLexicon();
+        System.out.println("Contains " + "zzz: " + map.containsKey("zzz"));
+        System.out.println("Get position of " + "zzz: " + map.get("zzz"));
+        System.out.println("DocIds " + invRead.getDocIds(map.get("zzz"), false));
+        System.out.println("Freq " + invRead.getFreq(map.get("zzz"), 576395, false));
+        System.out.println("Freq " + invRead.getFreq(map.get("zzz"), 4753079, false));
 
         /*List<PostingIndex> lst = BinaryFile.readBlock(Configuration.PATH_INVERTED_INDEX);
         System.out.println(lst.get(10).toString());*/

@@ -2,14 +2,10 @@ package it.unipi.dii.aide.mircv.index.merge;
 
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import org.junit.jupiter.api.Test;
-
-import java.io.DataInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertLinesMatch;
 
 public class FrequencyFileWriterTest {
     @Test
@@ -31,7 +27,7 @@ public class FrequencyFileWriterTest {
     }
 
     @Test
-     void readFreqsTest() throws IOException {
+     void readFreqsNoCompressionTest() throws IOException {
         List<Integer> freqs = List.of(1, 10, 13, 5, 7, 4, 4, 2, 7, 5, 4);
         String path = "data/test/testWriter.bin";
         FileUtils.deleteDirectory("data/test");
@@ -42,6 +38,20 @@ public class FrequencyFileWriterTest {
         List<Integer> freqsNew = List.of(1, 10 ,4 , 6, 3, 2);
         List<Long> offsetsNew = freq.writeFrequencies(freqsNew, false);
         assertEquals(freqsNew.toString(), freq.readFreqs(offsetsNew, false).toString());
+    }
+
+    @Test
+    void readFreqsYesCompressionTest() throws IOException {
+        List<Integer> freqs = List.of(1, 10, 13, 5, 7, 4, 4, 2, 7, 5, 4);
+        String path = "data/test/testWriter.bin";
+        FileUtils.deleteDirectory("data/test");
+        FileUtils.createDirectory("data/test");
+        FrequencyFileWriter freq = new FrequencyFileWriter(path, 5);
+        List<Long> offsets = freq.writeFrequencies(freqs,  true);
+        assertEquals(freqs.toString(), freq.readFreqs(offsets, true).toString());
+        List<Integer> freqsNew = List.of(1, 10 ,4 , 6, 3, 2);
+        List<Long> offsetsNew = freq.writeFrequencies(freqsNew, true);
+        assertEquals(freqsNew.toString(), freq.readFreqs(offsetsNew, true).toString());
     }
 
     @Test

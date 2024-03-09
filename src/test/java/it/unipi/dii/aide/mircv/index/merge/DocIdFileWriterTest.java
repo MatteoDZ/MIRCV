@@ -2,9 +2,6 @@ package it.unipi.dii.aide.mircv.index.merge;
 
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import org.junit.jupiter.api.Test;
-
-import java.io.DataInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -30,16 +27,25 @@ public class DocIdFileWriterTest{
     }
 
     @Test
-     void readDocIdsTest() throws IOException {
+     void readDocIdsNoCompressionTest() throws IOException {
         List<Integer> docIds = List.of(1, 20, 300, 401, 450, 461, 500, 6000, 70000, 800000, 8000000, 8800000);
         String path = "data/test/testWriter.bin";
         FileUtils.deleteDirectory("data/test");
         FileUtils.createDirectory("data/test");
         DocIdFileWriter doc = new DocIdFileWriter(path, 4);
         List<Long> offsets = doc.writeDocIds(docIds,  false);
-        System.out.println("offsets "+offsets);
-        System.out.println("massimi "+doc.getTermUpperBounds());
-        System.out.println(doc.readDocIdsBlock(16L,48L, false));
+        assertEquals(docIds, doc.readDocIds(offsets,  false));
+    }
+
+    @Test
+    void readDocIdsYesCompressionTest() throws IOException {
+        List<Integer> docIds = List.of(1, 20, 300, 401, 450, 461, 500, 6000, 70000, 800000, 8000000, 8800000);
+        String path = "data/test/testWriter.bin";
+        FileUtils.deleteDirectory("data/test");
+        FileUtils.createDirectory("data/test");
+        DocIdFileWriter doc = new DocIdFileWriter(path, 4);
+        List<Long> offsets = doc.writeDocIds(docIds,  true);
+        assertEquals(docIds, doc.readDocIds(offsets,  true));
     }
 
     @Test

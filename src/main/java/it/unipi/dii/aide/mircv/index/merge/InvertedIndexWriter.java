@@ -48,9 +48,7 @@ public class InvertedIndexWriter {
         List<Integer> termUpperBounds = docIdWriter.getTermUpperBounds();
 
         // Write metadata to the buffer
-        writeShortToBuffer((short)term.length());
-        writeStringToBuffer(term);
-        // writeShortToBuffer((short) termUpperBounds.size());
+        writeShortToBuffer((short) termUpperBounds.size());
         writeIntListToBuffer(termUpperBounds);
         writeIntToBuffer((int)-1);
         writeLongListToBuffer(docIdsOffsets);
@@ -63,9 +61,28 @@ public class InvertedIndexWriter {
         return termOffset;
     }
 
+    public List<Integer> getDocIds(Long offset, boolean compress) throws IOException {
+        mbb = fc.map(FileChannel.MapMode.READ_ONLY, offset, fc.size() - offset);
+        short numBlocks = mbb.getShort();
+        List<Integer> termUpperBounds = new ArrayList<>();
+        int termUpperBound;
+        while ((termUpperBound = mbb.getInt()) != -1) {
+            termUpperBounds.add(termUpperBound);
+        }
+        System.out.println("termUpperBounds " + termUpperBounds);
+        List<Long> docIdsOffsets = new ArrayList<>();
+        long docIdOffset;
+        while ((docIdOffset = mbb.getLong()) != -1) {
+            docIdsOffsets.add(docIdOffset);
+        }
+        // System.out.println("DocIds " + docIdsOffsets);
+        return docIdWriter.readDocIds(docIdsOffsets, compress);
+    }
+
     // Get frequency of a document in a given block
     public int getFreq(Long offset, int docId, boolean compress) throws IOException {
         short numBlocks = readShortFromBuffer(offset);
+        System.out.println("numBlocks " + numBlocks);
 
         int blockIndex = findBlockIndex(offset, numBlocks, docId);
         if(blockIndex == -1) return 0;
@@ -74,11 +91,13 @@ public class InvertedIndexWriter {
         List<Integer> docIdsBlock = docIdWriter.readDocIdsBlock(getOffsetsDocIds(offset, numBlocks, blockIndex).get(0),
                 getOffsetsDocIds(offset, numBlocks, blockIndex).get(1),compress);
 
+        System.out.println("InvertedIndexWriter DocIds"  + docIdsBlock);
+
         //leggiamo le frequenze
         List<Short> freqsBlock = frequencyWriter.readFreqsBlock(getOffsetsFreqs(offset, numBlocks, blockIndex).get(0),
                 getOffsetsFreqs(offset, numBlocks, blockIndex).get(1),compress);
 
-        System.out.println("InvertedIndexWriter "  + freqsBlock);
+        System.out.println("InvertedIndexWriter Freqs"  + freqsBlock);
 
 
         int indexDocId = docIdsBlock.indexOf(docId);
@@ -105,8 +124,8 @@ public class InvertedIndexWriter {
      * @throws IOException         if there is an error while performing I/O operations
      */
     public List<Long> getOffsetsDocIds(Long offset, int numBlocchi, int indiceBloccoCercato) throws IOException {
-        mbb=fc.map(FileChannel.MapMode.READ_ONLY,offset+2L+ 4L *numBlocchi+ 8L *indiceBloccoCercato,
-                offset+2L+ 4L *numBlocchi+ 8L *(indiceBloccoCercato+1));
+        mbb=fc.map(FileChannel.MapMode.READ_ONLY,offset+2L+ 4L * (numBlocchi+1)+ 8L *indiceBloccoCercato,
+                offset+2L+ 4L * (numBlocchi+1)+ 8L *(indiceBloccoCercato+1));
         return List.of(mbb.getLong(),mbb.getLong());
     }
 
@@ -120,8 +139,8 @@ public class InvertedIndexWriter {
      * @throws IOException         if there is an error while performing I/O operations
      */
     public List<Long> getOffsetsFreqs(Long offset, int numBlocchi, int indiceBloccoCercato) throws IOException {
-        mbb=fc.map(FileChannel.MapMode.READ_ONLY,offset+2L+ (4L *numBlocchi) + (8L *numBlocchi) + (8L *indiceBloccoCercato) +8,
-                offset+2L+ (4L *numBlocchi) + (8L *numBlocchi) + (8L *(indiceBloccoCercato+1)) +8);
+        mbb=fc.map(FileChannel.MapMode.READ_ONLY,offset+2L+ (4L *(numBlocchi+1)) + (8L * (numBlocchi+1)) + (8L *indiceBloccoCercato) +8,
+                offset+2L+ (4L * (numBlocchi+1)) + (8L * (numBlocchi+1)) + (8L *(indiceBloccoCercato+1)) +8);
         return List.of(mbb.getLong(),mbb.getLong());
     }
 
@@ -194,14 +213,7 @@ public class InvertedIndexWriter {
         try (InputStream input = new FileInputStream(Configuration.PATH_INVERTED_INDEX_OFFSETS);
              DataInputStream inputStream = new DataInputStream(input)) {
             while (inputStream.available() > 0) {
-                // Read the length of the term
                 short termLength = inputStream.readShort();
-
-                // Read the characters of the term
-                StringBuilder termBuilder = new StringBuilder();
-                for (int i = 0; i < termLength; i++) {
-                    termBuilder.append(inputStream.readChar());
-                }
 
                 int termUpperBound;
                 List<Integer> termUpperBounds = new ArrayList<>();
@@ -225,7 +237,6 @@ public class InvertedIndexWriter {
 
                 // Create a new Term_PostingList object and add it to the list
                 // invertedIndexBlock.add(new PostingIndex(termBuilder.toString(), docIds, frequencies));
-                System.out.println(termBuilder.toString() + " " + termUpperBounds.toString() + " " + docIdsOffsets.toString() + " " + frequenciesOffsets.toString());
                 limit--;
                 if (limit == 0)
                     break;
