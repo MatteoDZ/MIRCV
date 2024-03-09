@@ -133,7 +133,7 @@ public class DocIdFileWriter {
      * @return The last element in the block.
      */
     public Integer calculateTermUpperBounds(List<Integer> block) {
-        return block.get(block.size() - 1);
+        return block.stream().max(Integer::compareTo).get();
     }
 
     /**

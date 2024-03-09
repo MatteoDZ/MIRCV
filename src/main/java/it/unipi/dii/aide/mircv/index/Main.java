@@ -99,7 +99,7 @@ public class Main {
         System.out.println("Contains " + "zzz: " + map.containsKey("zzz"));
         System.out.println("Get position of " + "zzz: " + map.get("zzz"));
         System.out.println("DocIds " + invRead.getDocIds(map.get("zzz"), false));
-        System.out.println("Freq " + invRead.getFreq(map.get("zzz"), 576395, false));
+        System.out.println("Freq " + invRead.getFreq(map.get("zzz"), 3093287, false));
         System.out.println("Freq " + invRead.getFreq(map.get("zzz"), 4753079, false));
 
         /*List<PostingIndex> lst = BinaryFile.readBlock(Configuration.PATH_INVERTED_INDEX);
