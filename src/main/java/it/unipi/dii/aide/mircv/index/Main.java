@@ -94,13 +94,19 @@ public class Main {
         // invRead.read();
 
         LexiconWriter lexicon = new LexiconWriter(Configuration.PATH_LEXICON);
-        lexicon.read(Configuration.PATH_LEXICON);
+
+        /*lexicon.read(Configuration.PATH_LEXICON);
         HashMap<String, Long> map = lexicon.getLexicon();
         System.out.println("Contains " + "zzz: " + map.containsKey("zzz"));
         System.out.println("Get position of " + "zzz: " + map.get("zzz"));
         System.out.println("DocIds " + invRead.getDocIds(map.get("zzz"), false));
         System.out.println("Freq " + invRead.getFreq(map.get("zzz"), 3093287, false));
-        System.out.println("Freq " + invRead.getFreq(map.get("zzz"), 4753079, false));
+        System.out.println("Freq " + invRead.getFreq(map.get("zzz"), 4753079, false));*/
+
+        System.out.println(lexicon.findTerm("zzz"));
+        System.out.println("DocIds " + invRead.getDocIds(lexicon.findTerm("zzz"), false));
+        System.out.println("Freq " + invRead.getFreq(lexicon.findTerm("zzz"), 3093287, false));
+        System.out.println("Freq " + invRead.getFreq(lexicon.findTerm("zzz"), 4753079, false));
 
         /*List<PostingIndex> lst = BinaryFile.readBlock(Configuration.PATH_INVERTED_INDEX);
         System.out.println(lst.get(10).toString());*/

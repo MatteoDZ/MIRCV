@@ -111,7 +111,7 @@ public class Merger {
             long offsetTerm = inv.write(termToWrite, docs, freqs, false);
 
             //inserire qui le cose da fare
-            lexicon.write(termToWrite, offsetTerm);
+            lexicon.writeFixed(termToWrite, offsetTerm);
 
             //chiamata a oggetto che scrive le freqs e restituisce gli offsets di ciascun blocco. (i metodi di scrittura cerchiamo di tenerli su binaryFile)
             // tiene aperto e gestisce il descrittore del file freqs

@@ -17,7 +17,7 @@ public class Configuration {
     public static final String PATH_FEQUENCIES = load("path_freqs");
     public static final String PATH_VOCABULARY = load("path_vocabulary");
     public static final String PATH_LEXICON = load("path_lexicon");
-    public static final int BLOCK_SIZE = 5;
+    public static final int BLOCK_SIZE = 512;
     public static final boolean COMPRESSION = false;
 
     /**
