@@ -102,11 +102,23 @@ public class Main {
         System.out.println("DocIds " + invRead.getDocIds(map.get("zzz"), false));
         System.out.println("Freq " + invRead.getFreq(map.get("zzz"), 3093287, false));
         System.out.println("Freq " + invRead.getFreq(map.get("zzz"), 4753079, false));*/
-
-        System.out.println(lexicon.findTerm("zzz"));
-        System.out.println("DocIds " + invRead.getDocIds(lexicon.findTerm("zzz"), false));
-        System.out.println("Freq " + invRead.getFreq(lexicon.findTerm("zzz"), 3093287, false));
-        System.out.println("Freq " + invRead.getFreq(lexicon.findTerm("zzz"), 4753079, false));
+        long savedtime = 0;
+        long start_search_time = System.currentTimeMillis();
+        //System.out.println(lexicon.findTerm("hello"));
+        //System.out.println("DocIds " + invRead.getDocIds(lexicon.findTerm("hello"), false));
+        List<Integer>  lst = invRead.getDocIds(lexicon.findTerm("ciao"), false);
+        for (Integer i : lst){
+            long start_freq_time = System.currentTimeMillis();
+            invRead.getFreq(lexicon.findTerm("ciao"), i, false);
+            long end_freq_time = System.currentTimeMillis();
+            savedtime += (end_freq_time - start_freq_time);
+            System.out.println("TEMPO RECUPERO FREQUENZE DOC " + i + " " + (end_freq_time-start_freq_time) + " ms");
+        }
+        //System.out.println("Freq " + invRead.getFreq(lexicon.findTerm("hello"), 3093287, false));
+        //System.out.println("Freq " + invRead.getFreq(lexicon.findTerm("hello"), 4753079, false));
+        long end_search_time = System.currentTimeMillis();
+        System.out.println(("Search: " + (end_search_time-start_search_time) + " ms"));
+        System.out.println("Somma tempo frequenze: " + savedtime + " ms");
 
         /*List<PostingIndex> lst = BinaryFile.readBlock(Configuration.PATH_INVERTED_INDEX);
         System.out.println(lst.get(10).toString());*/
