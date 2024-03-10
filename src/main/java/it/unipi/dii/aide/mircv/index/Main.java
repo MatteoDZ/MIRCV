@@ -9,10 +9,12 @@ import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
 import it.unipi.dii.aide.mircv.index.preprocess.Preprocess;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
+import it.unipi.dii.aide.mircv.index.utils.Statistics;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -34,6 +36,8 @@ public class Main {
 
         System.out.println("Number of files in temporary directory: " + FileUtils.getNumberFiles(Configuration.DIRECTORY_TEMP_FILES));
 
+        Statistics statistics = new Statistics();
+
         if (FileUtils.getNumberFiles(Configuration.DIRECTORY_TEMP_FILES) <= 0) {
 
             InvertedIndex inv = new InvertedIndex();
@@ -45,11 +49,16 @@ public class Main {
                 try (BufferedReader br = new BufferedReader(new InputStreamReader(tarInput))) {
                     String line;
                     int blockNumber = 0, i = 0;
+                    float doclen = 0;
+                    List<Integer> doc_lens = new ArrayList<>();
                     Preprocess.readStopwords();
                     while ((line = br.readLine()) != null) { //loop giusto. sotto c'è quello provvisorio per vedere se va il tutto
                         String[] parts = line.split("\t");
                         List<String> term = Preprocess.processText(parts[1]);
                         term.removeAll(List.of("", " "));
+                        doclen += term.size();
+                        doc_lens.add(term.size());
+
                         if (!parts[1].isEmpty() || !term.isEmpty()) { //è sufficiente che una delle due non sia empty per fare inserire il tutto
                             inv.add(term, Integer.parseInt(parts[0]));
                             if (i % 1000000 == 0) {
@@ -65,6 +74,10 @@ public class Main {
                             }
                         }
                     }
+                    statistics.setNumdocs(i);
+                    statistics.setAvg_doc_length(doclen/i);
+                    statistics.setDocs_length(doc_lens);
+                    statistics.writeToDisk();
                 }
             }
 
@@ -95,21 +108,14 @@ public class Main {
 
         LexiconWriter lexicon = new LexiconWriter(Configuration.PATH_LEXICON);
 
-        /*lexicon.read(Configuration.PATH_LEXICON);
-        HashMap<String, Long> map = lexicon.getLexicon();
-        System.out.println("Contains " + "zzz: " + map.containsKey("zzz"));
-        System.out.println("Get position of " + "zzz: " + map.get("zzz"));
-        System.out.println("DocIds " + invRead.getDocIds(map.get("zzz"), false));
-        System.out.println("Freq " + invRead.getFreq(map.get("zzz"), 3093287, false));
-        System.out.println("Freq " + invRead.getFreq(map.get("zzz"), 4753079, false));*/
         long savedtime = 0;
         long start_search_time = System.currentTimeMillis();
         //System.out.println(lexicon.findTerm("hello"));
         //System.out.println("DocIds " + invRead.getDocIds(lexicon.findTerm("hello"), false));
-        List<Integer>  lst = invRead.getDocIds(lexicon.findTerm("ciao"), false);
+        List<Integer>  lst = invRead.getDocIds(lexicon.findTerm("hello"), true);
         for (Integer i : lst){
             long start_freq_time = System.currentTimeMillis();
-            invRead.getFreq(lexicon.findTerm("ciao"), i, false);
+            invRead.getFreq(lexicon.findTerm("hello"), i, true);
             long end_freq_time = System.currentTimeMillis();
             savedtime += (end_freq_time - start_freq_time);
             System.out.println("TEMPO RECUPERO FREQUENZE DOC " + i + " " + (end_freq_time-start_freq_time) + " ms");
@@ -120,9 +126,8 @@ public class Main {
         System.out.println(("Search: " + (end_search_time-start_search_time) + " ms"));
         System.out.println("Somma tempo frequenze: " + savedtime + " ms");
 
-        /*List<PostingIndex> lst = BinaryFile.readBlock(Configuration.PATH_INVERTED_INDEX);
-        System.out.println(lst.get(10).toString());*/
-
+        Statistics s = Statistics.read();
+        System.out.println("VEDIAMO SE STA MERDA FUNZIONA: " + s.getNumdocs() + " " + s.getAvg_doc_length() + " " + s.getDocs_length().get(0));
 
         /*
         //soluzione non usata (per ora) per controllare la heap occupata

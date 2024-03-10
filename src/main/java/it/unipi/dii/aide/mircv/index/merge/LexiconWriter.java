@@ -20,12 +20,13 @@ public class LexiconWriter {
 
     protected static final int MAX_LEN_OF_TERM = 32;
 
-    private HashMap<String, Long> lexicon; // <term, offset>
+    //private HashMap<String, Long> lexicon; // <term, offset>
+    private LexiconData lexicon;
 
-    public HashMap<String, Long> getLexicon() {return lexicon;}
+    //public HashMap<String, Long> getLexicon() {return lexicon;}
 
     public LexiconWriter(String pathLexicon) {
-        lexicon = new HashMap<>();
+        lexicon = new LexiconData();
         try {
             // Open file channel for reading and writing
             fc = FileChannel.open(Paths.get(Objects.requireNonNull(pathLexicon)),
@@ -36,18 +37,7 @@ public class LexiconWriter {
     }
 
 
-    public void write(String term, long offset) throws IOException {
-        mbb = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), 2);
-        mbb.putShort((short)term.length());
-        mbb = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), term.length() * 2L);
-        for(int i=0;i<term.length();i++){
-            mbb.putChar(term.charAt(i));
-        }
-        mbb = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), 8);
-        mbb.putLong(offset);
-    }
-
-    public void writeFixed(String term, long offset) throws IOException {
+    public void writeFixed(String term, long offset, List<Integer> docs, List<Integer> freqs) throws IOException {
         mbb = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), MAX_LEN_OF_TERM + 8);
         mbb.put(padStringToLength(term).getBytes(StandardCharsets.UTF_8));
         mbb.putLong(offset);
@@ -64,24 +54,6 @@ public class LexiconWriter {
             return input.substring(0, MAX_LEN_OF_TERM);
         } else {
             return String.format("%1$-" + MAX_LEN_OF_TERM + "s", input);
-        }
-    }
-
-    public void read(String pathLexicon){
-        try (InputStream input = new FileInputStream(pathLexicon);
-             DataInputStream inputStream = new DataInputStream(input)) {
-            while (inputStream.available() > 0) {
-                short termLength = inputStream.readShort();
-                // Read the characters of the term
-                StringBuilder termBuilder = new StringBuilder();
-                for (int i = 0; i < termLength; i++) {
-                    termBuilder.append(inputStream.readChar());
-                }
-                long offset = inputStream.readLong();
-                lexicon.put(termBuilder.toString(), offset);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 
