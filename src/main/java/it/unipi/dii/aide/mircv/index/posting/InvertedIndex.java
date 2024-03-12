@@ -69,12 +69,10 @@ public class InvertedIndex {
     /**
      * Calculates the size of the inverted index block.
      *
-     * @param bytesPerChar   The number of bytes per character.
-     * @param bytesPerInt    The number of bytes per integer.
-     * @param separator     The number of separators.
      * @return The size of the inverted index block in bytes.
      */
-    public int calculateDimensionByte(int bytesPerChar, int bytesPerInt, int separator) {
+    public int calculateDimensionByte() {
+        int separators = 2;
         // Calculate the number of terms in the inverted index block
         int numberOfTerms = Block.size();
 
@@ -89,7 +87,7 @@ public class InvertedIndex {
                 .sum();
 
         // Calculate the size of the inverted index block in bytes
-        return numberOfIntegers * bytesPerInt + numberOfChars * bytesPerChar + separator * bytesPerInt * numberOfTerms + numberOfTerms * bytesPerInt;
+        return numberOfIntegers * 4 + numberOfChars * 2 + separators * 4 * numberOfTerms + numberOfTerms * 4;
     }
 
 }

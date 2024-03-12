@@ -35,7 +35,7 @@ public class BlockReader {
             termLength = input.readInt();
         } catch (EOFException e) {
             // If no data is found, the block is terminated
-            lastWord = "blocco terminato";
+            lastWord = "block terminated";
             return lastWord;
         }
 

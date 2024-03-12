@@ -1,19 +1,15 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
-import it.unipi.dii.aide.mircv.index.config.Configuration;
-
 import java.io.*;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-public class LexiconWriter {
+public class Lexicon {
 
     private final FileChannel fc;
     private MappedByteBuffer mbb;
@@ -25,7 +21,7 @@ public class LexiconWriter {
 
     //public HashMap<String, Long> getLexicon() {return lexicon;}
 
-    public LexiconWriter(String pathLexicon) {
+    public Lexicon(String pathLexicon) {
         lexicon = new LexiconData();
         try {
             // Open file channel for reading and writing

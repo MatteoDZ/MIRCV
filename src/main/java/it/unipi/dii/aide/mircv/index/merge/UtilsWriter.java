@@ -14,4 +14,6 @@ public class UtilsWriter {
     public static int calculateDimensionLong(List<Long> block){
         return block.size()*8; //visto che scriveremo degli short
     }
+
+
 }

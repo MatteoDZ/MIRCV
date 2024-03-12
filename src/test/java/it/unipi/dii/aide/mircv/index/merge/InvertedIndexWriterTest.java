@@ -1,7 +1,7 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.List;
@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class InvertedIndexWriterTest {
 
 
-    /*@Test
+    @Test
     public void getFreqTest() throws IOException {
         List<Integer> docIds = List.of(0, 1, 20, 300, 401, 450, 461, 500, 6000, 70000, 800000, 8000000, 8800000, 8800001);
         List<Integer> freqs = List.of(10, 1, 2, 3, 41, 45, 46, 50, 600, 7000, 8000, 1000, 8800, 700);
@@ -83,6 +83,6 @@ public class InvertedIndexWriterTest {
         assertEquals(freqsNew.get(3), invIndex.getFreq(offsetNew, docIdsNew.get(3), true));
         assertEquals(freqsNew.get(4), invIndex.getFreq(offsetNew, docIdsNew.get(4), true));
         assertEquals(0, invIndex.getFreq(offsetNew, 8000000, true));
-    }*/
+    }
 
 }

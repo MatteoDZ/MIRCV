@@ -7,7 +7,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DocIdFileWriterTest{
+public class DocIdFileTest {
 
     @Test
      void readDocIdsBlockTest() throws IOException {
@@ -15,7 +15,7 @@ public class DocIdFileWriterTest{
         String path = "data/test/testWriter.bin";
         FileUtils.deleteDirectory("data/test");
         FileUtils.createDirectory("data/test");
-        DocIdFileWriter doc = new DocIdFileWriter(path, 5);
+        DocIdFile doc = new DocIdFile(path, 5);
         List<Long> offsets = doc.writeDocIds(docIds,  false);
         assertEquals(List.of(1,20,300,401,450).toString(), doc.readDocIdsBlock(offsets.get(0), offsets.get(1), false).toString());
         assertEquals(List.of(461, 500, 6000, 70000, 800000).toString(), doc.readDocIdsBlock(offsets.get(1), offsets.get(2), false).toString());
@@ -32,7 +32,7 @@ public class DocIdFileWriterTest{
         String path = "data/test/testWriter.bin";
         FileUtils.deleteDirectory("data/test");
         FileUtils.createDirectory("data/test");
-        DocIdFileWriter doc = new DocIdFileWriter(path, 4);
+        DocIdFile doc = new DocIdFile(path, 4);
         List<Long> offsets = doc.writeDocIds(docIds,  false);
         assertEquals(docIds, doc.readDocIds(offsets,  false));
     }
@@ -43,7 +43,7 @@ public class DocIdFileWriterTest{
         String path = "data/test/testWriter.bin";
         FileUtils.deleteDirectory("data/test");
         FileUtils.createDirectory("data/test");
-        DocIdFileWriter doc = new DocIdFileWriter(path, 4);
+        DocIdFile doc = new DocIdFile(path, 4);
         List<Long> offsets = doc.writeDocIds(docIds,  true);
         assertEquals(docIds, doc.readDocIds(offsets,  true));
     }
@@ -54,7 +54,7 @@ public class DocIdFileWriterTest{
         String path = "data/test/testWriter.bin";
         FileUtils.deleteDirectory("data/test");
         FileUtils.createDirectory("data/test");
-        DocIdFileWriter doc = new DocIdFileWriter(path, 5);
+        DocIdFile doc = new DocIdFile(path, 5);
         doc.writeDocIds(docIds,  false);
         assertEquals(List.of(450,800000,8800000), doc.getTermUpperBounds());
         List<Integer> docIdsNew = List.of(1, 10 , 100, 2000, 7000, 80000);
@@ -68,7 +68,7 @@ public class DocIdFileWriterTest{
         String path = "data/test/testWriter.bin";
         FileUtils.deleteDirectory("data/test");
         FileUtils.createDirectory("data/test");
-        DocIdFileWriter doc = new DocIdFileWriter(path, 5);
+        DocIdFile doc = new DocIdFile(path, 5);
         List<Long> offsets = doc.writeDocIds(docsIds,true);
         assertEquals(List.of(0, 1, 10, 20, 30).toString(), doc.readDocIdsBlock(offsets.get(0), offsets.get(1), true).toString());
         assertEquals(List.of(500, 1000, 5000, 10000, 100000).toString(), doc.readDocIdsBlock(offsets.get(1), offsets.get(2), true).toString());

@@ -1,7 +1,7 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
+import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
 import it.unipi.dii.aide.mircv.index.compression.VariableByteCompressor;
-import it.unipi.dii.aide.mircv.index.config.Configuration;
 
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
@@ -11,12 +11,10 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
-import static it.unipi.dii.aide.mircv.index.merge.UtilsWriter.calculateDimensionInt;
-
 /**
  * DocIdFileWriter class writes and reads document IDs to and from a file.
  */
-public class DocIdFileWriter {
+public class DocIdFile {
     private final FileChannel fc; // File channel for reading and writing
     private MappedByteBuffer mbb; // Mapped byte buffer for efficient I/O
     private final Integer BLOCK_SIZE; // Size of the data block
@@ -29,7 +27,7 @@ public class DocIdFileWriter {
      * @param path      The path of the file to be read/written.
      * @param blockSize The size of the data block.
      */
-    public DocIdFileWriter(String path, int blockSize) {
+    public DocIdFile(String path, int blockSize) {
         BLOCK_SIZE = blockSize;
         try {
             fc = FileChannel.open(Paths.get(path), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
@@ -62,7 +60,7 @@ public class DocIdFileWriter {
 
         for (Integer docId : docIds) {
             block.add(docId);
-            if (block.size() == Configuration.BLOCK_SIZE) {
+            if (block.size() == BLOCK_SIZE) {
                 offsets.add(writeBlock(block, compression));
                 termUpperBounds.add(calculateTermUpperBounds(block));
                 block.clear();
@@ -88,14 +86,9 @@ public class DocIdFileWriter {
      */
     private long writeBlock(List<Integer> block, boolean compression) throws IOException {
         if (!compression) {
-            mbb = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), calculateDimensionInt(block));
-            for (int docId : block) {
-                mbb.putInt(docId);
-            }
+            BinaryFile.writeIntListToBuffer(fc, block);
         } else {
-            byte[] compressed = VariableByteCompressor.encode(block);
-            mbb = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), compressed.length);
-            mbb.put(compressed);
+            BinaryFile.writeArrayByteToBuffer(fc, VariableByteCompressor.encode(block));
         }
 
         return fc.size();
@@ -112,17 +105,9 @@ public class DocIdFileWriter {
      */
     public List<Integer> readDocIdsBlock(Long offsetsStart, Long offsetsEnd, boolean compression) throws IOException {
         if (!compression) {
-            List<Integer> docIds = new ArrayList<>();
-            mbb = fc.map(FileChannel.MapMode.READ_ONLY, offsetsStart, offsetsEnd);
-            for (long i = offsetsStart; i < offsetsEnd; i += 4) {
-                docIds.add(mbb.getInt());
-            }
-            return docIds;
+            return BinaryFile.readIntListFromBuffer(fc, offsetsStart, offsetsEnd);
         } else {
-            byte[] compressed = new byte[(int) (offsetsEnd - offsetsStart)];
-            mbb = fc.map(FileChannel.MapMode.READ_ONLY, offsetsStart, offsetsEnd);
-            mbb.get(compressed);
-            return VariableByteCompressor.decode(compressed);
+            return VariableByteCompressor.decode(BinaryFile.readArrayByteFromBuffer(fc, offsetsStart, offsetsEnd));
         }
     }
 

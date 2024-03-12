@@ -26,7 +26,7 @@ public class BlockReaderTest {
         assertEquals("b", b.readTerm());
         assertEquals(List.of(2), b.readNumbers());
         assertEquals(List.of(1), b.readNumbers());
-        assertEquals("blocco terminato", b.readTerm());
+        assertEquals("block terminated", b.readTerm());
     }
 
     @Test
@@ -48,7 +48,7 @@ public class BlockReaderTest {
         assertEquals("c", b.readTerm());
         assertEquals(List.of(2), b.readNumbers());
         assertEquals(List.of(1), b.readNumbers());
-        assertEquals("blocco terminato", b.readTerm());
+        assertEquals("block terminated", b.readTerm());
 
     }
 
