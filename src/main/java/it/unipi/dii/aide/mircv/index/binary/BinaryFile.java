@@ -24,7 +24,7 @@ public class BinaryFile {
      * @param path the file path where the block will be written
      * @throws RuntimeException if an error occurs while writing to the binary file
      */
-    /*public static void writeBlock(InvertedIndex inv, String path){ //a serve a differenziarlo dal metodo precedente. Ã¨ una beta
+    public static void writeBlock(InvertedIndex inv, String path){ //a serve a differenziarlo dal metodo precedente. Ã¨ una beta
         try (FileChannel fc = FileChannel.open(Paths.get(path), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
             MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(),inv.calculateDimensionByte()); // errore nella scelta della dimensione . non dovrebbe avere il +10000. con +10000 da ancora errore quindi il tasso di errore Ã¨ molto alto. indagare
             List<String> sorted_keys=inv.sort();
@@ -53,25 +53,6 @@ public class BinaryFile {
             System.out.println(e);
             throw new RuntimeException("An error occurred while writing to the binary file.");
         }
-    }*/
-
-
-    public static void writeBlock(InvertedIndex inv, String path){
-        try (FileChannel fc = FileChannel.open(Paths.get(path), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
-            List<String> sorted_keys=inv.sort();
-            for(String key: sorted_keys){
-                PostingIndex tpl=inv.searchTerm(key);
-                writeIntToBuffer(fc, tpl.getTerm().length());
-                writeStringToBuffer(fc, tpl.getTerm());
-                writeIntListToBuffer(fc, tpl.getDocIds());
-                writeIntToBuffer(fc, -1);
-                writeIntListToBuffer(fc, tpl.getFrequencies());
-                writeIntToBuffer(fc, -1);
-            }
-
-        } catch (IOException e) {
-            throw new RuntimeException("An error occurred while writing to the binary file.");
-        }
     }
 
 
@@ -92,7 +73,7 @@ public class BinaryFile {
     }
 
     public static int readIntFromBuffer(FileChannel fc, Long offset) throws IOException {
-        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_ONLY, offset, 2);
+        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_ONLY, offset, 4);
         return mbb.getInt();
     }
 

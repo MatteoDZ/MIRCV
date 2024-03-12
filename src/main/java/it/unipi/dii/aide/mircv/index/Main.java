@@ -51,10 +51,11 @@ public class Main {
 
         long savedtime = 0;
         long start_search_time = System.currentTimeMillis();
-        List<Integer>  lst = invRead.getDocIds(lexicon.findTerm("hello"), Configuration.COMPRESSION);
+        long offsetTerm = lexicon.findTerm("hello");
+        List<Integer>  lst = invRead.getDocIds(offsetTerm, Configuration.COMPRESSION);
         for (Integer i : lst){
             long start_freq_time = System.currentTimeMillis();
-            int freq = invRead.getFreq(lexicon.findTerm("hello"), i, Configuration.COMPRESSION);
+            int freq = invRead.getFreq(offsetTerm, i, Configuration.COMPRESSION);
             long end_freq_time = System.currentTimeMillis();
             savedtime += (end_freq_time - start_freq_time);
             System.out.println("TEMPO RECUPERO FREQUENZE DOC " + i +  " are "+ freq + " in " + (end_freq_time-start_freq_time) + " ms");

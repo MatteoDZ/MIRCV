@@ -30,7 +30,15 @@ public class InvertedIndexFile {
         docIdWriter = new DocIdFile(pathDocIds, blockSize);
     }
 
-    // Write document IDs and frequencies to the file and return the offset of the term
+    /**
+     * Write document IDs and frequencies to the file and return the offset of the term
+     *
+     * @param docIds list of document IDs
+     * @param freqs list of frequencies
+     * @param compress flag indicating whether to compress the data
+     * @return the offset of the term
+     * @throws IOException if an I/O error occurs
+     */
     public Long write(List<Integer> docIds, List<Integer> freqs, boolean compress) throws IOException {
         Long termOffset = fc.size();
 
@@ -42,71 +50,75 @@ public class InvertedIndexFile {
         // Write metadata to the buffer
         BinaryFile.writeShortToBuffer(fc, (short) termUpperBounds.size());
         BinaryFile.writeIntListToBuffer(fc, termUpperBounds);
-        BinaryFile.writeIntToBuffer(fc, (int)-1);
+        BinaryFile.writeIntToBuffer(fc, -1);
         BinaryFile.writeLongListToBuffer(fc, docIdsOffsets);
-        BinaryFile.writeLongToBuffer(fc, (long)-1);
+        BinaryFile.writeLongToBuffer(fc, -1);
         BinaryFile.writeLongListToBuffer(fc, frequenciesOffsets);
-        BinaryFile.writeLongToBuffer(fc, (long)-1);
+        BinaryFile.writeLongToBuffer(fc, -1);
 
         // System.out.println(term + " " + docIdsOffsets + " " + frequenciesOffsets + " " + termUpperBounds);
 
         return termOffset;
     }
 
+    /**
+     * Retrieves document IDs from the file starting from the specified offset, with optional compression.
+     * @param offset the starting position in the file
+     * @param compress true if the document IDs should be compressed, false otherwise
+     * @return a list of document IDs
+     * @throws IOException if an I/O error occurs
+     */
     public List<Integer> getDocIds(Long offset, boolean compress) throws IOException {
         long start_search_time = System.currentTimeMillis();
         mbb = fc.map(FileChannel.MapMode.READ_ONLY, offset, fc.size() - offset);
-        short numBlocks = mbb.getShort();
-        List<Integer> termUpperBounds = new ArrayList<>();
-        int termUpperBound;
-        while ((termUpperBound = mbb.getInt()) != -1) {
-            termUpperBounds.add(termUpperBound);
-        }
-        //System.out.println("termUpperBounds " + termUpperBounds);
+        mbb.getShort();
+        while (mbb.getInt() != -1); //skip termUpperBounds
         List<Long> docIdsOffsets = new ArrayList<>();
         long docIdOffset;
         while ((docIdOffset = mbb.getLong()) != -1) {
             docIdsOffsets.add(docIdOffset);
         }
-        // System.out.println("DocIds " + docIdsOffsets);
         long end_search_time = System.currentTimeMillis();
+
+        System.out.println("Number of offsets: " + docIdsOffsets.size());
+        System.out.println("Number of docIds: " + docIdWriter.readDocIds(docIdsOffsets, compress).size());
+
         System.out.println("TEMPO getDocIds " + (end_search_time-start_search_time) + " ms");
         return docIdWriter.readDocIds(docIdsOffsets, compress);
     }
 
+    /**
+     * Get frequency of a document in a given block.
+     * @param offset the offset in the file
+     * @param docId the ID of the document
+     * @param compress whether compression is enabled
+     * @return the frequency of the document
+     * @throws IOException if an I/O error occurs
+     */
     // Get frequency of a document in a given block
-    public int getFreq(Long offset, int docId, boolean compress) throws IOException {
+    public Integer getFreq(Long offset, int docId, boolean compress) throws IOException {
         short numBlocks = BinaryFile.readShortFromBuffer(fc, offset);
         //System.out.println("numBlocks " + numBlocks);
 
         int blockIndex = findBlockIndex(offset, numBlocks, docId);
+
         if(blockIndex == -1) return 0;
 
         //leggiamo i docId
         List<Integer> docIdsBlock = docIdWriter.readDocIdsBlock(getOffsetsDocIds(offset, numBlocks, blockIndex).get(0),
                 getOffsetsDocIds(offset, numBlocks, blockIndex).get(1),compress);
 
-        //System.out.println("InvertedIndexWriter DocIds"  + docIdsBlock);
+        // System.out.println("InvertedIndexWriter DocIds"  + docIdsBlock);
 
         //leggiamo le frequenze
         List<Short> freqsBlock = frequencyWriter.readFreqsBlock(getOffsetsFreqs(offset, numBlocks, blockIndex).get(0),
                 getOffsetsFreqs(offset, numBlocks, blockIndex).get(1),compress);
 
-        //System.out.println("InvertedIndexWriter Freqs"  + freqsBlock);
-
-
         int indexDocId = docIdsBlock.indexOf(docId);
-        return (indexDocId == -1) ? 0 : freqsBlock.get(indexDocId);
-    }
-
-    // Get index block for a document ID
-    public Integer getIndexBlock(List<Integer> termUpperBounds, int docId) {
-        for (int i = 0; i < termUpperBounds.size(); i++) {
-            if (docId <= termUpperBounds.get(i)) {
-                return i;
-            }
-        }
-        return -1;
+        // System.out.println("InvertedIndexWriter Freqs"  + freqsBlock);
+        // System.out.println("InvertedIndexWriter Freqs Index"  + indexDocId);
+        // if(indexDocId != -1)  System.out.println("InvertedIndexWriter Freq "  + freqsBlock.get(indexDocId));
+        return (indexDocId == -1) ? 0 : (int)freqsBlock.get(indexDocId);
     }
 
     /**
@@ -142,7 +154,15 @@ public class InvertedIndexFile {
     // Helper method: Write a short value to the buffer
 
 
-    // Helper method: Find the index block for a given document ID
+    /**
+     * Find the index block for a given document ID.
+     *
+     * @param offset the offset in the file
+     * @param numBlocks the number of blocks
+     * @param docId the document ID to search for
+     * @return the index of the block, or -1 if not found
+     * @throws IOException if an I/O error occurs
+     */
     private int findBlockIndex(Long offset, short numBlocks, int docId) throws IOException {
         mbb = fc.map(FileChannel.MapMode.READ_ONLY, offset + 2L, numBlocks * 4);
         for (int i = 0; i < numBlocks; i++) {

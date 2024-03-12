@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Merge {
-    private List<BlockReader> readers = new ArrayList<>();
+    private final List<BlockReader> readers = new ArrayList<>();
     private final String pathLexicon, pathDocIds, pathFreqs;
     private final Integer blockSize;
 
@@ -50,13 +50,13 @@ public class Merge {
                 if (termToWrite.equals(reader.lastWord)) {
                     List<Integer> docIdsToAdd = reader.readNumbers();
                     List<Integer> freqsToAdd = reader.readNumbers();
-                    if(termToWrite.equals("a")){
+                    /*if(termToWrite.equals("a")){
                         System.out.println(docs);
                         System.out.println(freqs);
 
                         System.out.println(docIdsToAdd);
                         System.out.println(freqsToAdd);
-                    }
+                    }*/
                     docs.addAll(docIdsToAdd);
                     freqs.addAll(freqsToAdd);
                     if (reader.readTerm().equals("block terminated")) { //con questo si attiva automaticamente il readterm
