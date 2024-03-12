@@ -40,7 +40,7 @@ public class Merge {
         List<Integer> freqs=new ArrayList<>();
         String termToWrite;
 
-        InvertedIndexWriter inv = new InvertedIndexWriter(path, pathDocIds, pathFreqs, blockSize);
+        InvertedIndexFile inv = new InvertedIndexFile(path, pathDocIds, pathFreqs, blockSize);
         Lexicon lexicon = new Lexicon(pathLexicon);
         while(!readers.isEmpty()){
 

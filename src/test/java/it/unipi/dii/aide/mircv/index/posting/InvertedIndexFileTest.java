@@ -7,7 +7,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-public class InvertedIndexWriterTest {
+public class InvertedIndexFileTest {
 
     @Test
     public void addTest() {

@@ -10,14 +10,14 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InvertedIndexWriter {
+public class InvertedIndexFile {
     private final FileChannel fc;
     private MappedByteBuffer mbb;
     public final FrequencyFile frequencyWriter;
     public final DocIdFile docIdWriter;
 
     // Constructor
-    public InvertedIndexWriter(String pathInvertedIndex, String pathDocIds, String pathFrequencies, int blockSize) {
+    public InvertedIndexFile(String pathInvertedIndex, String pathDocIds, String pathFrequencies, int blockSize) {
         try {
             // Open file channel for reading and writing
             fc = FileChannel.open(Paths.get(pathInvertedIndex),

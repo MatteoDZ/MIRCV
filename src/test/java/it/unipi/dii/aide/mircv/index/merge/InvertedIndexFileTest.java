@@ -8,7 +8,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class InvertedIndexWriterTest {
+public class InvertedIndexFileTest {
 
 
     @Test
@@ -20,7 +20,7 @@ public class InvertedIndexWriterTest {
         String pathIndex= "data/test/testIndex.bin";
         FileUtils.deleteDirectory("data/test");
         FileUtils.createDirectory("data/test");
-        InvertedIndexWriter invIndex = new InvertedIndexWriter(pathIndex, pathDoc, pathFreq, 4);
+        InvertedIndexFile invIndex = new InvertedIndexFile(pathIndex, pathDoc, pathFreq, 4);
         Long offset = invIndex.write(docIds, freqs,false);
         assertEquals(freqs.get(0), invIndex.getFreq(offset, docIds.get(0), false));
         assertEquals(freqs.get(1), invIndex.getFreq(offset, docIds.get(1), false));
@@ -57,7 +57,7 @@ public class InvertedIndexWriterTest {
         String pathIndex= "data/test/testIndex.bin";
         FileUtils.deleteDirectory("data/test");
         FileUtils.createDirectory("data/test");
-        InvertedIndexWriter invIndex = new InvertedIndexWriter(pathIndex, pathDoc, pathFreq, 4);
+        InvertedIndexFile invIndex = new InvertedIndexFile(pathIndex, pathDoc, pathFreq, 4);
         Long offset = invIndex.write(docIds, freqs,true);
         assertEquals(freqs.get(0), invIndex.getFreq(offset, docIds.get(0), true));
         assertEquals(freqs.get(1), invIndex.getFreq(offset, docIds.get(1), true));

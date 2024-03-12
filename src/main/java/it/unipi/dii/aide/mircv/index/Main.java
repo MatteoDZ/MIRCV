@@ -1,7 +1,7 @@
 package it.unipi.dii.aide.mircv.index;
 
 import it.unipi.dii.aide.mircv.index.config.Configuration;
-import it.unipi.dii.aide.mircv.index.merge.InvertedIndexWriter;
+import it.unipi.dii.aide.mircv.index.merge.InvertedIndexFile;
 import it.unipi.dii.aide.mircv.index.merge.Lexicon;
 import it.unipi.dii.aide.mircv.index.merge.Merge;
 import it.unipi.dii.aide.mircv.index.spimi.Spimi;
@@ -45,7 +45,7 @@ public class Main {
             System.out.println(printTime("Merge", startTime_merge, endTime_merge));
         }
 
-        InvertedIndexWriter invRead = new InvertedIndexWriter(Configuration.PATH_INVERTED_INDEX_OFFSETS, Configuration.PATH_DOCIDS, Configuration.PATH_FEQUENCIES, Configuration.BLOCK_SIZE);
+        InvertedIndexFile invRead = new InvertedIndexFile(Configuration.PATH_INVERTED_INDEX_OFFSETS, Configuration.PATH_DOCIDS, Configuration.PATH_FEQUENCIES, Configuration.BLOCK_SIZE);
 
         Lexicon lexicon = new Lexicon(Configuration.PATH_LEXICON);
 
