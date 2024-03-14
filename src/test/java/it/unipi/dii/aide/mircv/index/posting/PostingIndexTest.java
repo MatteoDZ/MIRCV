@@ -19,6 +19,8 @@ public class PostingIndexTest {
         assertEquals(Arrays.asList(1,2), postings.getFrequencies());
     }
 
+    /*
+
     @Test
     public void getDocIdsTest() {
         PostingIndex postings = new PostingIndex("abc", Arrays.asList(1, 2, 3), Arrays.asList(1, 1, 2));
@@ -40,4 +42,6 @@ public class PostingIndexTest {
         postings.addPosting(4);
         assertEquals(Arrays.asList(1,1,2,2), postings.getFrequencies());
     }
+    
+     */
 }

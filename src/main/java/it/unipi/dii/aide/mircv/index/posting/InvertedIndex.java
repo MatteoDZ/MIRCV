@@ -1,7 +1,6 @@
 package it.unipi.dii.aide.mircv.index.posting;
 
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class InvertedIndex {
@@ -27,6 +26,17 @@ public class InvertedIndex {
             } else {
                 Block.put(term, new PostingIndex(term, doc_id));
             }
+        }
+    }
+
+    public void addNew(String term, Posting posting){
+        if (isPresent(term)) {
+            PostingIndex test = Block.get(term);
+            //Collections.sort(postingList);
+            test.addPosting(posting);
+        }
+        else {
+            Block.put(term, new PostingIndex(posting));
         }
     }
 

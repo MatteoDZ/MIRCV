@@ -1,6 +1,7 @@
 package it.unipi.dii.aide.mircv.index.posting;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -48,8 +49,11 @@ public class PostingIndex {
      */
     public PostingIndex() {}
 
-    public PostingIndex(String term, List<Integer> docIds, List<Integer> frequencies) {
-        this.term = term;
+    public PostingIndex(Posting p) {
+        postings.add(p);
+    }
+
+    public PostingIndex(List<Integer> docIds, List<Integer> frequencies) {
         docIds.forEach(docId -> postings.add(new Posting(docId, frequencies.get(docIds.indexOf(docId)))));
     }
 
@@ -103,15 +107,6 @@ public class PostingIndex {
         this.term = term;
     }
 
-    /**
-     * Adds a list of postings to the existing postings.
-     *
-     * @param postings2Add The list of postings to add.
-     */
-    public void addPostings(ArrayList<Posting> postings2Add) {
-        postings.addAll(postings2Add);
-    }
-
     public void addPosting(int documentId) {
         Posting existingPosting = postings.stream()
                 .filter(p -> p.getDoc_id() == documentId)
@@ -122,6 +117,20 @@ public class PostingIndex {
             existingPosting.incrementFrequency();
         } else {
             postings.add(new Posting(documentId, 1));
+        }
+    }
+
+
+    public void addPosting(Posting posting) {
+        Posting existingPosting = postings.stream()
+                .filter(p -> p.getDoc_id() == posting.getDoc_id())
+                .findFirst()
+                .orElse(null);
+
+        if (existingPosting != null) {
+            existingPosting.setFrequency(existingPosting.getFrequency() + posting.getFrequency());
+        } else {
+            postings.add(new Posting(posting.getDoc_id(), posting.getFrequency()));
         }
     }
 

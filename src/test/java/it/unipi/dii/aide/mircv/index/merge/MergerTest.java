@@ -29,6 +29,7 @@ public class MergerTest {
         inv1.add(List.of("b"), 2);
         inv1.add(List.of("a"), 3);
         inv1.add(List.of("b"), 4);
+        //inv1.add(List.of("a"), 20);
         BinaryFile.writeBlock(inv1, pathTest1);
         InvertedIndex inv2 = new InvertedIndex();
         inv2.add(List.of("d"), 3);
@@ -46,7 +47,7 @@ public class MergerTest {
         merge.write(pathInvIndex, false);
         InvertedIndexFile inv = new InvertedIndexFile(pathInvIndex, pathDocIds, pathFreqs, 2);
         Lexicon lex = new Lexicon(pathLexicon);
-        // assertEquals(List.of(1, 3, 5, 6), inv.getDocIds(lex.findTerm("a"), false));
+        assertEquals(List.of(1, 3, 5, 6), inv.getDocIds(lex.findTerm("a"), false));
         assertEquals(List.of(2, 4), inv.getDocIds(lex.findTerm("b"), false));
         assertEquals(List.of(4, 6), inv.getDocIds(lex.findTerm("c"), false));
         assertEquals(List.of(3), inv.getDocIds(lex.findTerm("d"), false));

@@ -53,7 +53,7 @@ public class Statistics {
     }
 
     public void writeToDisk() throws IOException {
-        mbb = fc.map(FileChannel.MapMode.READ_WRITE, 0, 4L + 4L + (4L * this.numdocs));
+        mbb = fc.map(FileChannel.MapMode.READ_WRITE, 0, 4L + 8L + (4L * this.numdocs));
         mbb.putInt(this.numdocs);
         mbb.putDouble(this.avg_doc_length);
         for (Integer i : this.docs_length){

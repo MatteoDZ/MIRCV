@@ -1,8 +1,15 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
+import it.unipi.dii.aide.mircv.index.config.Configuration;
+import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
+import it.unipi.dii.aide.mircv.index.posting.Posting;
+import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 public class Merge {
@@ -36,12 +43,13 @@ public class Merge {
         }
 
         List<BlockReader> daRimuovere=new ArrayList<>();
-        List<Integer> docs=new ArrayList<>();
-        List<Integer> freqs=new ArrayList<>();
+        HashMap<Integer, Integer> docs_freqs = new HashMap<>();
+        InvertedIndex ii = new InvertedIndex();
         String termToWrite;
 
         InvertedIndexFile inv = new InvertedIndexFile(path, pathDocIds, pathFreqs, blockSize);
         Lexicon lexicon = new Lexicon(pathLexicon);
+
         while(!readers.isEmpty()){
 
             termToWrite = getFirst();
@@ -50,21 +58,35 @@ public class Merge {
                 if (termToWrite.equals(reader.lastWord)) {
                     List<Integer> docIdsToAdd = reader.readNumbers();
                     List<Integer> freqsToAdd = reader.readNumbers();
-                    /*if(termToWrite.equals("a")){
-                        System.out.println(docs);
-                        System.out.println(freqs);
 
-                        System.out.println(docIdsToAdd);
-                        System.out.println(freqsToAdd);
-                    }*/
-                    docs.addAll(docIdsToAdd);
-                    freqs.addAll(freqsToAdd);
+
+                    assert(docIdsToAdd.size() == freqsToAdd.size());
+                    for(int i = 0; i < docIdsToAdd.size(); i++){
+                        if(docs_freqs.containsKey(docIdsToAdd.get(i))){
+                            int frequencies = docs_freqs.get(docIdsToAdd.get(i));
+                            frequencies += freqsToAdd.get(i);
+                            docs_freqs.put(docIdsToAdd.get(i), frequencies);
+                        }
+                        else{
+                            docs_freqs.put(docIdsToAdd.get(i), freqsToAdd.get(i));
+                        }
+                    }
+
                     if (reader.readTerm().equals("block terminated")) { //con questo si attiva automaticamente il readterm
                         daRimuovere.add(reader); //sennò il metodo è comunque stato chiamato quindi i blocchi si aggiornano
                     }
                 }
             }
             // inserire qui le cose da fare
+            List<Integer> docs = docs_freqs.keySet().stream().toList();
+            List<Integer> freqs = docs_freqs.values().stream().toList();
+
+
+            for(int i = 0; i < docs.size(); i++){
+                Posting p = new Posting(docs.get(i), freqs.get(i));
+                ii.addNew(termToWrite, p);
+            }
+
             long offsetTerm = inv.write(docs, freqs, compress);
 
             //inserire qui le cose da fare
@@ -80,11 +102,16 @@ public class Merge {
             //chiamata a oggetto che scrive sul lexicon termine, offset nell'inv restituito precedentemente, collection freqs and so
             // on altre statistiche descrittive
 
-            docs.clear();
-            freqs.clear();
+            docs_freqs.clear();
+
             readers.removeAll(daRimuovere);
             daRimuovere.clear();
         }
+
+        PostingIndex pd = ii.searchTerm("hello");
+        System.out.println("PORCODDIO E LA MADONNA PUTTANA SURGELATA" + pd.getPostings().toString());
+        long off = lexicon.findTerm("hello");
+        System.out.println("PORCODDIO E LA MADONNA PUTTANA SURGELATA" + inv.getDocIds(off, Configuration.COMPRESSION).toString());
 
     }
 

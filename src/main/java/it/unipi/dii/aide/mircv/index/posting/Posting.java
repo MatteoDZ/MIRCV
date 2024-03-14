@@ -3,7 +3,7 @@ package it.unipi.dii.aide.mircv.index.posting;
 /**
  * Represents a posting in the context of information retrieval.
  */
-public class Posting {
+public class Posting implements Comparable<Posting>{
     private int doc_id;  // Document ID
     private int frequency = 0;  // Frequency of the term in the document
 
@@ -66,5 +66,15 @@ public class Posting {
     @Override
     public String toString() {
         return "[doc_id-> " + doc_id + " freq-> " + frequency + "]";
+    }
+
+    @Override
+    public int compareTo(Posting o) {
+        if (this.doc_id > o.doc_id){
+            return 1;
+        }
+        else {
+            return 0;
+        }
     }
 }
