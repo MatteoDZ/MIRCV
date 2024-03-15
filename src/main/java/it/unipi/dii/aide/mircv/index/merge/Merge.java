@@ -12,9 +12,7 @@ import java.io.IOException;
 import java.util.*;
 
 public class Merge {
-    private final List<BlockReader> readers = new ArrayList<>();
-
-    HashMap<BlockReader, PostingIndex> readerLines = new HashMap<>();
+    private final HashMap<BlockReader, PostingIndex> readerLines = new HashMap<>();
     private final String pathLexicon, pathDocIds, pathFreqs;
     private final Integer blockSize;
 
@@ -36,27 +34,24 @@ public class Merge {
 
     public void write(String path, boolean compress) throws IOException {
 
-        int i=0;
+        int i = 0;
 
         InvertedIndexFile inv = new InvertedIndexFile(path, this.pathDocIds, this.pathFreqs, this.blockSize);
         Lexicon lexicon = new Lexicon(this.pathLexicon);
 
 
-
-        while(!readerLines.isEmpty()){
-
-
-            if(i%100000==0)
+        while (!readerLines.isEmpty()) {
+            if (i % 100000 == 0)
                 System.out.println("Line number " + i);
             i++;
 
             String minTerm = findMinTerm(readerLines);
             // System.out.println("minTerm: " + minTerm);
 
-            PostingIndex minPosting=new PostingIndex(minTerm);
+            PostingIndex minPosting = new PostingIndex(minTerm);
             Iterator<Map.Entry<BlockReader, PostingIndex>> iterator = readerLines.entrySet().iterator();
 
-            while(iterator.hasNext()) {
+            while (iterator.hasNext()) {
                 Map.Entry<BlockReader, PostingIndex> entry = iterator.next();
                 PostingIndex postingList = entry.getValue();
 
@@ -86,65 +81,61 @@ public class Merge {
                 }
             }
 
+            List<Integer> docIdsNew = minPosting.getDocIds();
+            List<Integer> freqsNew = minPosting.getFrequencies();
+            Integer docId;
 
-            if(!findDuplicates(minPosting.getDocIds()).isEmpty()){
-                List<Integer> docIdsNew = minPosting.getDocIds();
-                List<Integer> freqsNew = minPosting.getFrequencies();
-                for(Integer docId : findDuplicates(minPosting.getDocIds())){
-                    docIdsNew.remove((int)docId);
-                    freqsNew.remove((int)docId);
-                    freqsNew.add(docId, freqsNew.get(docId) + freqsNew.get(docId + 1));
+            while ((docId = findDuplicate(docIdsNew)) != 0){
+                // System.out.println("Prima DocIds: " + docIdsNew + " Freqs: " + freqsNew + " DocId: " + docId);
+                docIdsNew.remove((int) docId);
+                int freq = freqsNew.get(docId);
+                freqsNew.remove((int) docId);
+                freqsNew.add(docId,  freq+ freqsNew.get(docId + 1));
+                // System.out.println("Dopo DocIds: " + docIdsNew + " Freqs: " + freqsNew + " DocId: " + docId);
+            }
+            // System.out.println("Term: " + minPosting.getTerm() + " DocIds: " + docIdsNew + " Freqs: " + freqsNew);
+            long offsetTerm = inv.write(docIdsNew, freqsNew, compress);
+            lexicon.writeFixed(minPosting.getTerm(), offsetTerm, docIdsNew, freqsNew);
+
+
+            }
+        }
+
+        /**
+         * Find duplicates in the given list of integers and return a set containing the duplicate elements.
+         *
+         * @param  listContainingDuplicates   the list of integers containing possible duplicates
+         * @return a set containing the duplicate elements
+         */
+        public Integer findDuplicate (List<Integer> listContainingDuplicates) {
+            final Set<Integer> set1 = new HashSet<>();
+
+            for (Integer yourInt : listContainingDuplicates) {
+                if (!set1.add(yourInt)) {
+                    return listContainingDuplicates.indexOf(yourInt);
                 }
-                System.out.println("Prima Term: " + minPosting.getTerm() + " DocIds: " + minPosting.getDocIds() + " Freqs: " + minPosting.getFrequencies());
-                System.out.println("Dopo Term: " + minPosting.getTerm() + " DocIds: " + docIdsNew + " Freqs: " + freqsNew);
-                long offsetTerm = inv.write(docIdsNew, freqsNew, compress);
-                lexicon.writeFixed(minPosting.getTerm(), offsetTerm, docIdsNew, freqsNew);
-            }else{
-                // System.out.println("Term: " + minPosting.getTerm() + " DocIds: " + minPosting.getDocIds() + " Freqs: " + minPosting.getFrequencies());
-                long offsetTerm = inv.write(minPosting.getDocIds(), minPosting.getFrequencies(), compress);
-                lexicon.writeFixed(minPosting.getTerm(), offsetTerm, minPosting.getDocIds(), minPosting.getFrequencies());
             }
-
-
-        }
-    }
-
-    /**
-     * Find duplicates in the given list of integers and return a set containing the duplicate elements.
-     *
-     * @param  listContainingDuplicates   the list of integers containing possible duplicates
-     * @return                           a set containing the duplicate elements
-     */
-    public Set<Integer> findDuplicates(List<Integer> listContainingDuplicates) {
-        final Set<Integer> setToReturn = new HashSet<>();
-        final Set<Integer> set1 = new HashSet<>();
-
-        for (Integer yourInt : listContainingDuplicates) {
-            if (!set1.add(yourInt)) {
-                setToReturn.add(listContainingDuplicates.indexOf(yourInt));
-            }
-        }
-        return setToReturn;
-    }
-
-
-    /**
-     * this function finds the min term between all the posting lists of the same line of the intermediateIndexes
-     * @param map is the map of the posting lists, containing the reader of each intermediateIndex file associated to the last posting list read from that intermediateIndex
-     * @return the min term found
-     */
-    public static String findMinTerm(HashMap<BlockReader, PostingIndex> map) {
-        String minTerm = null;
-
-        for (PostingIndex postingList : map.values()) {
-            String term = postingList.getTerm();
-            if (minTerm == null || term.compareTo(minTerm) < 0) {
-                minTerm = term;
-            }
+            return 0;
         }
 
-        return minTerm;
+
+        /**
+         * this function finds the min term between all the posting lists of the same line of the intermediateIndexes
+         * @param map is the map of the posting lists, containing the reader of each intermediateIndex file associated to the last posting list read from that intermediateIndex
+         * @return the min term found
+         */
+        public static String findMinTerm (HashMap < BlockReader, PostingIndex > map){
+            String minTerm = null;
+
+            for (PostingIndex postingList : map.values()) {
+                String term = postingList.getTerm();
+                if (minTerm == null || term.compareTo(minTerm) < 0) {
+                    minTerm = term;
+                }
+            }
+
+            return minTerm;
+        }
+
+
     }
-
-
-}
