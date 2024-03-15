@@ -12,10 +12,8 @@ public class Configuration {
     public static final String PATH_BINARY = load("path_binary");
     public static final String DIRECTORY_TEMP_FILES = load("directory_temporary_files");
     public static final String PATH_INVERTED_INDEX = load("path_inverted_index");
-    public static final String PATH_INVERTED_INDEX_OFFSETS = load("path_inverted_index_offsets");
     public static final String PATH_DOCIDS = load("path_docids");
     public static final String PATH_FEQUENCIES = load("path_freqs");
-    public static final String PATH_VOCABULARY = load("path_vocabulary");
     public static final String PATH_LEXICON = load("path_lexicon");
     public static final int BLOCK_SIZE = 512;
     public static final boolean COMPRESSION = false;

@@ -80,8 +80,8 @@ public class InvertedIndexFile {
         }
         long end_search_time = System.currentTimeMillis();
 
-        System.out.println("Number of offsets: " + docIdsOffsets.size());
-        System.out.println("Number of docIds: " + docIdWriter.readDocIds(docIdsOffsets, compress).size());
+        // System.out.println("Number of offsets: " + docIdsOffsets.size());
+        // System.out.println("Number of docIds: " + docIdWriter.readDocIds(docIdsOffsets, compress).size());
 
         System.out.println("TEMPO getDocIds " + (end_search_time-start_search_time) + " ms");
         return docIdWriter.readDocIds(docIdsOffsets, compress);

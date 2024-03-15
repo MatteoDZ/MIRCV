@@ -5,27 +5,29 @@ import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
 import it.unipi.dii.aide.mircv.index.posting.Posting;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class Merge {
     private final List<BlockReader> readers = new ArrayList<>();
+
+    HashMap<BlockReader, PostingIndex> readerLines = new HashMap<>();
     private final String pathLexicon, pathDocIds, pathFreqs;
     private final Integer blockSize;
 
-    //altri cosi per fare il dizionario
-    public Merge(List<String> paths, String pathLexicon, String pathDocIds, String pathFreqs, Integer blockSize) {
-        paths.forEach(path -> {
-            try {
-                readers.add(new BlockReader(path));
-            } catch (FileNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        });
+    public Merge(List<String> paths, String pathLexicon, String pathDocIds, String pathFreqs, Integer blockSize) throws IOException {
+        for(String path :paths){
+            BlockReader reader = new BlockReader(path);
+            String line = reader.readTerm();
+            List<Integer> docIds = reader.readNumbers();
+            List<Integer> freqs = reader.readNumbers();
+            // System.out.println("Path: " + path + " Riga: " + line + " DocId: " + docIds + " Freq: " + freqs);
+            readerLines.put(reader, new PostingIndex(line, docIds, freqs));
+        }
+
         this.pathFreqs = pathFreqs;
         this.pathDocIds = pathDocIds;
         this.pathLexicon = pathLexicon;
@@ -33,98 +35,116 @@ public class Merge {
     }
 
     public void write(String path, boolean compress) throws IOException {
-        for (BlockReader reader : readers) {
-            try {
-                reader.readTerm();
-            } catch (IOException e) {
-                System.out.println("Block does not exist: " + path);
-            }
 
-        }
+        int i=0;
 
-        List<BlockReader> daRimuovere=new ArrayList<>();
-        HashMap<Integer, Integer> docs_freqs = new HashMap<>();
-        InvertedIndex ii = new InvertedIndex();
-        String termToWrite;
-
-        InvertedIndexFile inv = new InvertedIndexFile(path, pathDocIds, pathFreqs, blockSize);
-        Lexicon lexicon = new Lexicon(pathLexicon);
-
-        while(!readers.isEmpty()){
-
-            termToWrite = getFirst();
-            for (BlockReader reader : readers) {
-
-                if (termToWrite.equals(reader.lastWord)) {
-                    List<Integer> docIdsToAdd = reader.readNumbers();
-                    List<Integer> freqsToAdd = reader.readNumbers();
+        InvertedIndexFile inv = new InvertedIndexFile(path, this.pathDocIds, this.pathFreqs, this.blockSize);
+        Lexicon lexicon = new Lexicon(this.pathLexicon);
 
 
-                    assert(docIdsToAdd.size() == freqsToAdd.size());
-                    for(int i = 0; i < docIdsToAdd.size(); i++){
-                        if(docs_freqs.containsKey(docIdsToAdd.get(i))){
-                            int frequencies = docs_freqs.get(docIdsToAdd.get(i));
-                            frequencies += freqsToAdd.get(i);
-                            docs_freqs.put(docIdsToAdd.get(i), frequencies);
-                        }
-                        else{
-                            docs_freqs.put(docIdsToAdd.get(i), freqsToAdd.get(i));
-                        }
-                    }
 
-                    if (reader.readTerm().equals("block terminated")) { //con questo si attiva automaticamente il readterm
-                        daRimuovere.add(reader); //sennò il metodo è comunque stato chiamato quindi i blocchi si aggiornano
+        while(!readerLines.isEmpty()){
+
+
+            if(i%100000==0)
+                System.out.println("Line number " + i);
+            i++;
+
+            String minTerm = findMinTerm(readerLines);
+            // System.out.println("minTerm: " + minTerm);
+
+            PostingIndex minPosting=new PostingIndex(minTerm);
+            Iterator<Map.Entry<BlockReader, PostingIndex>> iterator = readerLines.entrySet().iterator();
+
+            while(iterator.hasNext()) {
+                Map.Entry<BlockReader, PostingIndex> entry = iterator.next();
+                PostingIndex postingList = entry.getValue();
+
+                // System.out.println("Term PostingList: " + postingList.getTerm());
+
+
+                if (postingList.getTerm().equals(minTerm)) {
+                    //we are inside a reader with the min term
+                    minPosting.appendList(postingList);
+
+                    // System.out.println("Term IF " + postingList.getTerm());
+
+                    BlockReader reader = entry.getKey();
+                    String line = reader.readTerm();
+                    // System.out.println("Line: " + line);
+
+
+                    if (line != null) {
+                        List<Integer> docIds = reader.readNumbers();
+                        // System.out.println("DocIds: " + docIds);
+                        List<Integer> freqs = reader.readNumbers();
+                        // System.out.println("Freqs: " + freqs);
+                        readerLines.put(reader, new PostingIndex(line, docIds, freqs));
+                    } else {
+                        iterator.remove(); // Remove the current reader from the list
                     }
                 }
             }
-            // inserire qui le cose da fare
-            List<Integer> docs = docs_freqs.keySet().stream().toList();
-            List<Integer> freqs = docs_freqs.values().stream().toList();
 
 
-            for(int i = 0; i < docs.size(); i++){
-                Posting p = new Posting(docs.get(i), freqs.get(i));
-                ii.addNew(termToWrite, p);
+            if(!findDuplicates(minPosting.getDocIds()).isEmpty()){
+                List<Integer> docIdsNew = minPosting.getDocIds();
+                List<Integer> freqsNew = minPosting.getFrequencies();
+                for(Integer docId : findDuplicates(minPosting.getDocIds())){
+                    docIdsNew.remove((int)docId);
+                    freqsNew.remove((int)docId);
+                    freqsNew.add(docId, freqsNew.get(docId) + freqsNew.get(docId + 1));
+                }
+                System.out.println("Prima Term: " + minPosting.getTerm() + " DocIds: " + minPosting.getDocIds() + " Freqs: " + minPosting.getFrequencies());
+                System.out.println("Dopo Term: " + minPosting.getTerm() + " DocIds: " + docIdsNew + " Freqs: " + freqsNew);
+                long offsetTerm = inv.write(docIdsNew, freqsNew, compress);
+                lexicon.writeFixed(minPosting.getTerm(), offsetTerm, docIdsNew, freqsNew);
+            }else{
+                // System.out.println("Term: " + minPosting.getTerm() + " DocIds: " + minPosting.getDocIds() + " Freqs: " + minPosting.getFrequencies());
+                long offsetTerm = inv.write(minPosting.getDocIds(), minPosting.getFrequencies(), compress);
+                lexicon.writeFixed(minPosting.getTerm(), offsetTerm, minPosting.getDocIds(), minPosting.getFrequencies());
             }
 
-            long offsetTerm = inv.write(docs, freqs, compress);
 
-            //inserire qui le cose da fare
-            lexicon.writeFixed(termToWrite, offsetTerm, docs, freqs);
-
-            //chiamata a oggetto che scrive le freqs e restituisce gli offsets di ciascun blocco. (i metodi di scrittura cerchiamo di tenerli su binaryFile)
-            // tiene aperto e gestisce il descrittore del file freqs
-
-            //chiamata a oggetto che scrive numero di blocchi,upper bounds, puntatori ai blocchi di doc id, puntatori ai blocchi  di freqs
-            // ottenuti dalla chiamata precedente e ai blocchi di doc ids contenuti nel file. restituisce solo il puntatore al primo
-            //punto di scrittura
-
-            //chiamata a oggetto che scrive sul lexicon termine, offset nell'inv restituito precedentemente, collection freqs and so
-            // on altre statistiche descrittive
-
-            docs_freqs.clear();
-
-            readers.removeAll(daRimuovere);
-            daRimuovere.clear();
         }
+    }
 
-        PostingIndex pd = ii.searchTerm("hello");
-        System.out.println("PORCODDIO E LA MADONNA PUTTANA SURGELATA" + pd.getPostings().toString());
-        long off = lexicon.findTerm("hello");
-        System.out.println("PORCODDIO E LA MADONNA PUTTANA SURGELATA" + inv.getDocIds(off, Configuration.COMPRESSION).toString());
+    /**
+     * Find duplicates in the given list of integers and return a set containing the duplicate elements.
+     *
+     * @param  listContainingDuplicates   the list of integers containing possible duplicates
+     * @return                           a set containing the duplicate elements
+     */
+    public Set<Integer> findDuplicates(List<Integer> listContainingDuplicates) {
+        final Set<Integer> setToReturn = new HashSet<>();
+        final Set<Integer> set1 = new HashSet<>();
 
+        for (Integer yourInt : listContainingDuplicates) {
+            if (!set1.add(yourInt)) {
+                setToReturn.add(listContainingDuplicates.indexOf(yourInt));
+            }
+        }
+        return setToReturn;
     }
 
 
+    /**
+     * this function finds the min term between all the posting lists of the same line of the intermediateIndexes
+     * @param map is the map of the posting lists, containing the reader of each intermediateIndex file associated to the last posting list read from that intermediateIndex
+     * @return the min term found
+     */
+    public static String findMinTerm(HashMap<BlockReader, PostingIndex> map) {
+        String minTerm = null;
 
-    String getFirst(){
-        String parolaMinima=readers.get(0).lastWord;
-        for(BlockReader b: readers){
-            if(b.lastWord.compareTo(parolaMinima)<0){
-                parolaMinima=b.lastWord;
+        for (PostingIndex postingList : map.values()) {
+            String term = postingList.getTerm();
+            if (minTerm == null || term.compareTo(minTerm) < 0) {
+                minTerm = term;
             }
         }
-        return parolaMinima;
+
+        return minTerm;
     }
+
 
 }

@@ -1,14 +1,8 @@
 package it.unipi.dii.aide.mircv.index.compression;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -119,9 +113,11 @@ class CompressionTest {
     }
 
     @Test
-    public void test(){
+    public void testUncompleteBlock(){
+        assertEquals(List.of((short)4, (short)1, (short)1, (short)1, (short)1),
+                UnaryCompressor.integerArrayDecompression(UnaryCompressor.integerArrayCompression(new int[]{4, 1, 1, 1, 1}), 5));
         assertEquals(List.of((short)4),
-                UnaryCompressor.integerArrayDecompression(UnaryCompressor.integerArrayCompression(new int[]{4}), 15));
+                UnaryCompressor.integerArrayDecompression(UnaryCompressor.integerArrayCompression(new int[]{4}), 1));
     }
 
 

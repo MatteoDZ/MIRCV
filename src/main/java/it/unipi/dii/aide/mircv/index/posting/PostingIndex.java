@@ -1,9 +1,6 @@
 package it.unipi.dii.aide.mircv.index.posting;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Represents an index of postings for a specific term in the context of information retrieval.
@@ -53,7 +50,8 @@ public class PostingIndex {
         postings.add(p);
     }
 
-    public PostingIndex(List<Integer> docIds, List<Integer> frequencies) {
+    public PostingIndex(String term, List<Integer> docIds, List<Integer> frequencies) {
+        this.term = term;
         docIds.forEach(docId -> postings.add(new Posting(docId, frequencies.get(docIds.indexOf(docId)))));
     }
 
@@ -133,6 +131,17 @@ public class PostingIndex {
             postings.add(new Posting(posting.getDoc_id(), posting.getFrequency()));
         }
     }
+
+    /**
+     * This method is used to merge the posting list of the intermediate index, in order to create the final posting list
+     * @param intermediatePostingList is the posting list of the intermediate index for a specific term
+     */
+    public void appendList(PostingIndex intermediatePostingList) {
+        //here we have to add the posting keeping the sorting in base of the docId
+        this.postings.addAll(intermediatePostingList.postings);
+        this.postings.sort(Comparator.comparing(Posting::getDoc_id));
+    }
+
 
     /**
      * Returns a string representation of the object.

@@ -35,8 +35,7 @@ public class BlockReader {
             termLength = input.readInt();
         } catch (EOFException e) {
             // If no data is found, the block is terminated
-            lastWord = "block terminated";
-            return lastWord;
+            return null;
         }
 
         // Read the term characters based on the length
@@ -44,8 +43,7 @@ public class BlockReader {
         for (int i = 0; i < termLength; i++) {
             term.append(input.readChar());
         }
-        lastWord = term.toString();
-        return lastWord;
+        return term.toString();
     }
 
     /**

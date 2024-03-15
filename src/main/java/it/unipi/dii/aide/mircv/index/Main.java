@@ -35,17 +35,17 @@ public class Main {
             System.out.println(printTime("Spimi", startTime_spimi, endTime_spimi));
         }
 
-        if(!FileUtils.searchIfExists(Configuration.PATH_INVERTED_INDEX_OFFSETS)){
+        if(!FileUtils.searchIfExists(Configuration.PATH_INVERTED_INDEX)){
             long startTime_merge = System.currentTimeMillis();
             System.out.println("Merge is starting....");
             Merge merge = new Merge(Objects.requireNonNull(FileUtils.getFilesOfDirectory(Configuration.DIRECTORY_TEMP_FILES)),
                     Configuration.PATH_LEXICON, Configuration.PATH_DOCIDS, Configuration.PATH_FEQUENCIES, Configuration.BLOCK_SIZE);
-            merge.write(Configuration.PATH_INVERTED_INDEX_OFFSETS, Configuration.COMPRESSION);
+            merge.write(Configuration.PATH_INVERTED_INDEX, Configuration.COMPRESSION);
             long endTime_merge = System.currentTimeMillis();
             System.out.println(printTime("Merge", startTime_merge, endTime_merge));
         }
 
-        InvertedIndexFile invRead = new InvertedIndexFile(Configuration.PATH_INVERTED_INDEX_OFFSETS, Configuration.PATH_DOCIDS, Configuration.PATH_FEQUENCIES, Configuration.BLOCK_SIZE);
+        InvertedIndexFile invRead = new InvertedIndexFile(Configuration.PATH_INVERTED_INDEX, Configuration.PATH_DOCIDS, Configuration.PATH_FEQUENCIES, Configuration.BLOCK_SIZE);
 
         Lexicon lexicon = new Lexicon(Configuration.PATH_LEXICON);
 
