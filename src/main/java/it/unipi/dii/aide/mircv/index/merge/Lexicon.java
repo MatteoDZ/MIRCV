@@ -83,6 +83,7 @@ public class Lexicon {
             termFound = removePadding(new String(termBytes, StandardCharsets.UTF_8));
 
             if (termFound.isEmpty()) {
+                System.out.println("Term "+termToFind+" not found in lexicon");
                 return -1;
             }
 
@@ -96,6 +97,7 @@ public class Lexicon {
                 top = mid - 1;
             }
         }
+        System.out.println("Term "+termToFind+" not found in lexicon");
         return -1;
 
     }
