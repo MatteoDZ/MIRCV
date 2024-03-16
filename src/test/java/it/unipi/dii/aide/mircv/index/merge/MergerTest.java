@@ -45,11 +45,11 @@ public class MergerTest {
         merge.write(pathInvIndex, false);
         InvertedIndexFile inv = new InvertedIndexFile(pathInvIndex, pathDocIds, pathFreqs, 2);
         Lexicon lex = new Lexicon(pathLexicon);
-        assertEquals(List.of(1, 3, 6, 20), inv.getDocIds(lex.findTerm("a"), false));
-        assertEquals(List.of(2, 4), inv.getDocIds(lex.findTerm("b"), false));
-        assertEquals(List.of(4, 6), inv.getDocIds(lex.findTerm("c"), false));
-        assertEquals(List.of(3, 5), inv.getDocIds(lex.findTerm("z"), false));
-        assertEquals(3, inv.getFreq(lex.findTerm("a"), 3, false));
+        assertEquals(List.of(1, 3, 6, 20), inv.getDocIds(lex.findTerm("a").getOffsetInvertedIndex(), false));
+        assertEquals(List.of(2, 4), inv.getDocIds(lex.findTerm("b").getOffsetInvertedIndex(), false));
+        assertEquals(List.of(4, 6), inv.getDocIds(lex.findTerm("c").getOffsetInvertedIndex(), false));
+        assertEquals(List.of(3, 5), inv.getDocIds(lex.findTerm("z").getOffsetInvertedIndex(), false));
+        assertEquals(3, inv.getFreq(lex.findTerm("a").getOffsetInvertedIndex(), 3, false));
     }
 
     @Test
@@ -85,11 +85,11 @@ public class MergerTest {
         merge.write(pathInvIndex, true);
         InvertedIndexFile inv = new InvertedIndexFile(pathInvIndex, pathDocIds, pathFreqs, 2);
         Lexicon lex = new Lexicon(pathLexicon);
-        assertEquals(List.of(1, 3, 6, 20), inv.getDocIds(lex.findTerm("a"), true));
-        assertEquals(List.of(2, 4), inv.getDocIds(lex.findTerm("b"), true));
-        assertEquals(List.of(4, 6), inv.getDocIds(lex.findTerm("c"), true));
-        assertEquals(List.of(3, 5), inv.getDocIds(lex.findTerm("z"), true));
-        assertEquals(2, inv.getFreq(lex.findTerm("a"), 3, true));
+        assertEquals(List.of(1, 3, 6, 20), inv.getDocIds(lex.findTerm("a").getOffsetInvertedIndex(), true));
+        assertEquals(List.of(2, 4), inv.getDocIds(lex.findTerm("b").getOffsetInvertedIndex(), true));
+        assertEquals(List.of(4, 6), inv.getDocIds(lex.findTerm("c").getOffsetInvertedIndex(), true));
+        assertEquals(List.of(3, 5), inv.getDocIds(lex.findTerm("z").getOffsetInvertedIndex(), true));
+        assertEquals(2, inv.getFreq(lex.findTerm("a").getOffsetInvertedIndex(), 3, true));
     }
     
 

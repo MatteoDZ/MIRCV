@@ -2,12 +2,12 @@ package it.unipi.dii.aide.mircv.index.config;
 
 import java.io.*;
 import java.io.FileInputStream;
+import java.util.Objects;
 import java.util.Properties;
 
 public class Configuration {
 
     public static final String PATH_DOCUMENTS = load("path_documents");
-    public static final String PATH_DOCUMENTS_PREPROCESSED = load("path_documents_preprocessed");
     public static final String PATH_STOPWORDS = load("path_stopwords");
     public static final String PATH_BINARY = load("path_binary");
     public static final String DIRECTORY_TEMP_FILES = load("directory_temporary_files");
@@ -15,8 +15,10 @@ public class Configuration {
     public static final String PATH_DOCIDS = load("path_docids");
     public static final String PATH_FEQUENCIES = load("path_freqs");
     public static final String PATH_LEXICON = load("path_lexicon");
-    public static final int BLOCK_SIZE = 512;
-    public static final boolean COMPRESSION = false;
+    public static final String PATH_STATISTICS = load("path_statistics");
+    public static final Integer LEXICON_CACHE_SIZE =  Integer.parseInt(Objects.requireNonNull(load("lexicon_cache_size")));
+    public static final Integer BLOCK_SIZE = Integer.parseInt(Objects.requireNonNull(load("block_size")));
+    public static final Boolean COMPRESSION = Boolean.parseBoolean(load("compression"));
 
     /**
      * Loads the value associated with the given key from the configuration properties file.

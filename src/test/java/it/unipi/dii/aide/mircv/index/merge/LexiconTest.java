@@ -4,7 +4,6 @@ import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -28,8 +27,8 @@ public class LexiconTest {
         Lexicon lexicon = new Lexicon("data/test/Lexicon.bin");
         lexicon.writeFixed("a",offsetA, docIdsA, freqsA);
         lexicon.writeFixed("b",offsetB, docIdsB, freqsB);
-        Long offsetLexiconA = lexicon.findTerm("a");
-        Long offsetLexiconB = lexicon.findTerm("b");
+        Long offsetLexiconA = lexicon.get("a").getOffsetInvertedIndex();
+        Long offsetLexiconB = lexicon.get("b").getOffsetInvertedIndex();
 
         assertEquals(offsetA,offsetLexiconA);
         assertEquals(docIdsA, invIndex.getDocIds(offsetLexiconA, false));
@@ -61,8 +60,8 @@ public class LexiconTest {
         Lexicon lexicon = new Lexicon("data/test/Lexicon.bin");
         lexicon.writeFixed("a",offsetA, docIdsA, freqsA);
         lexicon.writeFixed("b",offsetB, docIdsB, freqsB);
-        Long offsetLexiconA = lexicon.findTerm("a");
-        Long offsetLexiconB = lexicon.findTerm("b");
+        Long offsetLexiconA = lexicon.findTerm("a").getOffsetInvertedIndex();
+        Long offsetLexiconB = lexicon.findTerm("b").getOffsetInvertedIndex();
 
         assertEquals(offsetA,offsetLexiconA);
         assertEquals(docIdsA, invIndex.getDocIds(offsetLexiconA, true));

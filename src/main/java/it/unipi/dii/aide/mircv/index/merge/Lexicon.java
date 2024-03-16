@@ -1,9 +1,10 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
+import it.unipi.dii.aide.mircv.index.config.Configuration;
+
 import java.io.*;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
@@ -13,18 +14,14 @@ public class Lexicon {
 
     private final FileChannel fc;
     private MappedByteBuffer mbb;
-
+    private final LFUCache<String, LexiconData> lfuCache = new LFUCache<>(Configuration.LEXICON_CACHE_SIZE);
     protected static final int MAX_LEN_OF_TERM = 32;
+    private final LexiconData lexicon;
 
-    //private HashMap<String, Long> lexicon; // <term, offset>
-    private LexiconData lexicon;
-
-    //public HashMap<String, Long> getLexicon() {return lexicon;}
 
     public Lexicon(String pathLexicon) {
         lexicon = new LexiconData();
         try {
-            // Open file channel for reading and writing
             fc = FileChannel.open(Paths.get(Objects.requireNonNull(pathLexicon)),
                     StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         } catch (IOException e) {
@@ -34,9 +31,9 @@ public class Lexicon {
 
 
     public void writeFixed(String term, long offset, List<Integer> docs, List<Integer> freqs) throws IOException {
-        mbb = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), MAX_LEN_OF_TERM + 8);
-        mbb.put(padStringToLength(term).getBytes(StandardCharsets.UTF_8));
-        mbb.putLong(offset);
+        lexicon.setTerm(term);
+        lexicon.setOffsetInvertedIndex(offset);
+        lexicon.writeEntryToDisk(fc);
     }
 
     /**
@@ -65,32 +62,27 @@ public class Lexicon {
         return nullIndex >= 0 ? trimmed.substring(0, nullIndex) : trimmed;
     }
 
-    public long findTerm(String termToFind) throws IOException {
+    public LexiconData findTerm(String termToFind) throws IOException {
         long bot = 0;
         long mid;
-        long top = fc.size()/40;
-        String termFound;
+        long top = fc.size()/LexiconData.ENTRY_SIZE;
+        LexiconData entry = new LexiconData();
 
         while (bot <= top) {
             mid = (bot + top) / 2;
-            mbb=fc.map(FileChannel.MapMode.READ_ONLY,mid * (MAX_LEN_OF_TERM+8), MAX_LEN_OF_TERM + 8);
+            entry.readEntryFromDisk(mid * LexiconData.ENTRY_SIZE, fc);
 
-            byte[] termBytes = new byte[32];
-            mbb.get(termBytes);
-            long offset = mbb.getLong();
-
-
-            termFound = removePadding(new String(termBytes, StandardCharsets.UTF_8));
-
-            if (termFound.isEmpty()) {
+            if (entry.getTerm().isEmpty()) {
                 System.out.println("Term "+termToFind+" not found in lexicon");
-                return -1;
+                return null;
             }
+
+            String termFound = entry.getTerm();
 
             int comparisonResult = termToFind.compareTo(termFound);
 
             if (comparisonResult == 0) {
-                return offset;
+                return entry;
             } else if (comparisonResult > 0) {
                 bot = mid + 1;
             } else {
@@ -98,8 +90,34 @@ public class Lexicon {
             }
         }
         System.out.println("Term "+termToFind+" not found in lexicon");
-        return -1;
+        return null;
 
+    }
+
+
+    /**
+     * Gets the LexiconEntry for a given term, either from the cache or by retrieving it.
+     *
+     * @param term The term to get.
+     * @return The LexiconEntry for the term, or null if not found.
+     */
+    public LexiconData get(String term) throws IOException {
+        if (lfuCache.containsKey(term)) {
+            return lfuCache.get(term);
+        }
+        LexiconData lexiconEntry = findTerm(term);
+        if (lexiconEntry == null) {
+            return null;
+        }
+        lfuCache.put(term, lexiconEntry);
+        return lfuCache.get(term);
+    }
+
+    /**
+     * Clears the cache.
+     */
+    public void clear(){
+        lfuCache.clear();
     }
 
 }

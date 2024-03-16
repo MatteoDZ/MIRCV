@@ -49,9 +49,11 @@ public class Main {
 
         Lexicon lexicon = new Lexicon(Configuration.PATH_LEXICON);
 
+
+        System.out.println("SENZA CACHE");
         long savedtime = 0;
         long start_search_time = System.currentTimeMillis();
-        long offsetTerm = lexicon.findTerm("hello");
+        long offsetTerm = lexicon.get("hello").getOffsetInvertedIndex();
         List<Integer>  lst = invRead.getDocIds(offsetTerm, Configuration.COMPRESSION);
         for (Integer i : lst){
             long start_freq_time = System.currentTimeMillis();
@@ -62,6 +64,23 @@ public class Main {
         }
         long end_search_time = System.currentTimeMillis();
         System.out.println(("Search: " + (end_search_time-start_search_time) + " ms"));
+        System.out.println("Somma tempo frequenze: " + savedtime + " ms");
+
+
+        System.out.println("CON CACHE");
+        savedtime =0;
+        long start_search_time_cache = System.currentTimeMillis();
+        long offsetTermCache = lexicon.get("hello").getOffsetInvertedIndex();
+        List<Integer>  lstcache = invRead.getDocIds(offsetTermCache, Configuration.COMPRESSION);
+        for (Integer i : lstcache){
+            long start_freq_time = System.currentTimeMillis();
+            int freq = invRead.getFreq(offsetTermCache, i, Configuration.COMPRESSION);
+            long end_freq_time = System.currentTimeMillis();
+            savedtime += (end_freq_time - start_freq_time);
+            System.out.println("TEMPO RECUPERO FREQUENZE DOC " + i +  " are "+ freq + " in " + (end_freq_time-start_freq_time) + " ms");
+        }
+        long end_search_time_cache = System.currentTimeMillis();
+        System.out.println(("Search: " + (end_search_time_cache-start_search_time_cache) + " ms"));
         System.out.println("Somma tempo frequenze: " + savedtime + " ms");
 
         // Statistics s = Statistics.read();

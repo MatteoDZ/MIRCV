@@ -12,8 +12,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
-import static it.unipi.dii.aide.mircv.index.merge.UtilsWriter.*;
-
 public class BinaryFile {
 
 
@@ -50,7 +48,6 @@ public class BinaryFile {
             }
 
         } catch (IOException e) {
-            System.out.println(e);
             throw new RuntimeException("An error occurred while writing to the binary file.");
         }
     }
@@ -99,7 +96,7 @@ public class BinaryFile {
     }
 
     public static void writeShortListToBuffer(FileChannel fc, List<Integer> values) throws IOException {
-        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), calculateDimensionShort(values));
+        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), values.size() * 2L);
         for (int value : values) {
             mbb.putShort((short)value);
         }
@@ -117,7 +114,7 @@ public class BinaryFile {
 
     // Helper method: Write a list of integers to the buffer
     public static void writeIntListToBuffer(FileChannel fc, List<Integer> values) throws IOException {
-        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), calculateDimensionInt(values));
+        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), values.size() * 4L);
         for (int value : values) {
             mbb.putInt(value);
         }
@@ -144,7 +141,7 @@ public class BinaryFile {
 
     // Helper method: Write a list of long values to the buffer
     public static void writeLongListToBuffer(FileChannel fc, List<Long> values) throws IOException {
-        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), calculateDimensionLong(values));
+        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), values.size() * 8L);
         for (Long value : values) {
             mbb.putLong(value);
         }
