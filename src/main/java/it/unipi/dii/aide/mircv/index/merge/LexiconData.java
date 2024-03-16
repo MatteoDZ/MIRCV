@@ -17,7 +17,7 @@ public class LexiconData {
     private long offset_frequency = 0;
     private long offset_skip_pointer = 0;
     private int numBlocks = 1;
-    protected static final long BYTES_ATTRIBUTES = 4 * 6 + 8 * 3; //4bytes * (n_int + n_float) + 8bytes * (n_long)
+    private static final long BYTES_ATTRIBUTES = 4 * 6 + 8 * 3; //4bytes * (n_int + n_float) + 8bytes * (n_long)
     protected static final long ENTRY_SIZE = BYTES_ATTRIBUTES + Lexicon.MAX_LEN_OF_TERM;
 
     public LexiconData(){

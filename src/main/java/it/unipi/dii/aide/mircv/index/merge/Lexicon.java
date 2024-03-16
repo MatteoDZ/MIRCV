@@ -11,9 +11,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class Lexicon {
-
     private final FileChannel fc;
-    private MappedByteBuffer mbb;
     private final LFUCache<String, LexiconData> lfuCache = new LFUCache<>(Configuration.LEXICON_CACHE_SIZE);
     protected static final int MAX_LEN_OF_TERM = 32;
     private final LexiconData lexicon;

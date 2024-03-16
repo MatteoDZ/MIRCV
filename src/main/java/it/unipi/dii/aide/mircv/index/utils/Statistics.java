@@ -10,17 +10,18 @@ import java.util.List;
 
 public class Statistics {
 
-    private int numdocs = 0;
-    private double avg_doc_length = 0.0;
-    private List<Integer> docs_length;
-    private static MappedByteBuffer mbb;
-    private static FileChannel fc = null;
+    private int numDocs;
+    private long totalLenDoc;
+    private double avgDocLen;
+    private long terms = 0; //not used
+    protected long ENTRY_SIZE = 4 + 8 + 8 + 8;
+    private  MappedByteBuffer mbb;
+    private  FileChannel fc;
 
 
-    public Statistics() {
+    public Statistics(String path) {
         try {
-            // Open file channel for reading and writing
-            fc = FileChannel.open(Paths.get("data/statistics"),
+            fc = FileChannel.open(Paths.get(path),
                     StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         } catch (
                 IOException e) {
@@ -28,49 +29,114 @@ public class Statistics {
         }
     }
 
-    public int getNumdocs() {
-        return numdocs;
+    /**
+     * Getter for the number of documents in the collection.
+     *
+     * @return The number of documents.
+     */
+    public  int getNumDocs() {
+        return numDocs;
     }
 
-    public double getAvg_doc_length() {
-        return avg_doc_length;
+
+    /**
+     * Setter for the number of documents in the collection.
+     *
+     * @param numDoc The number of documents to set.
+     */
+    public  void setNumDocs(int numDoc) {
+        numDocs = numDoc;
     }
 
-    public List<Integer> getDocs_length() {
-        return docs_length;
+    /**
+     * Getter for the average document length.
+     *
+     * @return The average document length.
+     */
+    public  double getAvgDocLen() {
+        return avgDocLen;
     }
 
-    public void setNumdocs(int numdocs) {
-        this.numdocs = numdocs;
+    /**
+     * Setter for the average document length.
+     *
+     * @param avgDocLen1 The average document length to set.
+     */
+    public  void setAvgDocLen(double avgDocLen1) {
+        avgDocLen = avgDocLen1;
     }
 
-    public void setAvg_doc_length(double avg_doc_length) {
-        this.avg_doc_length = avg_doc_length;
+    /**
+     * Getter for the total number of terms in the collection.
+     *
+     * @return The total number of terms.
+     */
+    public  long getTerms() {
+        return terms;
     }
 
-    public void setDocs_length(List<Integer> docs_length) {
-        this.docs_length = docs_length;
+    /**
+     * Setter for the total number of terms in the collection.
+     *
+     * @param terms1 The total number of terms to set.
+     */
+    public  void setTerms(long terms1) {
+        terms = terms1;
     }
 
+    /**
+     * Getter for the total document length in the collection.
+     *
+     * @return The total document length.
+     */
+    public  long getTotalLenDoc() {
+        return totalLenDoc;
+    }
+
+    /**
+     * Setter for the total document length in the collection.
+     *
+     * @param totalLenDoc The total document length to set.
+     */
+    public  void setTotalLenDoc(long totalLenDoc) {
+        this.totalLenDoc = totalLenDoc;
+    }
+
+    /**
+     * Writes collection statistics to disk.
+     *
+     */
     public void writeToDisk() throws IOException {
-        mbb = fc.map(FileChannel.MapMode.READ_WRITE, 0, 4L + 8L + (4L * this.numdocs));
-        mbb.putInt(this.numdocs);
-        mbb.putDouble(this.avg_doc_length);
-        for (Integer i : this.docs_length){
-            mbb.putInt(i);
-        }
+        mbb = fc.map(FileChannel.MapMode.READ_WRITE, 0, ENTRY_SIZE);
+        mbb.putInt(numDocs);
+        mbb.putDouble(avgDocLen);
+        mbb.putLong(terms);
+        mbb.putLong(totalLenDoc);
     }
 
-    public static Statistics read() throws IOException {
+
+    /**
+     * Reads collection statistics from disk.
+     *
+     */
+    public void readFromDisk() throws IOException {
         mbb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
-        Statistics s = new Statistics();
-        s.setNumdocs(mbb.getInt());
-        s.setAvg_doc_length(mbb.getDouble());
-        List<Integer> lst = new ArrayList<>();
-        for (int i = 0; i < s.numdocs; i++){
-            lst.add(mbb.getInt());
-        }
-        s.setDocs_length(lst);
-        return s;
+        this.setNumDocs(mbb.getInt());
+        this.setAvgDocLen(mbb.getDouble());
+        this.setTerms(mbb.getLong());
+        this.setTotalLenDoc(mbb.getLong());
     }
+
+    /**
+     * A description of the entire Java function.
+     *
+     * @return         	description of return value
+     */
+    public String toString() {
+        return "Number of documents: " + this.getNumDocs() + " " +
+                "Average document length: " + this.getAvgDocLen() + " " +
+                "Total number of terms: " + this.getTerms() + " " +
+                "Total document length: " + this.getTotalLenDoc();
+    }
+
 }

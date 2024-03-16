@@ -6,6 +6,7 @@ import it.unipi.dii.aide.mircv.index.merge.Lexicon;
 import it.unipi.dii.aide.mircv.index.merge.Merge;
 import it.unipi.dii.aide.mircv.index.spimi.Spimi;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
+import it.unipi.dii.aide.mircv.index.utils.Statistics;
 
 import java.io.*;
 import java.util.List;
@@ -49,7 +50,6 @@ public class Main {
 
         Lexicon lexicon = new Lexicon(Configuration.PATH_LEXICON);
 
-
         System.out.println("SENZA CACHE");
         long savedtime = 0;
         long start_search_time = System.currentTimeMillis();
@@ -71,7 +71,7 @@ public class Main {
         savedtime =0;
         long start_search_time_cache = System.currentTimeMillis();
         long offsetTermCache = lexicon.get("hello").getOffsetInvertedIndex();
-        List<Integer>  lstcache = invRead.getDocIds(offsetTermCache, Configuration.COMPRESSION);
+        List<Integer> lstcache = invRead.getDocIds(offsetTermCache, Configuration.COMPRESSION);
         for (Integer i : lstcache){
             long start_freq_time = System.currentTimeMillis();
             int freq = invRead.getFreq(offsetTermCache, i, Configuration.COMPRESSION);
@@ -82,6 +82,10 @@ public class Main {
         long end_search_time_cache = System.currentTimeMillis();
         System.out.println(("Search: " + (end_search_time_cache-start_search_time_cache) + " ms"));
         System.out.println("Somma tempo frequenze: " + savedtime + " ms");
+
+        Statistics statistics = new Statistics(Configuration.PATH_STATISTICS);
+        statistics.readFromDisk();
+        System.out.println(statistics.toString());
 
         // Statistics s = Statistics.read();
         // System.out.println("VEDIAMO SE STA MERDA FUNZIONA: " + s.getNumdocs() + " " + s.getAvg_doc_length() + " " + s.getDocs_length().get(0));
