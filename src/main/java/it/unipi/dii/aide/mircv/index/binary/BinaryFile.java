@@ -45,6 +45,14 @@ public class BinaryFile {
                     mbb.putInt(freq);
                 }
                 mbb.putInt(-1);
+
+                /*writeIntToBuffer(fc, termine.length());
+                writeStringToBuffer(fc, termine);
+                writeIntListToBuffer(fc, tpl.getDocIds());
+                writeIntToBuffer(fc, -1);
+                writeIntListToBuffer(fc, tpl.getFrequencies());
+                writeIntToBuffer(fc,-1);*/
+
             }
 
         } catch (IOException e) {

@@ -31,7 +31,7 @@ public class Main {
         if (FileUtils.getNumberFiles(Configuration.DIRECTORY_TEMP_FILES) <= 0) {
             long startTime_spimi = System.currentTimeMillis();
             System.out.println("Spimi is starting....");
-            Spimi.spimi(Configuration.PATH_DOCUMENTS);
+            Spimi.spimi(Configuration.PATH_DOCUMENTS, Configuration.PATH_STATISTICS);
             long endTime_spimi = System.currentTimeMillis();
             System.out.println(printTime("Spimi", startTime_spimi, endTime_spimi));
         }
@@ -40,7 +40,7 @@ public class Main {
             long startTime_merge = System.currentTimeMillis();
             System.out.println("Merge is starting....");
             Merge merge = new Merge(Objects.requireNonNull(FileUtils.getFilesOfDirectory(Configuration.DIRECTORY_TEMP_FILES)),
-                    Configuration.PATH_LEXICON, Configuration.PATH_DOCIDS, Configuration.PATH_FEQUENCIES, Configuration.BLOCK_SIZE);
+                    Configuration.PATH_LEXICON, Configuration.PATH_DOCIDS, Configuration.PATH_FEQUENCIES, Configuration.PATH_STATISTICS, Configuration.BLOCK_SIZE);
             merge.write(Configuration.PATH_INVERTED_INDEX, Configuration.COMPRESSION);
             long endTime_merge = System.currentTimeMillis();
             System.out.println(printTime("Merge", startTime_merge, endTime_merge));
@@ -60,7 +60,7 @@ public class Main {
             int freq = invRead.getFreq(offsetTerm, i, Configuration.COMPRESSION);
             long end_freq_time = System.currentTimeMillis();
             savedtime += (end_freq_time - start_freq_time);
-            System.out.println("TEMPO RECUPERO FREQUENZE DOC " + i +  " are "+ freq + " in " + (end_freq_time-start_freq_time) + " ms");
+            // System.out.println("TEMPO RECUPERO FREQUENZE DOC " + i +  " are "+ freq + " in " + (end_freq_time-start_freq_time) + " ms");
         }
         long end_search_time = System.currentTimeMillis();
         System.out.println(("Search: " + (end_search_time-start_search_time) + " ms"));
@@ -70,14 +70,14 @@ public class Main {
         System.out.println("CON CACHE");
         savedtime =0;
         long start_search_time_cache = System.currentTimeMillis();
-        long offsetTermCache = lexicon.get("hello").getOffsetInvertedIndex();
+        long offsetTermCache = lexicon.get("zzz").getOffsetInvertedIndex();
         List<Integer> lstcache = invRead.getDocIds(offsetTermCache, Configuration.COMPRESSION);
         for (Integer i : lstcache){
             long start_freq_time = System.currentTimeMillis();
             int freq = invRead.getFreq(offsetTermCache, i, Configuration.COMPRESSION);
             long end_freq_time = System.currentTimeMillis();
             savedtime += (end_freq_time - start_freq_time);
-            System.out.println("TEMPO RECUPERO FREQUENZE DOC " + i +  " are "+ freq + " in " + (end_freq_time-start_freq_time) + " ms");
+            // System.out.println("TEMPO RECUPERO FREQUENZE DOC " + i +  " are "+ freq + " in " + (end_freq_time-start_freq_time) + " ms");
         }
         long end_search_time_cache = System.currentTimeMillis();
         System.out.println(("Search: " + (end_search_time_cache-start_search_time_cache) + " ms"));
@@ -86,9 +86,7 @@ public class Main {
         Statistics statistics = new Statistics(Configuration.PATH_STATISTICS);
         statistics.readFromDisk();
         System.out.println(statistics.toString());
-
-        // Statistics s = Statistics.read();
-        // System.out.println("VEDIAMO SE STA MERDA FUNZIONA: " + s.getNumdocs() + " " + s.getAvg_doc_length() + " " + s.getDocs_length().get(0));
+        
 
         /*
         //soluzione non usata (per ora) per controllare la heap occupata

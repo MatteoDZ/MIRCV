@@ -9,12 +9,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PreprocessTest {
 
-    @BeforeAll
-    static void setUp() {
-        Preprocess.setPathStopwordsTest("data/stopwords");
-        Preprocess.readStopwords();
-    }
-
     @Test
     void processText() {
         assertLinesMatch(List.of("text", "url", "content"),

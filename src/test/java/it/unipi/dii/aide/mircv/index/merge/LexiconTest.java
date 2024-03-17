@@ -25,8 +25,8 @@ public class LexiconTest {
         Long offsetA = invIndex.write(docIdsA, freqsA,false);
         Long offsetB = invIndex.write(docIdsB, freqsB,false);
         Lexicon lexicon = new Lexicon("data/test/Lexicon.bin");
-        lexicon.writeFixed("a",offsetA, docIdsA, freqsA);
-        lexicon.writeFixed("b",offsetB, docIdsB, freqsB);
+        lexicon.write("a",offsetA, docIdsA, freqsA);
+        lexicon.write("b",offsetB, docIdsB, freqsB);
         Long offsetLexiconA = lexicon.get("a").getOffsetInvertedIndex();
         Long offsetLexiconB = lexicon.get("b").getOffsetInvertedIndex();
 
@@ -58,8 +58,8 @@ public class LexiconTest {
         Long offsetA = invIndex.write(docIdsA, freqsA,true);
         Long offsetB = invIndex.write(docIdsB, freqsB,true);
         Lexicon lexicon = new Lexicon("data/test/Lexicon.bin");
-        lexicon.writeFixed("a",offsetA, docIdsA, freqsA);
-        lexicon.writeFixed("b",offsetB, docIdsB, freqsB);
+        lexicon.write("a",offsetA, docIdsA, freqsA);
+        lexicon.write("b",offsetB, docIdsB, freqsB);
         Long offsetLexiconA = lexicon.findTerm("a").getOffsetInvertedIndex();
         Long offsetLexiconB = lexicon.findTerm("b").getOffsetInvertedIndex();
 

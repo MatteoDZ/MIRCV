@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class BlockReaderTest {
     @Test
@@ -26,7 +27,7 @@ public class BlockReaderTest {
         assertEquals("b", b.readTerm());
         assertEquals(List.of(2), b.readNumbers());
         assertEquals(List.of(1), b.readNumbers());
-        assertEquals("block terminated", b.readTerm());
+        assertNull( b.readTerm());
     }
 
     @Test
@@ -48,7 +49,7 @@ public class BlockReaderTest {
         assertEquals("c", b.readTerm());
         assertEquals(List.of(2), b.readNumbers());
         assertEquals(List.of(1), b.readNumbers());
-        assertEquals("block terminated", b.readTerm());
+        assertNull(b.readTerm());
 
     }
 

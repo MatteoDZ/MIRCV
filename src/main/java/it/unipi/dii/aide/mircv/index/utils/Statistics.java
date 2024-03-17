@@ -1,5 +1,7 @@
 package it.unipi.dii.aide.mircv.index.utils;
 
+import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
+
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -13,10 +15,10 @@ public class Statistics {
     private int numDocs;
     private long totalLenDoc;
     private double avgDocLen;
-    private long terms = 0; //not used
-    protected long ENTRY_SIZE = 4 + 8 + 8 + 8;
+    private long terms = 0; //written in merge
+    protected long ENTRY_SIZE = 4 + 8 + 8;
     private  MappedByteBuffer mbb;
-    private  FileChannel fc;
+    private final FileChannel fc;
 
 
     public Statistics(String path) {
@@ -25,7 +27,7 @@ public class Statistics {
                     StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         } catch (
                 IOException e) {
-            throw new RuntimeException("An error occurred while writing to the " + "data/statistics" + " file.");
+            throw new RuntimeException("An error occurred while writing to the " + path + " file.");
         }
     }
 
@@ -106,12 +108,19 @@ public class Statistics {
      * Writes collection statistics to disk.
      *
      */
-    public void writeToDisk() throws IOException {
+    public void writeSpimiToDisk() throws IOException {
         mbb = fc.map(FileChannel.MapMode.READ_WRITE, 0, ENTRY_SIZE);
         mbb.putInt(numDocs);
         mbb.putDouble(avgDocLen);
-        mbb.putLong(terms);
         mbb.putLong(totalLenDoc);
+    }
+
+    /**
+     * Writes collection statistics to disk.
+     *
+     */
+    public void writeMergeToDisk() throws IOException {
+        BinaryFile.writeLongToBuffer(fc, terms);
     }
 
 

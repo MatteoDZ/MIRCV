@@ -1,9 +1,9 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
 import it.unipi.dii.aide.mircv.index.config.Configuration;
+import it.unipi.dii.aide.mircv.index.utils.Statistics;
 
 import java.io.*;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -28,7 +28,7 @@ public class Lexicon {
     }
 
 
-    public void writeFixed(String term, long offset, List<Integer> docs, List<Integer> freqs) throws IOException {
+    public void write(String term, long offset, List<Integer> docs, List<Integer> freqs) throws IOException {
         lexicon.setTerm(term);
         lexicon.setOffsetInvertedIndex(offset);
         lexicon.writeEntryToDisk(fc);
@@ -64,6 +64,8 @@ public class Lexicon {
         long bot = 0;
         long mid;
         long top = fc.size()/LexiconData.ENTRY_SIZE;
+
+
         LexiconData entry = new LexiconData();
 
         while (bot <= top) {
@@ -108,7 +110,7 @@ public class Lexicon {
             return null;
         }
         lfuCache.put(term, lexiconEntry);
-        return lfuCache.get(term);
+        return lexiconEntry;
     }
 
     /**

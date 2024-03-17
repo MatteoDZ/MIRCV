@@ -55,6 +55,7 @@ public class LFUCache<K, V> {
 
         return cache.get(key);
     }
+
     /**
      * Clears the cache, removing all entries.
      */

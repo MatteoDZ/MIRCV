@@ -9,7 +9,6 @@ import java.util.List;
  */
 public class BlockReader {
     private final DataInputStream input; // Input stream for reading data
-    String lastWord; // Last term read from the file
 
     /**
      * Constructor for BlockReader.
@@ -18,7 +17,6 @@ public class BlockReader {
      * @throws FileNotFoundException If the specified file is not found.
      */
     public BlockReader(String path) throws FileNotFoundException {
-        // File path
         input = new DataInputStream(new FileInputStream(path));
     }
 

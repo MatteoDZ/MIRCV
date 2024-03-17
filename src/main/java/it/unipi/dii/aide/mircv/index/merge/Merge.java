@@ -1,16 +1,17 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
+import it.unipi.dii.aide.mircv.index.utils.Statistics;
 
 import java.io.IOException;
 import java.util.*;
 
 public class Merge {
     private final HashMap<BlockReader, PostingIndex> readerLines = new HashMap<>();
-    private final String pathLexicon, pathDocIds, pathFreqs;
+    private final String pathLexicon, pathDocIds, pathFreqs, pathStatistics;
     private final Integer blockSize;
 
-    public Merge(List<String> paths, String pathLexicon, String pathDocIds, String pathFreqs, Integer blockSize) throws IOException {
+    public Merge(List<String> paths, String pathLexicon, String pathDocIds, String pathFreqs, String pathStatistics, Integer blockSize) throws IOException {
         for (String path : paths) {
             BlockReader reader = new BlockReader(path);
             String line = reader.readTerm();
@@ -19,24 +20,27 @@ public class Merge {
             // System.out.println("Path: " + path + " Riga: " + line + " DocId: " + docIds + " Freq: " + freqs);
             readerLines.put(reader, new PostingIndex(line, docIds, freqs));
         }
-
         this.pathFreqs = pathFreqs;
         this.pathDocIds = pathDocIds;
         this.pathLexicon = pathLexicon;
+        this.pathStatistics = pathStatistics;
         this.blockSize = blockSize;
     }
 
     public void write(String path, boolean compress) throws IOException {
 
         int i = 0;
+        long lexSize = 0L;
 
         InvertedIndexFile inv = new InvertedIndexFile(path, this.pathDocIds, this.pathFreqs, this.blockSize);
         Lexicon lexicon = new Lexicon(this.pathLexicon);
 
 
         while (!readerLines.isEmpty()) {
-            if (i % 100000 == 0)
+            if (i % 100000 == 0){
                 System.out.println("Line number " + i);
+                System.out.println("Term number " + lexSize);
+            }
             i++;
 
             String minTerm = findMinTerm(readerLines);
@@ -89,10 +93,12 @@ public class Merge {
             }
             // System.out.println("Term: " + minPosting.getTerm() + " DocIds: " + docIdsNew + " Freqs: " + freqsNew);
             long offsetTerm = inv.write(docIdsNew, freqsNew, compress);
-            lexicon.writeFixed(minPosting.getTerm(), offsetTerm, docIdsNew, freqsNew);
-
-
+            lexicon.write(minPosting.getTerm(), offsetTerm, docIdsNew, freqsNew);
+            lexSize++;
         }
+        Statistics statistics = new Statistics(pathStatistics);
+        statistics.setTerms(lexSize);
+        statistics.writeMergeToDisk();
     }
 
 

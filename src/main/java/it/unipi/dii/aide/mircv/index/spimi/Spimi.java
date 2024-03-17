@@ -15,15 +15,14 @@ import java.util.Objects;
 
 public class Spimi {
 
-    public static void spimi(String pathCollection) throws IOException {
+    public static void spimi(String pathCollection, String pathStatistics) throws IOException {
         try (TarArchiveInputStream tarInput = new TarArchiveInputStream(new GzipCompressorInputStream(new FileInputStream(Objects.requireNonNull(pathCollection))))) {
             tarInput.getNextTarEntry();
             try (BufferedReader br = new BufferedReader(new InputStreamReader(tarInput))) {
-                Statistics statistics = new Statistics(Configuration.PATH_STATISTICS);
+                Statistics statistics = new Statistics(pathStatistics);
                 String line;
                 int blockNumber = 0, numDocs = 0, total_length = 0;
                 InvertedIndex inv = new InvertedIndex();
-                Preprocess.readStopwords();
                 while ((line = br.readLine()) != null) { //loop giusto. sotto c'è quello provvisorio per vedere se va il tutto
                     String[] parts = line.split("\t");
                     List<String> term = Preprocess.processText(parts[1]);
@@ -47,7 +46,7 @@ public class Spimi {
                 statistics.setTotalLenDoc(total_length);
                 statistics.setNumDocs(numDocs);
                 statistics.setAvgDocLen((double)total_length / numDocs);
-                statistics.writeToDisk();
+                statistics.writeSpimiToDisk();
             }
         }
     }

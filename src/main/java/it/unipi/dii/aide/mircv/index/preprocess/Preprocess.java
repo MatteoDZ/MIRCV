@@ -11,10 +11,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Preprocess {
+    private static final Set<String> stopwords;
 
-    private static String PATH_STOPWORDS = Configuration.PATH_STOPWORDS;
-
-    private static Set<String> stopwords = new HashSet<>();
+    static {
+        try (Stream<String> lines = Files.lines(Paths.get(Objects.requireNonNull(Configuration.PATH_STOPWORDS)))) {
+            stopwords = lines.collect(Collectors.toSet());
+        } catch (IOException e) {
+            throw new RuntimeException("File " + Configuration.PATH_STOPWORDS + " not found");
+        }
+    }
 
 
     /**
@@ -143,17 +148,6 @@ public class Preprocess {
         return filteredText.toString().trim();
     }
 
-    /**
-     * Reads the stopwords from the specified path and returns a list of stopwords.
-     */
-    public static void readStopwords() {
-        try (Stream<String> lines = Files.lines(Paths.get(PATH_STOPWORDS))) {
-            stopwords = lines.collect(Collectors.toSet());
-        } catch (IOException e) {
-            throw new RuntimeException("File " + PATH_STOPWORDS + " not found");
-        }
-    }
-
 
     /**
      * Applies stemming to each word in the input text.
@@ -200,14 +194,6 @@ public class Preprocess {
      */
     public static List<String> uniqueToken(List<String> tokens) {
         return tokens.stream().distinct().collect(Collectors.toList());
-    }
-
-    /**
-     * Set path of stopwords file for test
-     * @param stopwords path of stopwords
-     */
-    public static void setPathStopwordsTest(String stopwords) {
-        PATH_STOPWORDS = stopwords;
     }
 
 }

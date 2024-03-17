@@ -21,6 +21,7 @@ public class MergerTest {
         String pathFreqs = "data/test/freqs";
         String pathLexicon = "data/test/flexicon";
         String pathInvIndex = "data/test/invIndex";
+        String pathStatistics = "data/test/statistics";
         FileUtils.deleteDirectory("data/test");
         FileUtils.createDirectory("data/test");
         InvertedIndex inv1 = new InvertedIndex();
@@ -41,7 +42,7 @@ public class MergerTest {
         inv3.add(List.of("z", "m"), 5);
         inv3.add(List.of("c", "a"), 6);
         BinaryFile.writeBlock(inv3, pathTest3);
-        Merge merge = new Merge(List.of(pathTest1, pathTest2, pathTest3), pathLexicon, pathDocIds, pathFreqs, 2);
+        Merge merge = new Merge(List.of(pathTest1, pathTest2, pathTest3), pathLexicon, pathDocIds, pathFreqs, pathStatistics, 2);
         merge.write(pathInvIndex, false);
         InvertedIndexFile inv = new InvertedIndexFile(pathInvIndex, pathDocIds, pathFreqs, 2);
         Lexicon lex = new Lexicon(pathLexicon);
@@ -59,8 +60,9 @@ public class MergerTest {
         String pathTest3 = "data/test/test3.bin";
         String pathDocIds = "data/test/docIds";
         String pathFreqs = "data/test/freqs";
-        String pathLexicon = "data/test/flexicon";
+        String pathLexicon = "data/test/lexicon";
         String pathInvIndex = "data/test/invIndex";
+        String pathStatistics = "data/test/statistics";
         FileUtils.deleteDirectory("data/test");
         FileUtils.createDirectory("data/test");
         InvertedIndex inv1 = new InvertedIndex();
@@ -81,7 +83,7 @@ public class MergerTest {
         inv3.add(List.of("z", "m"), 5);
         inv3.add(List.of("c", "a"), 6);
         BinaryFile.writeBlock(inv3, pathTest3);
-        Merge merge = new Merge(List.of(pathTest1, pathTest2, pathTest3), pathLexicon, pathDocIds, pathFreqs, 2);
+        Merge merge = new Merge(List.of(pathTest1, pathTest2, pathTest3), pathLexicon, pathDocIds, pathFreqs, pathStatistics, 2);
         merge.write(pathInvIndex, true);
         InvertedIndexFile inv = new InvertedIndexFile(pathInvIndex, pathDocIds, pathFreqs, 2);
         Lexicon lex = new Lexicon(pathLexicon);
