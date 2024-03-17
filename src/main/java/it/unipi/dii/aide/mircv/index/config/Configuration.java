@@ -17,6 +17,7 @@ public class Configuration {
     public static final String PATH_LEXICON = load("path_lexicon");
     public static final String PATH_STATISTICS = load("path_statistics");
     public static final Integer LEXICON_CACHE_SIZE =  Integer.parseInt(Objects.requireNonNull(load("lexicon_cache_size")));
+    public static final Integer INVERTED_INDEX_CACHE_SIZE =  Integer.parseInt(Objects.requireNonNull(load("inverted_index_cache_size")));
     public static final Integer BLOCK_SIZE = Integer.parseInt(Objects.requireNonNull(load("block_size")));
     public static final Boolean COMPRESSION = Boolean.parseBoolean(load("compression"));
 

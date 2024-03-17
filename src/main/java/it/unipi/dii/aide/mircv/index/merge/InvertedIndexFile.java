@@ -1,6 +1,7 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
+import it.unipi.dii.aide.mircv.index.config.Configuration;
 import org.javatuples.Pair;
 
 import java.io.IOException;
@@ -16,7 +17,7 @@ public class InvertedIndexFile {
     private MappedByteBuffer mbb;
     public final FrequencyFile frequencyWriter;
     public final DocIdFile docIdWriter;
-    private final LFUCache<Pair<Long, Integer>, Integer> lfuCache = new LFUCache<>(1000);
+    private final LFUCache<Pair<Long, Integer>, Integer> lfuCache = new LFUCache<>(Configuration.INVERTED_INDEX_CACHE_SIZE);
 
     // Constructor
     public InvertedIndexFile(String pathInvertedIndex, String pathDocIds, String pathFrequencies, int blockSize) {
