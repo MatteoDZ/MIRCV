@@ -1,6 +1,5 @@
 package it.unipi.dii.aide.mircv.index.binary;
 
-
 import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
 

@@ -1,7 +1,6 @@
 package it.unipi.dii.aide.mircv.index.spimi;
 
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
-import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
 import it.unipi.dii.aide.mircv.index.preprocess.Preprocess;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;

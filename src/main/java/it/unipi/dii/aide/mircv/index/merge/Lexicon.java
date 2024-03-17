@@ -1,7 +1,6 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
 import it.unipi.dii.aide.mircv.index.config.Configuration;
-import it.unipi.dii.aide.mircv.index.utils.Statistics;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
