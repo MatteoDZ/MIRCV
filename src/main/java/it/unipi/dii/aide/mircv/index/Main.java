@@ -57,7 +57,7 @@ public class Main {
         List<Integer>  lst = invRead.getDocIds(offsetTerm, Configuration.COMPRESSION);
         for (Integer i : lst){
             long start_freq_time = System.currentTimeMillis();
-            int freq = invRead.getFreq(offsetTerm, i, Configuration.COMPRESSION);
+            int freq = invRead.getFreqCache(offsetTerm, i, Configuration.COMPRESSION);
             long end_freq_time = System.currentTimeMillis();
             savedtime += (end_freq_time - start_freq_time);
             // System.out.println("TEMPO RECUPERO FREQUENZE DOC " + i +  " are "+ freq + " in " + (end_freq_time-start_freq_time) + " ms");
@@ -74,7 +74,7 @@ public class Main {
         List<Integer> lstcache = invRead.getDocIds(offsetTermCache, Configuration.COMPRESSION);
         for (Integer i : lstcache){
             long start_freq_time = System.currentTimeMillis();
-            int freq = invRead.getFreq(offsetTermCache, i, Configuration.COMPRESSION);
+            int freq = invRead.getFreqCache(offsetTermCache, i, Configuration.COMPRESSION);
             long end_freq_time = System.currentTimeMillis();
             savedtime += (end_freq_time - start_freq_time);
             // System.out.println("TEMPO RECUPERO FREQUENZE DOC " + i +  " are "+ freq + " in " + (end_freq_time-start_freq_time) + " ms");

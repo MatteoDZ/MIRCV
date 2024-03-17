@@ -78,6 +78,11 @@
       <version>5.9.0</version>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>org.javatuples</groupId>
+      <artifactId>javatuples</artifactId>
+      <version>1.2</version>
+    </dependency>
   </dependencies>
 
 
