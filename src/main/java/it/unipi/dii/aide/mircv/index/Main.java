@@ -70,7 +70,7 @@ public class Main {
         System.out.println("CON CACHE");
         savedtime =0;
         long start_search_time_cache = System.currentTimeMillis();
-        long offsetTermCache = lexicon.get("zzz").getOffsetInvertedIndex();
+        long offsetTermCache = lexicon.get("hello").getOffsetInvertedIndex();
         List<Integer> lstcache = invRead.getDocIds(offsetTermCache, Configuration.COMPRESSION);
         for (Integer i : lstcache){
             long start_freq_time = System.currentTimeMillis();

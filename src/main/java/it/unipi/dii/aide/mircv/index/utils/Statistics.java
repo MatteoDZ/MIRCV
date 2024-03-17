@@ -7,9 +7,6 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.List;
-
 public class Statistics {
 
     private int numDocs;
@@ -110,9 +107,9 @@ public class Statistics {
      */
     public void writeSpimiToDisk() throws IOException {
         mbb = fc.map(FileChannel.MapMode.READ_WRITE, 0, ENTRY_SIZE);
-        mbb.putInt(numDocs);
-        mbb.putDouble(avgDocLen);
-        mbb.putLong(totalLenDoc);
+        mbb.putInt(this.numDocs);
+        mbb.putDouble(this.avgDocLen);
+        mbb.putLong(this.totalLenDoc);
     }
 
     /**
@@ -120,7 +117,7 @@ public class Statistics {
      *
      */
     public void writeMergeToDisk() throws IOException {
-        BinaryFile.writeLongToBuffer(fc, terms);
+        BinaryFile.writeLongToBuffer(fc, this.terms);
     }
 
 
@@ -132,8 +129,8 @@ public class Statistics {
         mbb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
         this.setNumDocs(mbb.getInt());
         this.setAvgDocLen(mbb.getDouble());
-        this.setTerms(mbb.getLong());
         this.setTotalLenDoc(mbb.getLong());
+        this.setTerms(mbb.getLong());
     }
 
     /**

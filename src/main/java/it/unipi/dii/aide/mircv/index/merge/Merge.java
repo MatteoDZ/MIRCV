@@ -28,8 +28,6 @@ public class Merge {
     }
 
     public void write(String path, boolean compress) throws IOException {
-
-        int i = 0;
         long lexSize = 0L;
 
         InvertedIndexFile inv = new InvertedIndexFile(path, this.pathDocIds, this.pathFreqs, this.blockSize);
@@ -37,11 +35,10 @@ public class Merge {
 
 
         while (!readerLines.isEmpty()) {
-            if (i % 100000 == 0){
-                System.out.println("Line number " + i);
+            if (lexSize % 100000 == 0)
                 System.out.println("Term number " + lexSize);
-            }
-            i++;
+
+            lexSize++;
 
             String minTerm = findMinTerm(readerLines);
             // System.out.println("minTerm: " + minTerm);
@@ -94,7 +91,7 @@ public class Merge {
             // System.out.println("Term: " + minPosting.getTerm() + " DocIds: " + docIdsNew + " Freqs: " + freqsNew);
             long offsetTerm = inv.write(docIdsNew, freqsNew, compress);
             lexicon.write(minPosting.getTerm(), offsetTerm, docIdsNew, freqsNew);
-            lexSize++;
+
         }
         Statistics statistics = new Statistics(pathStatistics);
         statistics.setTerms(lexSize);

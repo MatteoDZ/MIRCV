@@ -31,7 +31,6 @@ public class BinaryFile {
                 String termine=tpl.getTerm();
                 List<Integer> doc_ids=tpl.getDocIds();
                 List<Integer> freqs=tpl.getFrequencies();
-
                 mbb.putInt(termine.length()); //scrivo in un primo int la lunghezza del termine
                 for(int i=0;i<termine.length();i++){
                     mbb.putChar(termine.charAt(i));
@@ -45,13 +44,6 @@ public class BinaryFile {
                     mbb.putInt(freq);
                 }
                 mbb.putInt(-1);
-
-                /*writeIntToBuffer(fc, termine.length());
-                writeStringToBuffer(fc, termine);
-                writeIntListToBuffer(fc, tpl.getDocIds());
-                writeIntToBuffer(fc, -1);
-                writeIntListToBuffer(fc, tpl.getFrequencies());
-                writeIntToBuffer(fc,-1);*/
 
             }
 
