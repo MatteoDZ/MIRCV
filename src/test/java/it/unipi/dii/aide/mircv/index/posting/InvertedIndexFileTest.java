@@ -65,4 +65,13 @@ public class InvertedIndexFileTest {
         assertFalse(invIndex.isPresent("a"));
         assertFalse(invIndex.isPresent("b"));
     }
+
+    @Test
+    public void calculateDimensionByteTest() {
+        InvertedIndex invIndex = new InvertedIndex();
+        invIndex.add(Arrays.asList("z", "a", "b", "ba", "bb"), 1);
+        assertEquals( 10 * 4 + 7*2 + 2*4*5 + 4*5 , (int)invIndex.calculateDimensionByte());
+    }
+
+
 }

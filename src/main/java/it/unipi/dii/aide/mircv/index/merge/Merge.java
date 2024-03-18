@@ -78,13 +78,13 @@ public class Merge {
 
             List<Integer> docIdsNew = minPosting.getDocIds();
             List<Integer> freqsNew = minPosting.getFrequencies();
-            Integer docId;
+            int docId;
 
             while ((docId = findDuplicate(docIdsNew)) != 0) {
                 // System.out.println("Prima DocIds: " + docIdsNew + " Freqs: " + freqsNew + " DocId: " + docId);
-                docIdsNew.remove((int) docId);
+                docIdsNew.remove(docId);
                 int freq = freqsNew.get(docId);
-                freqsNew.remove((int) docId);
+                freqsNew.remove( docId);
                 freqsNew.add(docId, freq + freqsNew.get(docId + 1));
                 // System.out.println("Dopo DocIds: " + docIdsNew + " Freqs: " + freqsNew + " DocId: " + docId);
             }
@@ -106,9 +106,8 @@ public class Merge {
      * @param  listContainingDuplicates  the list of integers to search for duplicates
      * @return                          the index of the first duplicate element in the list
      */
-    public Integer findDuplicate (List<Integer> listContainingDuplicates) {
+    protected static Integer findDuplicate (List<Integer> listContainingDuplicates) {
         final Set<Integer> set1 = new HashSet<>();
-
         for (Integer yourInt : listContainingDuplicates) {
             if (!set1.add(yourInt)) {
                 return listContainingDuplicates.indexOf(yourInt);
@@ -123,7 +122,7 @@ public class Merge {
      * @param map is the map of the posting lists, containing the reader of each intermediateIndex file associated to the last posting list read from that intermediateIndex
      * @return the min term found
      */
-    public static String findMinTerm (HashMap<BlockReader, PostingIndex> map){
+    protected static String findMinTerm (HashMap<BlockReader, PostingIndex> map){
         String minTerm = null;
         for (PostingIndex postingList : map.values()) {
             String term = postingList.getTerm();

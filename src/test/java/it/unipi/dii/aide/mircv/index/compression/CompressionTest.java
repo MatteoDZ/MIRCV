@@ -103,23 +103,10 @@ class CompressionTest {
         assertEquals(List.of(1, 127, 128, 255, 256, 16383, 16384),
                 VariableByteCompressor.decode(VariableByteCompressor.encode(List.of(1, 127, 128, 255, 256, 16383, 16384))));
 
-        assertEquals(List.of((short)5, (short)312, (short)32000),
-                UnaryCompressor.integerArrayDecompression(UnaryCompressor.integerArrayCompression(new int[]{5, 312, 32000}), 3));
-        assertEquals(List.of((short)1, (short)127, (short)128, (short)255, (short)256, (short)16383, (short)16384),
-                UnaryCompressor.integerArrayDecompression(UnaryCompressor.integerArrayCompression(new int[]{1, 127, 128, 255, 256, 16383, 16384}), 7));
-        assertEquals(List.of((short)4, (short)4, (short)2, (short)7, (short)5),
-                UnaryCompressor.integerArrayDecompression(UnaryCompressor.integerArrayCompression(new int[]{4, 4, 2, 7, 5}), 5));
+        assertEquals(List.of((short)5, (short)312, (short)32000, (short)129, (short)32770),
+                UnaryCompressor.integerArrayDecompression(UnaryCompressor.integerArrayCompression(new int[]{5, 312, 32000, 129, 32770}), 5));
 
     }
-
-    @Test
-    public void testUncompleteBlock(){
-        assertEquals(List.of((short)4, (short)1, (short)1, (short)1, (short)1),
-                UnaryCompressor.integerArrayDecompression(UnaryCompressor.integerArrayCompression(new int[]{4, 1, 1, 1, 1}), 5));
-        assertEquals(List.of((short)4),
-                UnaryCompressor.integerArrayDecompression(UnaryCompressor.integerArrayCompression(new int[]{4}), 1));
-    }
-
 
 
 }

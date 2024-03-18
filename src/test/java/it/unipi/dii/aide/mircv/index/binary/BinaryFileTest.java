@@ -1,5 +1,6 @@
 package it.unipi.dii.aide.mircv.index.binary;
 
+import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.merge.BlockReader;
 import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
@@ -18,11 +19,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class BinaryFileTest {
 
+    String path = Configuration.DIRECTORY_TEST +"test.bin";
+
     @Test
     public void writeBlockTest() throws IOException {
-        String path = "data/test/test.bin";
-        FileUtils.deleteDirectory("data/test");
-        FileUtils.createDirectory("data/test");
+        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
+        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
         InvertedIndex inv = new InvertedIndex();
         inv.add(List.of("a","a","a","b","b","b"), 1);
         inv.add(List.of("b","b","b","c", "c", "c"), 2);
@@ -43,9 +45,8 @@ public class BinaryFileTest {
 
     @Test
     public void shortToBufferTest() throws IOException {
-        String path = "data/test/test.bin";
-        FileUtils.deleteDirectory("data/test");
-        FileUtils.createDirectory("data/test");
+        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
+        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
         FileChannel  fc = FileChannel.open(Paths.get(path), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         BinaryFile.writeShortToBuffer(fc, (short)1);
         assertEquals(1, BinaryFile.readShortFromBuffer(fc, (long)0));
@@ -53,9 +54,8 @@ public class BinaryFileTest {
 
     @Test
     public void intToBufferTest() throws IOException {
-        String path = "data/test/test.bin";
-        FileUtils.deleteDirectory("data/test");
-        FileUtils.createDirectory("data/test");
+        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
+        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
         FileChannel  fc = FileChannel.open(Paths.get(path), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         BinaryFile.writeIntToBuffer(fc, (int)1);
         assertEquals(1, BinaryFile.readIntFromBuffer(fc, (long)0));
@@ -63,9 +63,8 @@ public class BinaryFileTest {
 
     @Test
     public void longToBufferTest() throws IOException {
-        String path = "data/test/test.bin";
-        FileUtils.deleteDirectory("data/test");
-        FileUtils.createDirectory("data/test");
+        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
+        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
         FileChannel  fc = FileChannel.open(Paths.get(path), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         BinaryFile.writeLongToBuffer(fc, (int)1);
         assertEquals(1, BinaryFile.readLongFromBuffer(fc, (long)0));
@@ -73,9 +72,8 @@ public class BinaryFileTest {
 
     @Test
     public void arrayByteToBufferTest() throws IOException {
-        String path = "data/test/test.bin";
-        FileUtils.deleteDirectory("data/test");
-        FileUtils.createDirectory("data/test");
+        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
+        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
         FileChannel  fc = FileChannel.open(Paths.get(path), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         BinaryFile.writeArrayByteToBuffer(fc, new byte[]{1});
         assertArrayEquals(new byte[]{1}, BinaryFile.readArrayByteFromBuffer(fc, (long)0, (long) new byte[]{1}.length));
@@ -83,9 +81,8 @@ public class BinaryFileTest {
 
     @Test
     public void shortListToBuffer() throws IOException {
-        String path = "data/test/test.bin";
-        FileUtils.deleteDirectory("data/test");
-        FileUtils.createDirectory("data/test");
+        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
+        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
         FileChannel  fc = FileChannel.open(Paths.get(path), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         BinaryFile.writeShortListToBuffer(fc, List.of(1));
         assertEquals(List.of(1).toString(),
@@ -94,9 +91,8 @@ public class BinaryFileTest {
 
     @Test
     public void intListToBuffer() throws IOException {
-        String path = "data/test/test.bin";
-        FileUtils.deleteDirectory("data/test");
-        FileUtils.createDirectory("data/test");
+        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
+        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
         FileChannel  fc = FileChannel.open(Paths.get(path), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         BinaryFile.writeIntListToBuffer(fc, List.of(1));
         assertEquals(List.of(1).toString(),

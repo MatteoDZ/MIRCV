@@ -1,6 +1,7 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
+import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import org.junit.jupiter.api.Test;
@@ -11,11 +12,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class BlockReaderTest {
+    String pathTest1 = "data/test/test1.bin";
+
     @Test
     public void readBlockTest() throws IOException {
-        String pathTest1 = "data/test/test1.bin";
-        FileUtils.deleteDirectory("data/test");
-        FileUtils.createDirectory("data/test");
+        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
+        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
         InvertedIndex inv1 = new InvertedIndex();
         inv1.add(List.of("a"), 1);
         inv1.add(List.of("b"), 2);
@@ -32,9 +34,8 @@ public class BlockReaderTest {
 
     @Test
     public void readBlockTest1() throws IOException {
-        String pathTest1 = "data/test/test1.bin";
-        FileUtils.deleteDirectory("data/test");
-        FileUtils.createDirectory("data/test");
+        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
+        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
         InvertedIndex inv1 = new InvertedIndex();
         inv1.add(List.of("a", "a", "b"), 1);
         inv1.add(List.of("b", "c"), 2);

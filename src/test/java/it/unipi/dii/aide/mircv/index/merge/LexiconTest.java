@@ -1,5 +1,6 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
+import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import org.junit.Test;
 
@@ -7,8 +8,13 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class LexiconTest {
+    String pathDoc = Configuration.DIRECTORY_TEST + "/testDoc.bin";
+    String pathFreq= Configuration.DIRECTORY_TEST + "/testFreq.bin";
+    String pathIndex= Configuration.DIRECTORY_TEST + "/testIndex.bin";
+    String pathLexicon= Configuration.DIRECTORY_TEST + "/testLexicon.bin";
 
     @Test
     public void writeNoCompressionTest() throws IOException {
@@ -16,15 +22,12 @@ public class LexiconTest {
         List<Integer> freqsA = List.of(10, 1, 2, 3, 41, 45, 46, 50, 600, 7000, 8000, 1000, 8800, 700);
         List<Integer> docIdsB = List.of(1, 11, 21, 35);
         List<Integer> freqsB = List.of(10, 5, 4, 5);
-        String pathDoc = "data/test/testDoc.bin";
-        String pathFreq= "data/test/testFreq.bin";
-        String pathIndex= "data/test/testIndex.bin";
-        FileUtils.deleteDirectory("data/test");
-        FileUtils.createDirectory("data/test");
+        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
+        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
         InvertedIndexFile invIndex = new InvertedIndexFile(pathIndex, pathDoc, pathFreq, 4);
         Long offsetA = invIndex.write(docIdsA, freqsA,false);
         Long offsetB = invIndex.write(docIdsB, freqsB,false);
-        Lexicon lexicon = new Lexicon("data/test/Lexicon.bin");
+        Lexicon lexicon = new Lexicon(pathLexicon);
         lexicon.write("a",offsetA, docIdsA, freqsA);
         lexicon.write("b",offsetB, docIdsB, freqsB);
         Long offsetLexiconA = lexicon.get("a").getOffsetInvertedIndex();
@@ -49,15 +52,12 @@ public class LexiconTest {
         List<Integer> freqsA = List.of(10, 1, 2, 3, 41, 45, 46, 50, 600, 7000, 8000, 1000, 8800, 700);
         List<Integer> docIdsB = List.of(1, 11, 21, 35);
         List<Integer> freqsB = List.of(10, 5, 4, 5);
-        String pathDoc = "data/test/testDoc.bin";
-        String pathFreq= "data/test/testFreq.bin";
-        String pathIndex= "data/test/testIndex.bin";
-        FileUtils.deleteDirectory("data/test");
-        FileUtils.createDirectory("data/test");
+        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
+        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
         InvertedIndexFile invIndex = new InvertedIndexFile(pathIndex, pathDoc, pathFreq, 4);
         Long offsetA = invIndex.write(docIdsA, freqsA,true);
         Long offsetB = invIndex.write(docIdsB, freqsB,true);
-        Lexicon lexicon = new Lexicon("data/test/Lexicon.bin");
+        Lexicon lexicon = new Lexicon(pathLexicon);
         lexicon.write("a",offsetA, docIdsA, freqsA);
         lexicon.write("b",offsetB, docIdsB, freqsB);
         Long offsetLexiconA = lexicon.findTerm("a").getOffsetInvertedIndex();
@@ -86,6 +86,24 @@ public class LexiconTest {
     public void removePaddingTest() {
         assertEquals("a", Lexicon.removePadding("a                               "));
         assertEquals("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", Lexicon.removePadding("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
+    }
+
+    @Test
+    public void findTerm() throws IOException {
+        List<Integer> docIdsA = List.of(0, 1, 20, 300, 401, 450, 461, 500, 6000, 70000, 800000, 8000000, 8800000, 8800001);
+        List<Integer> freqsA = List.of(10, 1, 2, 3, 41, 45, 46, 50, 600, 7000, 8000, 1000, 8800, 700);
+        List<Integer> docIdsB = List.of(1, 11, 21, 35);
+        List<Integer> freqsB = List.of(10, 5, 4, 5);
+        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
+        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
+        InvertedIndexFile invIndex = new InvertedIndexFile(pathIndex, pathDoc, pathFreq, 4);
+        Long offsetA = invIndex.write(docIdsA, freqsA,false);
+        Long offsetB = invIndex.write(docIdsB, freqsB,false);
+        Lexicon lexicon = new Lexicon(pathLexicon);
+        lexicon.write("a",offsetA, docIdsA, freqsA);
+        lexicon.write("b",offsetB, docIdsB, freqsB);
+        assertEquals("a", lexicon.findTerm("a").getTerm());
+        assertNull(lexicon.findTerm("c"));
     }
 
 }

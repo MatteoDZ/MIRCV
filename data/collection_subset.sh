@@ -1,25 +1,32 @@
 #!/bin/bash
 
-# Verifica il numero corretto di argomenti
 if [ "$#" -lt 1 ]; then
     echo "Usage: $0 <number_of_rows> [-r]"
+    echo "  -r: Optional flag to shuffle the lines before selecting the first n rows"
     exit 1
 fi
 
-# Estrai il file tsv dall'archivio
-tar -xzOf collection.tar.gz collection.tsv > collection.tsv
 
-# Seleziona il numero desiderato di righe e, se richiesto, mescola prima di selezionarle
+# Extract the original collection.tar.gz
+tar -xzvf collection.tar.gz
+
+n_rows="$1"
+tsv_filename="collection_subset_top${n_rows}.tsv"
+targz_filename="collection_subset_top${n_rows}.tar.gz"
+
+# Check if the -r flag is provided
 if [ "$2" == "-r" ]; then
-    shuf collection.tsv | head -n "$1" > "collection_subset_top${1}.tsv"
+    # Shuffle the lines and select the first n rows
+    shuf collection.tsv | head -n "$n_rows" > ${tsv_filename} 
 else
-    head -n "$1" collection.tsv > "collection_subset_top${1}.tsv"
+    # Select the first n rows without shuffling
+    head -n "$n_rows" collection.tsv > "${tsv_filename}"
 fi
 
-# Comprimi il file tsv risultante
-tar -czf "collection_subset_top${1}.tar.gz" "collection_subset_top${1}.tsv"
+# Create a new tar.gz file for the subset
+tar -czvf ${targz_filename} ${tsv_filename}
 
-# Pulisci i file temporanei
-rm collection.tsv "collection_subset_top${1}.tsv"
+# Clean up temporary files
+rm collection.tsv ${tsv_filename}
 
-echo "Subset creation complete. Output: collection_subset_top${1}.tsv"
+echo "Subset creation complete. Output: collection_subset.tar.gz"

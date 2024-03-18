@@ -1,5 +1,6 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
+import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import org.junit.Test;
 
@@ -9,17 +10,17 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class InvertedIndexFileTest {
+    String pathDoc = Configuration.DIRECTORY_TEST + "/testDoc.bin";
+    String pathFreq= Configuration.DIRECTORY_TEST + "/testFreq.bin";
+    String pathIndex= Configuration.DIRECTORY_TEST + "/testIndex.bin";
 
 
     @Test
     public void getFreqTest() throws IOException {
         List<Integer> docIds = List.of(0, 1, 20, 300, 401, 450, 461, 500, 6000, 70000, 800000, 8000000, 8800000, 8800001);
         List<Integer> freqs = List.of(10, 1, 2, 3, 41, 45, 46, 50, 600, 7000, 8000, 1000, 8800, 700);
-        String pathDoc = "data/test/testDoc.bin";
-        String pathFreq= "data/test/testFreq.bin";
-        String pathIndex= "data/test/testIndex.bin";
-        FileUtils.deleteDirectory("data/test");
-        FileUtils.createDirectory("data/test");
+        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
+        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
         InvertedIndexFile invIndex = new InvertedIndexFile(pathIndex, pathDoc, pathFreq, 4);
         Long offset = invIndex.write(docIds, freqs,false);
         assertEquals(freqs.get(0), invIndex.getFreq(offset, docIds.get(0), false));
@@ -52,11 +53,8 @@ public class InvertedIndexFileTest {
     public void getFreqCompressedTest() throws IOException {
         List<Integer> docIds = List.of(0, 1, 20, 300, 401, 450, 461, 500, 6000, 70000, 800000, 8000000, 8800000, 8800001);
         List<Integer> freqs = List.of(10, 1, 2, 3, 41, 45, 46, 50, 600, 7000, 8000, 1000, 8800, 700);
-        String pathDoc = "data/test/testDoc.bin";
-        String pathFreq= "data/test/testFreq.bin";
-        String pathIndex= "data/test/testIndex.bin";
-        FileUtils.deleteDirectory("data/test");
-        FileUtils.createDirectory("data/test");
+        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
+        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
         InvertedIndexFile invIndex = new InvertedIndexFile(pathIndex, pathDoc, pathFreq, 4);
         Long offset = invIndex.write(docIds, freqs,true);
         assertEquals(freqs.get(0), invIndex.getFreq(offset, docIds.get(0), true));
@@ -83,6 +81,29 @@ public class InvertedIndexFileTest {
         assertEquals(freqsNew.get(3), invIndex.getFreq(offsetNew, docIdsNew.get(3), true));
         assertEquals(freqsNew.get(4), invIndex.getFreq(offsetNew, docIdsNew.get(4), true));
         assertEquals(0, invIndex.getFreq(offsetNew, 8000000, true));
+    }
+
+
+    @Test
+    public void getDocIdsTestNoCompression() throws IOException {
+        List<Integer> docIds = List.of(0, 1, 20, 300, 401, 450, 461, 500, 6000, 70000, 800000, 8000000, 8800000, 8800001);
+        List<Integer> freqs = List.of(10, 1, 2, 3, 41, 45, 46, 50, 600, 7000, 8000, 1000, 8800, 700);
+        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
+        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
+        InvertedIndexFile invIndex = new InvertedIndexFile(pathIndex, pathDoc, pathFreq, 4);
+        Long offset = invIndex.write(docIds, freqs,false);
+        assertEquals(docIds, invIndex.getDocIds(offset, false));
+    }
+
+    @Test
+    public void getDocIdsTestYesCompression() throws IOException {
+        List<Integer> docIds = List.of(0, 1, 20, 300, 401, 450, 461, 500, 6000, 70000, 800000, 8000000, 8800000, 8800001);
+        List<Integer> freqs = List.of(10, 1, 2, 3, 41, 45, 46, 50, 600, 7000, 8000, 1000, 8800, 700);
+        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
+        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
+        InvertedIndexFile invIndex = new InvertedIndexFile(pathIndex, pathDoc, pathFreq, 4);
+        Long offset = invIndex.write(docIds, freqs,true);
+        assertEquals(docIds, invIndex.getDocIds(offset, true));
     }
 
 }

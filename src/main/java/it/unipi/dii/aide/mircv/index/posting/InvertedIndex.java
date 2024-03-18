@@ -81,7 +81,7 @@ public class InvertedIndex {
      *
      * @return The size of the inverted index block in bytes.
      */
-    public int calculateDimensionByte() {
+    public Integer calculateDimensionByte() {
         int separators = 2;
         // Calculate the number of terms in the inverted index block
         int numberOfTerms = Block.size();

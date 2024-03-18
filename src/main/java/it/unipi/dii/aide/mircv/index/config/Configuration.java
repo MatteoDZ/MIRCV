@@ -8,9 +8,12 @@ import java.util.Properties;
 public class Configuration {
 
     public static final String PATH_DOCUMENTS = load("path_documents");
+    public static final String PATH_DOCUMENTS_TEST = load("path_documents_test");
     public static final String PATH_STOPWORDS = load("path_stopwords");
     public static final String PATH_BINARY = load("path_binary");
     public static final String DIRECTORY_TEMP_FILES = load("directory_temporary_files");
+    public static final String DIRECTORY_TEMP_FILES_TEST = load("directory_temporary_files_test");
+    public static final String DIRECTORY_TEST = load("directory_test");
     public static final String PATH_INVERTED_INDEX = load("path_inverted_index");
     public static final String PATH_DOCIDS = load("path_docids");
     public static final String PATH_FEQUENCIES = load("path_freqs");
@@ -20,6 +23,7 @@ public class Configuration {
     public static final Integer INVERTED_INDEX_CACHE_SIZE =  Integer.parseInt(Objects.requireNonNull(load("inverted_index_cache_size")));
     public static final Integer BLOCK_SIZE = Integer.parseInt(Objects.requireNonNull(load("block_size")));
     public static final Boolean COMPRESSION = Boolean.parseBoolean(load("compression"));
+
 
     /**
      * Loads the value associated with the given key from the configuration properties file.

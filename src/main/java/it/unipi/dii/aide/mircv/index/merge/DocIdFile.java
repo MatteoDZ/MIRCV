@@ -4,7 +4,6 @@ import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
 import it.unipi.dii.aide.mircv.index.compression.VariableByteCompressor;
 
 import java.io.IOException;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -16,7 +15,6 @@ import java.util.List;
  */
 public class DocIdFile {
     private final FileChannel fc; // File channel for reading and writing
-    private MappedByteBuffer mbb; // Mapped byte buffer for efficient I/O
     private final Integer BLOCK_SIZE; // Size of the data block
     private final List<Integer> block = new ArrayList<>(); // Temporary block to store document IDs
     private final List<Integer> termUpperBounds = new ArrayList<>(); // Upper bounds of terms

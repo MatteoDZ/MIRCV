@@ -6,6 +6,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
@@ -121,11 +122,22 @@ public class FileUtils {
      * @param  blockNumber  the number of the block
      * @return              a path for a new block
      */
-    public static String createPathFileBlockN(int blockNumber){
-        assert Configuration.PATH_BINARY != null;
-        return Configuration.PATH_BINARY.split("\\.")[0] + "_" + blockNumber + "." + Configuration.PATH_BINARY.split("\\.")[1];
+    public static String createPathFileBlockN(String path, int blockNumber){
+        return path.split("\\.")[0] + "_" + blockNumber + "." + path.split("\\.")[1];
     }
 
+
+    /**
+     * Generates a path for the test file
+     *
+     * @return              a path for a new block
+     */
+    public static String createPathTestFile(String path){
+        if(path.split("//*").length == 2)
+            return path.split("//*")[0] + "/test/" + path.split("//*")[1];
+        else
+            return path.split("//*")[0] + "/test/" + path.split("//*")[1] + "/" + path.split("//*")[2];
+    }
 
 
 

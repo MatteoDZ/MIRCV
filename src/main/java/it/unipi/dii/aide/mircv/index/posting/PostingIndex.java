@@ -28,6 +28,7 @@ public class PostingIndex {
     public void setIdf(float idf) {
         this.idf = idf;
     }
+
     /**
      * Retrieves the list of document IDs.
      *
@@ -105,6 +106,11 @@ public class PostingIndex {
         this.term = term;
     }
 
+    /**
+     * A method that adds a posting to the list of postings.
+     *
+     * @param  documentId   the id of the document to add
+     */
     public void addPosting(int documentId) {
         Posting existingPosting = postings.stream()
                 .filter(p -> p.getDoc_id() == documentId)

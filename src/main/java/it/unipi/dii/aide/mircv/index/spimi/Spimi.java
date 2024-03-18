@@ -1,6 +1,7 @@
 package it.unipi.dii.aide.mircv.index.spimi;
 
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
+import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
 import it.unipi.dii.aide.mircv.index.preprocess.Preprocess;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
@@ -14,7 +15,7 @@ import java.util.Objects;
 
 public class Spimi {
 
-    public static void spimi(String pathCollection, String pathStatistics) throws IOException {
+    public static void spimi(String pathCollection, String pathStatistics, String pathBlocks) throws IOException {
         try (TarArchiveInputStream tarInput = new TarArchiveInputStream(new GzipCompressorInputStream(new FileInputStream(Objects.requireNonNull(pathCollection))))) {
             tarInput.getNextTarEntry();
             try (BufferedReader br = new BufferedReader(new InputStreamReader(tarInput))) {
@@ -34,13 +35,19 @@ public class Spimi {
                         }
                         numDocs++;
                         if (Runtime.getRuntime().freeMemory() < (Runtime.getRuntime().totalMemory() * 20 / 100)) { //if giusto che tiene conto della memoria occupata
-                            String pathBlockN = FileUtils.createPathFileBlockN(blockNumber);
+                            String pathBlockN = FileUtils.createPathFileBlockN(Objects.requireNonNull(pathBlocks),blockNumber);
                             BinaryFile.writeBlock(inv, pathBlockN);
                             blockNumber++;
                             inv.clean();
                             System.gc();
                         }
                     }
+                }
+                if(!inv.getInvertedIndexBlock().isEmpty()){
+                    String pathBlockN = FileUtils.createPathFileBlockN(Objects.requireNonNull(pathBlocks),blockNumber);
+                    BinaryFile.writeBlock(inv, pathBlockN);
+                    inv.clean();
+                    System.gc();
                 }
                 statistics.setTotalLenDoc(total_length);
                 statistics.setNumDocs(numDocs);

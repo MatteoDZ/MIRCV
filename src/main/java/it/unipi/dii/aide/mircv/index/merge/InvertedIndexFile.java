@@ -146,7 +146,7 @@ public class InvertedIndexFile {
      * @return                     a list containing the retrieved start and end offset of a document ID
      * @throws IOException         if there is an error while performing I/O operations
      */
-    public List<Long> getOffsetsDocIds(Long offset, int numBlocchi, int indiceBloccoCercato) throws IOException {
+    private List<Long> getOffsetsDocIds(Long offset, int numBlocchi, int indiceBloccoCercato) throws IOException {
         mbb=fc.map(FileChannel.MapMode.READ_ONLY,offset+2L+ 4L * (numBlocchi+1)+ 8L *indiceBloccoCercato,
                 offset+2L+ 4L * (numBlocchi+1)+ 8L *(indiceBloccoCercato+1));
         return List.of(mbb.getLong(),mbb.getLong());
@@ -161,13 +161,11 @@ public class InvertedIndexFile {
      * @return                     a list containing the retrieved start and end offset of a frequency
      * @throws IOException         if there is an error while performing I/O operations
      */
-    public List<Long> getOffsetsFreqs(Long offset, int numBlocchi, int indiceBloccoCercato) throws IOException {
+    private List<Long> getOffsetsFreqs(Long offset, int numBlocchi, int indiceBloccoCercato) throws IOException {
         mbb=fc.map(FileChannel.MapMode.READ_ONLY,offset+2L+ (4L *(numBlocchi+1)) + (8L * (numBlocchi+1)) + (8L *indiceBloccoCercato) +8,
                 offset+2L+ (4L * (numBlocchi+1)) + (8L * (numBlocchi+1)) + (8L *(indiceBloccoCercato+1)) +8);
         return List.of(mbb.getLong(),mbb.getLong());
     }
-
-    // Helper method: Write a short value to the buffer
 
 
     /**
