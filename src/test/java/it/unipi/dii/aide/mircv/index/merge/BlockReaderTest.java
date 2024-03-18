@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class BlockReaderTest {
-    String pathTest1 = "data/test/test1.bin";
+    String pathTest1 = Configuration.DIRECTORY_TEST + "/test1.bin";
 
     @Test
     public void readBlockTest() throws IOException {

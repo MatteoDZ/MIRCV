@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FrequencyFileTest {
 
-    String path = Configuration.DIRECTORY_TEST +  "testFreq";
+    String path = Configuration.DIRECTORY_TEST +  "/testFreq";
     @Test
      void readFreqsBlockTest() throws IOException {
         List<Integer> freqs = List.of(1, 10, 13, 5, 7, 4, 4, 2, 7, 5, 4);
