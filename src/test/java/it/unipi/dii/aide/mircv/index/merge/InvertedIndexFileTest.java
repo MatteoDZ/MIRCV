@@ -1,5 +1,6 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
+import it.unipi.dii.aide.mircv.index.ConfigTest;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import org.junit.Test;
@@ -10,9 +11,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class InvertedIndexFileTest {
-    String pathDoc = Configuration.DIRECTORY_TEST + "/testDoc.bin";
-    String pathFreq= Configuration.DIRECTORY_TEST + "/testFreq.bin";
-    String pathIndex= Configuration.DIRECTORY_TEST + "/testIndex.bin";
 
 
     @Test
@@ -21,7 +19,7 @@ public class InvertedIndexFileTest {
         List<Integer> freqs = List.of(10, 1, 2, 3, 41, 45, 46, 50, 600, 7000, 8000, 1000, 8800, 700);
         FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
         FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
-        InvertedIndexFile invIndex = new InvertedIndexFile(pathIndex, pathDoc, pathFreq, 4);
+        InvertedIndexFile invIndex = new InvertedIndexFile(ConfigTest.PATH_INV_INDEX, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, 4);
         Long offset = invIndex.write(docIds, freqs,false);
         assertEquals(freqs.get(0), invIndex.getFreq(offset, docIds.get(0), false));
         assertEquals(freqs.get(1), invIndex.getFreq(offset, docIds.get(1), false));
@@ -55,7 +53,7 @@ public class InvertedIndexFileTest {
         List<Integer> freqs = List.of(10, 1, 2, 3, 41, 45, 46, 50, 600, 7000, 8000, 1000, 8800, 700);
         FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
         FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
-        InvertedIndexFile invIndex = new InvertedIndexFile(pathIndex, pathDoc, pathFreq, 4);
+        InvertedIndexFile invIndex = new InvertedIndexFile(ConfigTest.PATH_INV_INDEX, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, 4);
         Long offset = invIndex.write(docIds, freqs,true);
         assertEquals(freqs.get(0), invIndex.getFreq(offset, docIds.get(0), true));
         assertEquals(freqs.get(1), invIndex.getFreq(offset, docIds.get(1), true));
@@ -90,7 +88,7 @@ public class InvertedIndexFileTest {
         List<Integer> freqs = List.of(10, 1, 2, 3, 41, 45, 46, 50, 600, 7000, 8000, 1000, 8800, 700);
         FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
         FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
-        InvertedIndexFile invIndex = new InvertedIndexFile(pathIndex, pathDoc, pathFreq, 4);
+        InvertedIndexFile invIndex = new InvertedIndexFile(ConfigTest.PATH_INV_INDEX, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, 4);
         Long offset = invIndex.write(docIds, freqs,false);
         assertEquals(docIds, invIndex.getDocIds(offset, false));
     }
@@ -101,7 +99,7 @@ public class InvertedIndexFileTest {
         List<Integer> freqs = List.of(10, 1, 2, 3, 41, 45, 46, 50, 600, 7000, 8000, 1000, 8800, 700);
         FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
         FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
-        InvertedIndexFile invIndex = new InvertedIndexFile(pathIndex, pathDoc, pathFreq, 4);
+        InvertedIndexFile invIndex = new InvertedIndexFile(ConfigTest.PATH_INV_INDEX, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, 4);
         Long offset = invIndex.write(docIds, freqs,true);
         assertEquals(docIds, invIndex.getDocIds(offset, true));
     }
