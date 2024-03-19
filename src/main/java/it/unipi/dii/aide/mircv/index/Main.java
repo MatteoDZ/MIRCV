@@ -85,7 +85,7 @@ public class Main {
 
         Statistics statistics = new Statistics(Configuration.PATH_STATISTICS);
         statistics.readFromDisk();
-        System.out.println(statistics.toString());
+        System.out.println(statistics);
         
 
         /*

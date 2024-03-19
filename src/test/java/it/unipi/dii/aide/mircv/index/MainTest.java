@@ -43,7 +43,7 @@ public class MainTest {
 
         long offsetTermWar = lexicon.get("war").getOffsetInvertedIndex();
         assertEquals(List.of(1,3,6,7,34), invRead.getDocIds(offsetTermWar, false).stream().limit(5).toList());
-        assertEquals((int)1, (int)invRead.getFreqCache(offsetTermWar, 1, false));
+        assertEquals(1, (int)invRead.getFreqCache(offsetTermWar, 1, false));
         assertEquals(1, (int)invRead.getFreqCache(offsetTermWar, 3, false));
         assertEquals(1, (int)invRead.getFreqCache(offsetTermWar, 6, false));
         assertEquals(1, (int)invRead.getFreqCache(offsetTermWar, 7, false));
@@ -52,7 +52,7 @@ public class MainTest {
 
         long offsetTermBomb = lexicon.get("bomb").getOffsetInvertedIndex();
         assertEquals(List.of(1,2,3,5,6,7,8), invRead.getDocIds(offsetTermBomb, false).stream().limit(7).toList());
-        assertEquals((int)1, (int)invRead.getFreqCache(offsetTermBomb, 1, false));
+        assertEquals(1, (int)invRead.getFreqCache(offsetTermBomb, 1, false));
         assertEquals(1, (int)invRead.getFreqCache(offsetTermBomb, 2, false));
         assertEquals(1, (int)invRead.getFreqCache(offsetTermBomb, 3, false));
         assertEquals(1, (int)invRead.getFreqCache(offsetTermBomb, 5, false));
@@ -88,7 +88,7 @@ public class MainTest {
 
         long offsetTermWar = lexicon.get("war").getOffsetInvertedIndex();
         assertEquals(List.of(1,3,6,7,34), invRead.getDocIds(offsetTermWar, true).stream().limit(5).toList());
-        assertEquals((int)1, (int)invRead.getFreqCache(offsetTermWar, 1, true));
+        assertEquals(1, (int)invRead.getFreqCache(offsetTermWar, 1, true));
         assertEquals(1, (int)invRead.getFreqCache(offsetTermWar, 3, true));
         assertEquals(1, (int)invRead.getFreqCache(offsetTermWar, 6, true));
         assertEquals(1, (int)invRead.getFreqCache(offsetTermWar, 7, true));
@@ -97,7 +97,7 @@ public class MainTest {
 
         long offsetTermBomb = lexicon.get("bomb").getOffsetInvertedIndex();
         assertEquals(List.of(1,2,3,5,6,7,8), invRead.getDocIds(offsetTermBomb, true).stream().limit(7).toList());
-        assertEquals((int)1, (int)invRead.getFreqCache(offsetTermBomb, 1, true));
+        assertEquals(1, (int)invRead.getFreqCache(offsetTermBomb, 1, true));
         assertEquals(1, (int)invRead.getFreqCache(offsetTermBomb, 2, true));
         assertEquals(1, (int)invRead.getFreqCache(offsetTermBomb, 3, true));
         assertEquals(1, (int)invRead.getFreqCache(offsetTermBomb, 5, true));

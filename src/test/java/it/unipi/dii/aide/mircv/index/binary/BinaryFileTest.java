@@ -53,7 +53,7 @@ public class BinaryFileTest {
         FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
         FileUtils.createDirectory(ConfigTest.DIRECTORY_TMP);
         FileChannel  fc = FileChannel.open(Paths.get(ConfigTest.PATH_BLOCKS), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
-        BinaryFile.writeIntToBuffer(fc, (int)1);
+        BinaryFile.writeIntToBuffer(fc, 1);
         assertEquals(1, BinaryFile.readIntFromBuffer(fc, (long)0));
     }
 
@@ -62,7 +62,7 @@ public class BinaryFileTest {
         FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
         FileUtils.createDirectory(ConfigTest.DIRECTORY_TMP);
         FileChannel  fc = FileChannel.open(Paths.get(ConfigTest.PATH_BLOCKS), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
-        BinaryFile.writeLongToBuffer(fc, (int)1);
+        BinaryFile.writeLongToBuffer(fc, 1);
         assertEquals(1, BinaryFile.readLongFromBuffer(fc, (long)0));
     }
 
