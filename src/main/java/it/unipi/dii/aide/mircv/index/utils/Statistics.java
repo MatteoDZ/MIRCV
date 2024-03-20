@@ -133,6 +133,12 @@ public class Statistics {
         this.setTerms(mbb.getLong());
     }
 
+    public void readSPIMI() throws IOException {
+        mbb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+        this.setNumDocs(mbb.getInt());
+        this.setAvgDocLen(mbb.getDouble());
+    }
+
     /**
      * A description of the entire Java function.
      *

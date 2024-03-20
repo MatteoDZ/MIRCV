@@ -40,6 +40,8 @@ public class LexiconData {
         return tf;
     }
 
+    public int getDf() {return df;}
+
     public float getIdf() {
         return idf;
     }
@@ -56,6 +58,10 @@ public class LexiconData {
         this.offsetInvertedIndex = offsetInvertedIndex;
     }
 
+    public void setOffset_frequency(long offset_frequency) {
+        this.offset_frequency = offset_frequency;
+    }
+
     public void setUpperTF(int upperTF) {
         this.upperTF = upperTF;
     }
@@ -63,6 +69,8 @@ public class LexiconData {
     public void setTf(int tf) {
         this.tf = tf;
     }
+
+    public void setDf(int df) {this.df = df;}
 
     public void setIdf(float idf) {
         this.idf = idf;

@@ -2,11 +2,14 @@ package it.unipi.dii.aide.mircv.index;
 
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.merge.InvertedIndexFile;
+import it.unipi.dii.aide.mircv.index.merge.LFUCache;
 import it.unipi.dii.aide.mircv.index.merge.Lexicon;
 import it.unipi.dii.aide.mircv.index.merge.Merge;
 import it.unipi.dii.aide.mircv.index.spimi.Spimi;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
+import it.unipi.dii.aide.mircv.index.utils.ObjectSizeFetcher;
 import it.unipi.dii.aide.mircv.index.utils.Statistics;
+import org.javatuples.Pair;
 
 import java.io.*;
 import java.util.List;
@@ -86,8 +89,9 @@ public class Main {
         Statistics statistics = new Statistics(Configuration.PATH_STATISTICS);
         statistics.readFromDisk();
         System.out.println(statistics.toString());
-        
 
+        LFUCache<Pair<Long, Integer>, Integer> temp = invRead.getLfuCache();
+        //System.out.println(ObjectSizeFetcher.getObjectSize(temp));
         /*
         //soluzione non usata (per ora) per controllare la heap occupata
 

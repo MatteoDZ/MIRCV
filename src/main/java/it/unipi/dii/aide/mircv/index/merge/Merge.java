@@ -1,9 +1,16 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
+import it.unipi.dii.aide.mircv.index.config.Configuration;
+import it.unipi.dii.aide.mircv.index.posting.Posting;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
 import it.unipi.dii.aide.mircv.index.utils.Statistics;
 
 import java.io.IOException;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 
 public class Merge {
@@ -35,6 +42,7 @@ public class Merge {
 
 
         while (!readerLines.isEmpty()) {
+
             if (lexSize % 100000 == 0)
                 System.out.println("Term number " + lexSize);
 
@@ -56,6 +64,7 @@ public class Merge {
                 if (postingList.getTerm().equals(minTerm)) {
                     //we are inside a reader with the min term
                     minPosting.appendList(postingList);
+                    postingList.getFrequencies().get(0);
 
                     // System.out.println("Term IF " + postingList.getTerm());
 
@@ -89,8 +98,9 @@ public class Merge {
                 // System.out.println("Dopo DocIds: " + docIdsNew + " Freqs: " + freqsNew + " DocId: " + docId);
             }
             // System.out.println("Term: " + minPosting.getTerm() + " DocIds: " + docIdsNew + " Freqs: " + freqsNew);
+
             long offsetTerm = inv.write(docIdsNew, freqsNew, compress);
-            lexicon.write(minPosting.getTerm(), offsetTerm, docIdsNew, freqsNew);
+            lexiconWrite(minPosting, offsetTerm, docIdsNew, freqsNew, lexicon);
 
         }
         Statistics statistics = new Statistics(pathStatistics);
@@ -131,6 +141,45 @@ public class Merge {
             }
         }
         return minTerm;
+    }
+
+    protected static void lexiconWrite(PostingIndex pi, long offset, List<Integer> docIds, List<Integer> freqs, Lexicon lexicon) throws IOException {
+        float BM25Upper = 0F;
+        float actualBM25;
+        int  tf  = 0;
+
+        Statistics stats = new Statistics(Configuration.PATH_STATISTICS);
+        stats.readSPIMI();
+        int df = pi.getPostings().size();
+        float idf = (float) ((Math.log((double) stats.getNumDocs() / df)));
+
+        for (Posting posting : pi.getPostings()) {
+            actualBM25 = 1F;
+
+            if (actualBM25 != -1F && actualBM25 > BM25Upper){
+                BM25Upper = actualBM25;
+            }
+
+            if (tf < posting.getFrequency()) {
+                tf = posting.getFrequency();
+            }
+        }
+
+        lexicon.write(pi.getTerm(), offset, df, stats.getNumDocs(), tf);
+    }
+
+
+    protected static float calculateBM25(float tf, long doc_id, Statistics stats){
+        try {
+            assert Configuration.PATH_DOCIDS != null;
+            FileChannel fc = FileChannel.open(Path.of(Configuration.PATH_DOCIDS), StandardOpenOption.READ);
+            MappedByteBuffer mappedByteBuffer = fc.map(FileChannel.MapMode.READ_ONLY, (doc_id - 1) * 20 + 8 + 4, 8);
+            long doc_len = mappedByteBuffer.getLong();
+            return (float) ((tf / (tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (doc_len / stats.getAvgDocLen())))));
+        } catch (IOException e) {
+            System.out.println(e);
+            return -1F;
+        }
     }
 
 
