@@ -7,7 +7,6 @@ import it.unipi.dii.aide.mircv.index.merge.Lexicon;
 import it.unipi.dii.aide.mircv.index.merge.Merge;
 import it.unipi.dii.aide.mircv.index.spimi.Spimi;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
-import it.unipi.dii.aide.mircv.index.utils.ObjectSizeFetcher;
 import it.unipi.dii.aide.mircv.index.utils.Statistics;
 import org.javatuples.Pair;
 

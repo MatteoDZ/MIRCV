@@ -30,11 +30,11 @@ public class Lexicon {
     public void write(String term, long offset, int df, double docnum, int tf) throws IOException {
         lexicon.setTerm(term);
         lexicon.setOffsetInvertedIndex(offset);
-        lexicon.writeEntryToDisk(fc);
         lexicon.setDf(df);
         lexicon.setIdf((float) Math.log10(docnum/df));
         lexicon.setUpperTFIDF((float) ((1 + Math.log(tf)) * lexicon.getIdf()));
         lexicon.setUpperTF(1);
+        lexicon.writeEntryToDisk(fc);
     }
 
     /**

@@ -30,6 +30,7 @@ public class Spimi {
                     total_length += term.size();
                     if (!parts[1].isEmpty() || !term.isEmpty()) { //è sufficiente che una delle due non sia empty per fare inserire il tutto
                         inv.add(term, Integer.parseInt(parts[0]));
+                        // inv.add(term, Integer.parseInt(parts[0]), term.size());
                         if (numDocs % 1000000 == 0) {
                             System.out.println("Now at document: " + numDocs + " and block: " + blockNumber);
                         }

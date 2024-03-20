@@ -143,12 +143,12 @@ public class Merge {
         return minTerm;
     }
 
-    protected static void lexiconWrite(PostingIndex pi, long offset, List<Integer> docIds, List<Integer> freqs, Lexicon lexicon) throws IOException {
+    protected void lexiconWrite(PostingIndex pi, long offset, List<Integer> docIds, List<Integer> freqs, Lexicon lexicon) throws IOException {
         float BM25Upper = 0F;
         float actualBM25;
         int  tf  = 0;
 
-        Statistics stats = new Statistics(Configuration.PATH_STATISTICS);
+        Statistics stats = new Statistics(this.pathStatistics);
         stats.readSPIMI();
         int df = pi.getPostings().size();
         float idf = (float) ((Math.log((double) stats.getNumDocs() / df)));
@@ -156,7 +156,7 @@ public class Merge {
         for (Posting posting : pi.getPostings()) {
             actualBM25 = 1F;
 
-            if (actualBM25 != -1F && actualBM25 > BM25Upper){
+            if (actualBM25 != -1 && actualBM25 > BM25Upper){
                 BM25Upper = actualBM25;
             }
 
@@ -169,7 +169,12 @@ public class Merge {
     }
 
 
-    protected static float calculateBM25(float tf, long doc_id, Statistics stats){
+    protected float calculateBM25(PostingIndex pi, float tf, long doc_id, Statistics stats){
+        int doc_len = pi.getDocIds().size();
+        return (float) ((tf / (tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (doc_len / stats.getAvgDocLen())))));
+    }
+
+    /*protected static float calculateBM25(float tf, long doc_id, Statistics stats){
         try {
             assert Configuration.PATH_DOCIDS != null;
             FileChannel fc = FileChannel.open(Path.of(Configuration.PATH_DOCIDS), StandardOpenOption.READ);
@@ -180,7 +185,7 @@ public class Merge {
             System.out.println(e);
             return -1F;
         }
-    }
+    }*/
 
 
 }

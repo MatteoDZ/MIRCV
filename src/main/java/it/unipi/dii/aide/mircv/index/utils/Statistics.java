@@ -137,6 +137,7 @@ public class Statistics {
         mbb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
         this.setNumDocs(mbb.getInt());
         this.setAvgDocLen(mbb.getDouble());
+        this.setTotalLenDoc(mbb.getLong());
     }
 
     /**

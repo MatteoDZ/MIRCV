@@ -2,7 +2,6 @@ package it.unipi.dii.aide.mircv.index.merge;
 
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
-import it.unipi.dii.aide.mircv.index.utils.ObjectSizeFetcher;
 import org.javatuples.Pair;
 
 import java.io.IOException;
