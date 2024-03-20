@@ -26,7 +26,7 @@ public class InvertedIndexFileTest {
     List<Integer> freqsNew = List.of(1, 2, 3 ,4, 2);
 
     @Test
-    public void writeTest() throws IOException {
+    public void writeNoCompressionTest() throws IOException {
         FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
         FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
         InvertedIndexFile invIndex = new InvertedIndexFile(ConfigTest.PATH_INV_INDEX, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, 4);
@@ -48,6 +48,39 @@ public class InvertedIndexFileTest {
             docIdsFreqs.add(freqffset);
         }
         assertEquals(List.of(0L, 8L, 16L, 24L, 28L), docIdsFreqs);
+    }
+
+    @Test
+    public void writeYesCompressionTest() throws IOException {
+        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
+        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
+        InvertedIndexFile invIndex = new InvertedIndexFile(ConfigTest.PATH_INV_INDEX, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, 4);
+        Long offset = invIndex.write(docIds, freqs,true);
+        FileChannel  fc = FileChannel.open(Paths.get(ConfigTest.PATH_INV_INDEX), StandardOpenOption.READ, StandardOpenOption.WRITE);
+        assertEquals(4, BinaryFile.readShortFromBuffer(fc, offset));
+        assertEquals(List.of(300, 500, 8000000, 8800001), BinaryFile.readIntListFromBuffer(fc, offset+2, offset+2 + 4*4));
+        assertEquals(-1, BinaryFile.readIntFromBuffer(fc,offset+2 + 4*4));
+        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_ONLY, 4+offset+2 + 4*4, fc.size());
+        List<Long> docIdsOffsets = new ArrayList<>();
+        long docIdOffset;
+        while ((docIdOffset = mbb.getLong()) != -1) {
+            docIdsOffsets.add(docIdOffset);
+        }
+        int byteFirstBlockDocIds = VariableByteCompressor.encode(List.of(0, 1, 20, 300)).length;
+        int byteSecondBlockDocIds = VariableByteCompressor.encode(List.of( 401, 450, 461, 500)).length;
+        int byteThirdBlockDocIds = VariableByteCompressor.encode(List.of(6000, 70000, 800000, 8000000)).length;
+        int byteFourthBlockDocIds = VariableByteCompressor.encode(List.of(8800000, 8800001)).length;
+        assertEquals(List.of(0L, (long)byteFirstBlockDocIds, (long)byteFirstBlockDocIds+byteSecondBlockDocIds, (long)byteFirstBlockDocIds+byteSecondBlockDocIds+byteThirdBlockDocIds, (long)byteFirstBlockDocIds+byteSecondBlockDocIds+byteThirdBlockDocIds+byteFourthBlockDocIds), docIdsOffsets);
+        List<Long> docIdsFreqs = new ArrayList<>();
+        long freqffset;
+        while ((freqffset = mbb.getLong()) != -1) {
+            docIdsFreqs.add(freqffset);
+        }
+        int byteFirstBlockFreqs = UnaryCompressor.integerArrayCompression(new int[] {10, 1, 2, 3}).length;
+        int byteSecondBlockFreqs = UnaryCompressor.integerArrayCompression(new int[] {41, 45, 46, 50}).length;
+        int byteThirdBlockFreqs = UnaryCompressor.integerArrayCompression(new int[] {600, 7000, 8000, 1000}).length;
+        int byteFourthBlockFreqs = UnaryCompressor.integerArrayCompression(new int[] {8800, 700}).length;
+        assertEquals(List.of(0L, (long)byteFirstBlockFreqs, (long)byteFirstBlockFreqs+byteSecondBlockFreqs, (long)byteFirstBlockFreqs+byteSecondBlockFreqs+byteThirdBlockFreqs, (long)byteFirstBlockFreqs+byteSecondBlockFreqs+byteThirdBlockFreqs+byteFourthBlockFreqs), docIdsFreqs);
     }
 
 
