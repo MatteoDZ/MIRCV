@@ -9,9 +9,11 @@ import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,6 +24,31 @@ public class InvertedIndexFileTest {
     List<Integer> freqs = List.of(10, 1, 2, 3, 41, 45, 46, 50, 600, 7000, 8000, 1000, 8800, 700);
     List<Integer> docIdsNew = List.of(10, 200, 8000, 7000000, 7100000);
     List<Integer> freqsNew = List.of(1, 2, 3 ,4, 2);
+
+    @Test
+    public void writeTest() throws IOException {
+        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
+        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
+        InvertedIndexFile invIndex = new InvertedIndexFile(ConfigTest.PATH_INV_INDEX, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, 4);
+        Long offset = invIndex.write(docIds, freqs,false);
+        FileChannel  fc = FileChannel.open(Paths.get(ConfigTest.PATH_INV_INDEX), StandardOpenOption.READ, StandardOpenOption.WRITE);
+        assertEquals(4, BinaryFile.readShortFromBuffer(fc, offset));
+        assertEquals(List.of(300, 500, 8000000, 8800001), BinaryFile.readIntListFromBuffer(fc, offset+2, offset+2 + 4*4));
+        assertEquals(-1, BinaryFile.readIntFromBuffer(fc,offset+2 + 4*4));
+        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_ONLY, 4+offset+2 + 4*4, fc.size());
+        List<Long> docIdsOffsets = new ArrayList<>();
+        long docIdOffset;
+        while ((docIdOffset = mbb.getLong()) != -1) {
+            docIdsOffsets.add(docIdOffset);
+        }
+        assertEquals(List.of(0L, 16L, 32L, 48L, 56L), docIdsOffsets);
+        List<Long> docIdsFreqs = new ArrayList<>();
+        long freqffset;
+        while ((freqffset = mbb.getLong()) != -1) {
+            docIdsFreqs.add(freqffset);
+        }
+        assertEquals(List.of(0L, 8L, 16L, 24L, 28L), docIdsFreqs);
+    }
 
 
     @Test
