@@ -1,5 +1,6 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
+import it.unipi.dii.aide.mircv.index.ConfigTest;
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
@@ -12,17 +13,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class BlockReaderTest {
-    String pathTest1 = Configuration.DIRECTORY_TEST + "/test1.bin";
 
     @Test
     public void readBlockTest() throws IOException {
         FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
-        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
+        FileUtils.createDirectory(ConfigTest.DIRECTORY_TMP);
         InvertedIndex inv1 = new InvertedIndex();
         inv1.add(List.of("a"), 1);
         inv1.add(List.of("b"), 2);
-        BinaryFile.writeBlock(inv1, pathTest1);
-        BlockReader b = new BlockReader(pathTest1);
+        BinaryFile.writeBlock(inv1, ConfigTest.PATH_BLOCKS);
+        BlockReader b = new BlockReader(ConfigTest.PATH_BLOCKS);
         assertEquals("a", b.readTerm());
         assertEquals(List.of(1), b.readNumbers());
         assertEquals(List.of(1), b.readNumbers());
@@ -35,12 +35,12 @@ public class BlockReaderTest {
     @Test
     public void readBlockTest1() throws IOException {
         FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
-        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
+        FileUtils.createDirectory(ConfigTest.DIRECTORY_TMP);
         InvertedIndex inv1 = new InvertedIndex();
         inv1.add(List.of("a", "a", "b"), 1);
         inv1.add(List.of("b", "c"), 2);
-        BinaryFile.writeBlock(inv1, pathTest1);
-        BlockReader b = new BlockReader(pathTest1);
+        BinaryFile.writeBlock(inv1, ConfigTest.PATH_BLOCKS);
+        BlockReader b = new BlockReader(ConfigTest.PATH_BLOCKS);
         assertEquals("a", b.readTerm());
         assertEquals(List.of(1), b.readNumbers());
         assertEquals(List.of(2), b.readNumbers());

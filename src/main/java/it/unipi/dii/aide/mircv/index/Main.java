@@ -34,7 +34,7 @@ public class Main {
         if (FileUtils.getNumberFiles(Configuration.DIRECTORY_TEMP_FILES) <= 0) {
             long startTime_spimi = System.currentTimeMillis();
             System.out.println("Spimi is starting....");
-            Spimi.spimi(Configuration.PATH_DOCUMENTS, Configuration.PATH_STATISTICS, Configuration.PATH_BINARY);
+            Spimi.spimi(Configuration.PATH_DOCUMENTS, Configuration.PATH_STATISTICS, Configuration.PATH_BLOCKS);
             long endTime_spimi = System.currentTimeMillis();
             System.out.println(printTime("Spimi", startTime_spimi, endTime_spimi));
         }
@@ -88,6 +88,8 @@ public class Main {
 
         Statistics statistics = new Statistics(Configuration.PATH_STATISTICS);
         statistics.readFromDisk();
+        System.out.println(statistics);
+        
         System.out.println(statistics.toString());
 
         LFUCache<Pair<Long, Integer>, Integer> temp = invRead.getLfuCache();

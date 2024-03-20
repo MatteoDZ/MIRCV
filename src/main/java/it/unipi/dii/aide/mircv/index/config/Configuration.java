@@ -10,9 +10,8 @@ public class Configuration {
     public static final String PATH_DOCUMENTS = load("path_documents");
     public static final String PATH_DOCUMENTS_TEST = load("path_documents_test");
     public static final String PATH_STOPWORDS = load("path_stopwords");
-    public static final String PATH_BINARY = load("path_binary");
+    public static final String PATH_BLOCKS = load("path_blocks");
     public static final String DIRECTORY_TEMP_FILES = load("directory_temporary_files");
-    public static final String DIRECTORY_TEMP_FILES_TEST = load("directory_temporary_files_test");
     public static final String DIRECTORY_TEST = load("directory_test");
     public static final String PATH_INVERTED_INDEX = load("path_inverted_index");
     public static final String PATH_DOCIDS = load("path_docids");

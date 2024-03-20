@@ -1,12 +1,9 @@
 package it.unipi.dii.aide.mircv.index.utils;
 
-import it.unipi.dii.aide.mircv.index.config.Configuration;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
@@ -16,16 +13,6 @@ import java.util.stream.Stream;
  */
 public class FileUtils {
 
-
-    /**
-     * Creates the file if it does not already exist.
-     * @param path The path of the file to be created.
-     */
-    public static void createIfNotExists(String path) throws IOException {
-        if(!searchIfExists(path)){
-            Files.createFile(Paths.get(path));
-        }
-    }
 
     /**
      * Checks if a file or directory exists at the given path.
@@ -57,8 +44,7 @@ public class FileUtils {
      */
     public static void createDirectory(String path) {
         try {
-            Path dirPath = Paths.get(path);
-            Files.createDirectories(dirPath);
+            Files.createDirectories(Paths.get(path));
         } catch (IOException e) {
             throw new RuntimeException("Failed to create directory: " + path);
         }
@@ -126,18 +112,6 @@ public class FileUtils {
         return path.split("\\.")[0] + "_" + blockNumber + "." + path.split("\\.")[1];
     }
 
-
-    /**
-     * Generates a path for the test file
-     *
-     * @return              a path for a new block
-     */
-    public static String createPathTestFile(String path){
-        if(path.split("//*").length == 2)
-            return path.split("//*")[0] + "/test/" + path.split("//*")[1];
-        else
-            return path.split("//*")[0] + "/test/" + path.split("//*")[1] + "/" + path.split("//*")[2];
-    }
 
 
 

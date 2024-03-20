@@ -1,5 +1,6 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
+import it.unipi.dii.aide.mircv.index.ConfigTest;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import org.junit.jupiter.api.Test;
@@ -10,13 +11,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FrequencyFileTest {
 
-    String path = Configuration.DIRECTORY_TEST +  "/testFreq";
     @Test
      void readFreqsBlockTest() throws IOException {
         List<Integer> freqs = List.of(1, 10, 13, 5, 7, 4, 4, 2, 7, 5, 4);
         FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
         FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
-        FrequencyFile freq = new FrequencyFile(path, 5);
+        FrequencyFile freq = new FrequencyFile(ConfigTest.PATH_FREQ, 5);
         List<Long> offsets = freq.writeFrequencies(freqs, false);
         assertEquals(List.of(1, 10, 13, 5, 7).toString(), freq.readFreqsBlock(offsets.get(0), offsets.get(1), false).toString());
         assertEquals(List.of(4, 4, 2, 7, 5).toString(), freq.readFreqsBlock(offsets.get(1), offsets.get(2), false).toString());
@@ -33,7 +33,7 @@ public class FrequencyFileTest {
         List<Integer> freqs = List.of(1, 10, 13, 5, 7, 4, 4, 2, 7, 5, 4);
         FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
         FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
-        FrequencyFile freq = new FrequencyFile(path, 5);
+        FrequencyFile freq = new FrequencyFile(ConfigTest.PATH_FREQ, 5);
         List<Long> offsets = freq.writeFrequencies(freqs,  false);
         assertEquals(freqs.toString(), freq.readFreqs(offsets, false).toString());
         List<Integer> freqsNew = List.of(1, 10 ,4 , 6, 3, 2);
@@ -46,7 +46,7 @@ public class FrequencyFileTest {
         List<Integer> freqs = List.of(1, 10, 13, 5, 7, 4, 4, 2, 7, 5, 4);
         FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
         FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
-        FrequencyFile freq = new FrequencyFile(path, 5);
+        FrequencyFile freq = new FrequencyFile(ConfigTest.PATH_FREQ, 5);
         List<Long> offsets = freq.writeFrequencies(freqs,  true);
         assertEquals(freqs.toString(), freq.readFreqs(offsets, true).toString());
         List<Integer> freqsNew = List.of(1, 10 ,4 , 6, 3, 2);
@@ -59,13 +59,13 @@ public class FrequencyFileTest {
         List<Integer> freqs = List.of(1, 10, 13, 5, 7, 4, 4, 2, 7, 5, 4);
         FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
         FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
-        FrequencyFile freq = new FrequencyFile(path, 2);
+        FrequencyFile freq = new FrequencyFile(ConfigTest.PATH_FREQ, 2);
         List<Long> offsets = freq.writeFrequencies(freqs, false);
         assertEquals(List.of(1, 10).toString(), freq.readFreqsBlock(offsets.get(0), offsets.get(1), false).toString());
         assertEquals(List.of(13, 5).toString(), freq.readFreqsBlock(offsets.get(1), offsets.get(2), false).toString());
         assertEquals(List.of(7, 4).toString(), freq.readFreqsBlock(offsets.get(2), offsets.get(3), false).toString());
         List<Integer> freqsNew = List.of(1, 10 ,4 , 6, 3, 2, 1);
-        FrequencyFile freqFileNew = new FrequencyFile(path, 3);
+        FrequencyFile freqFileNew = new FrequencyFile(ConfigTest.PATH_FREQ, 3);
         List<Long> offsetsNew = freqFileNew.writeFrequencies(freqsNew ,false);
         assertEquals(List.of(1, 10 ,4).toString(), freqFileNew.readFreqsBlock(offsetsNew.get(0), offsetsNew.get(1), false).toString());
         assertEquals(List.of(6, 3, 2).toString(), freqFileNew.readFreqsBlock(offsetsNew.get(1), offsetsNew.get(2), false).toString());
@@ -78,7 +78,7 @@ public class FrequencyFileTest {
         List<Integer> freqs = List.of(1, 10, 13, 5, 7, 4, 4, 2, 7, 5, 4);
         FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
         FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
-        FrequencyFile freq = new FrequencyFile(path, 5);
+        FrequencyFile freq = new FrequencyFile(ConfigTest.PATH_FREQ, 5);
         List<Long> offsets = freq.writeFrequencies(freqs,true);
         assertEquals(List.of(1, 10, 13, 5, 7).toString(), freq.readFreqsBlock(offsets.get(0), offsets.get(1), true).toString());
         assertEquals(List.of(4, 4, 2, 7, 5).toString(), freq.readFreqsBlock(offsets.get(1), offsets.get(2), true).toString());

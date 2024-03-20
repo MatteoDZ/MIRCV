@@ -1,5 +1,6 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
+import it.unipi.dii.aide.mircv.index.ConfigTest;
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
@@ -17,11 +18,6 @@ public class MergerTest {
     String pathTest1 = Configuration.DIRECTORY_TEST + "/test1.bin";
     String pathTest2 = Configuration.DIRECTORY_TEST + "/test2.bin";
     String pathTest3 = Configuration.DIRECTORY_TEST + "/test3.bin";
-    String pathDocIds = Configuration.DIRECTORY_TEST + "/testDoc.bin";
-    String pathFreq= Configuration.DIRECTORY_TEST + "/testFreq.bin";
-    String pathInvIndex= Configuration.DIRECTORY_TEST + "/testIndex.bin";
-    String pathLexicon= Configuration.DIRECTORY_TEST + "/testLexicon.bin";
-    String pathStatistics= Configuration.DIRECTORY_TEST + "/testStatistics.bin";
 
     @Test
     public void writeCompressionFalseTest() throws IOException {
@@ -45,10 +41,10 @@ public class MergerTest {
         inv3.add(List.of("z", "m"), 5);
         inv3.add(List.of("c", "a"), 6);
         BinaryFile.writeBlock(inv3, pathTest3);
-        Merge merge = new Merge(List.of(pathTest1, pathTest2, pathTest3), pathLexicon, pathDocIds, pathFreq, pathStatistics, 2);
-        merge.write(pathInvIndex, false);
-        InvertedIndexFile inv = new InvertedIndexFile(pathInvIndex, pathDocIds, pathFreq, 2);
-        Lexicon lex = new Lexicon(pathLexicon);
+        Merge merge = new Merge(List.of(pathTest1, pathTest2, pathTest3), ConfigTest.PATH_LEXICON, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, ConfigTest.PATH_STATISTICS, 2);
+        merge.write(ConfigTest.PATH_INV_INDEX, false);
+        InvertedIndexFile inv = new InvertedIndexFile(ConfigTest.PATH_INV_INDEX, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, 2);
+        Lexicon lex = new Lexicon(ConfigTest.PATH_LEXICON);
         assertEquals(List.of(1, 3, 6, 20), inv.getDocIds(lex.findTerm("a").getOffsetInvertedIndex(), false));
         assertEquals(List.of(2, 4), inv.getDocIds(lex.findTerm("b").getOffsetInvertedIndex(), false));
         assertEquals(List.of(4, 6), inv.getDocIds(lex.findTerm("c").getOffsetInvertedIndex(), false));
@@ -78,10 +74,10 @@ public class MergerTest {
         inv3.add(List.of("z", "m"), 5);
         inv3.add(List.of("c", "a"), 6);
         BinaryFile.writeBlock(inv3, pathTest3);
-        Merge merge = new Merge(List.of(pathTest1, pathTest2, pathTest3), pathLexicon, pathDocIds, pathFreq, pathStatistics, 2);
-        merge.write(pathInvIndex, true);
-        InvertedIndexFile inv = new InvertedIndexFile(pathInvIndex, pathDocIds, pathFreq, 2);
-        Lexicon lex = new Lexicon(pathLexicon);
+        Merge merge = new Merge(List.of(pathTest1, pathTest2, pathTest3), ConfigTest.PATH_LEXICON, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, ConfigTest.PATH_STATISTICS, 2);
+        merge.write(ConfigTest.PATH_INV_INDEX, true);
+        InvertedIndexFile inv = new InvertedIndexFile(ConfigTest.PATH_INV_INDEX, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, 2);
+        Lexicon lex = new Lexicon(ConfigTest.PATH_LEXICON);
         assertEquals(List.of(1, 3, 6, 20), inv.getDocIds(lex.findTerm("a").getOffsetInvertedIndex(), true));
         assertEquals(List.of(2, 4), inv.getDocIds(lex.findTerm("b").getOffsetInvertedIndex(), true));
         assertEquals(List.of(4, 6), inv.getDocIds(lex.findTerm("c").getOffsetInvertedIndex(), true));
