@@ -146,7 +146,7 @@ public class InvertedIndexFile {
      * @return                     a list containing the retrieved start and end offset of a document ID
      * @throws IOException         if there is an error while performing I/O operations
      */
-    private List<Long> getOffsetsDocIds(Long offset, int numBlocchi, int indiceBloccoCercato) throws IOException {
+    protected List<Long> getOffsetsDocIds(Long offset, int numBlocchi, int indiceBloccoCercato) throws IOException {
         mbb=fc.map(FileChannel.MapMode.READ_ONLY,offset+2L+ 4L * (numBlocchi+1)+ 8L *indiceBloccoCercato,
                 offset+2L+ 4L * (numBlocchi+1)+ 8L *(indiceBloccoCercato+1));
         return List.of(mbb.getLong(),mbb.getLong());
@@ -161,7 +161,7 @@ public class InvertedIndexFile {
      * @return                     a list containing the retrieved start and end offset of a frequency
      * @throws IOException         if there is an error while performing I/O operations
      */
-    private List<Long> getOffsetsFreqs(Long offset, int numBlocchi, int indiceBloccoCercato) throws IOException {
+    protected List<Long> getOffsetsFreqs(Long offset, int numBlocchi, int indiceBloccoCercato) throws IOException {
         mbb=fc.map(FileChannel.MapMode.READ_ONLY,offset+2L+ (4L *(numBlocchi+1)) + (8L * (numBlocchi+1)) + (8L *indiceBloccoCercato) +8,
                 offset+2L+ (4L * (numBlocchi+1)) + (8L * (numBlocchi+1)) + (8L *(indiceBloccoCercato+1)) +8);
         return List.of(mbb.getLong(),mbb.getLong());
@@ -177,7 +177,7 @@ public class InvertedIndexFile {
      * @return the index of the block, or -1 if not found
      * @throws IOException if an I/O error occurs
      */
-    private int findBlockIndex(Long offset, short numBlocks, int docId) throws IOException {
+    protected int findBlockIndex(Long offset, short numBlocks, int docId) throws IOException {
         mbb = fc.map(FileChannel.MapMode.READ_ONLY, offset + 2L, numBlocks * 4);
         for (int i = 0; i < numBlocks; i++) {
             if (mbb.getInt() >= docId) {
