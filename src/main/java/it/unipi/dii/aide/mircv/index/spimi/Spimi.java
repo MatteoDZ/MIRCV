@@ -1,21 +1,32 @@
 package it.unipi.dii.aide.mircv.index.spimi;
 
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
-import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
 import it.unipi.dii.aide.mircv.index.preprocess.Preprocess;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import it.unipi.dii.aide.mircv.index.utils.Statistics;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.javatuples.Pair;
 
 import java.io.*;
+import java.nio.channels.FileChannel;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Objects;
 
 public class Spimi {
 
     public static void spimi(String pathCollection, String pathStatistics, String pathBlocks) throws IOException {
+        final FileChannel fc;
+        try {
+            // Open file channel for reading and writing
+            fc = FileChannel.open(Paths.get("data/docterms"),
+                    StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+        } catch (IOException e) {
+            throw new RuntimeException("An error occurred while writing to the " + "data/test/docprova" + " file.");
+        }
         try (TarArchiveInputStream tarInput = new TarArchiveInputStream(new GzipCompressorInputStream(new FileInputStream(Objects.requireNonNull(pathCollection))))) {
             tarInput.getNextTarEntry();
             try (BufferedReader br = new BufferedReader(new InputStreamReader(tarInput))) {
@@ -30,6 +41,8 @@ public class Spimi {
                     total_length += term.size();
                     if (!parts[1].isEmpty() || !term.isEmpty()) { //è sufficiente che una delle due non sia empty per fare inserire il tutto
                         inv.add(term, Integer.parseInt(parts[0]));
+                        int size = term.size();
+                        BinaryFile.writeIntToBuffer(fc, size);
                         // inv.add(term, Integer.parseInt(parts[0]), term.size());
                         if (numDocs % 1000000 == 0) {
                             System.out.println("Now at document: " + numDocs + " and block: " + blockNumber);

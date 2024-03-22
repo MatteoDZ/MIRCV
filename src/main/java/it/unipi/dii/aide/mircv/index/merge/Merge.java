@@ -1,5 +1,6 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
+import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.posting.Posting;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
@@ -154,7 +155,7 @@ public class Merge {
         float idf = (float) ((Math.log((double) stats.getNumDocs() / df)));
 
         for (Posting posting : pi.getPostings()) {
-            actualBM25 = 1F;
+            actualBM25 = calculateBM25(tf, posting.getDoc_id(), stats);
 
             if (actualBM25 != -1 && actualBM25 > BM25Upper){
                 BM25Upper = actualBM25;
@@ -165,27 +166,27 @@ public class Merge {
             }
         }
 
-        lexicon.write(pi.getTerm(), offset, df, stats.getNumDocs(), tf);
+        lexicon.write(pi.getTerm(), offset, df, stats.getNumDocs(), tf, BM25Upper);
     }
 
-
+    /*
     protected float calculateBM25(PostingIndex pi, float tf, long doc_id, Statistics stats){
         int doc_len = pi.getDocIds().size();
         return (float) ((tf / (tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (doc_len / stats.getAvgDocLen())))));
     }
+    */
 
-    /*protected static float calculateBM25(float tf, long doc_id, Statistics stats){
+    protected static float calculateBM25(float tf, long doc_id, Statistics stats){
         try {
-            assert Configuration.PATH_DOCIDS != null;
-            FileChannel fc = FileChannel.open(Path.of(Configuration.PATH_DOCIDS), StandardOpenOption.READ);
-            MappedByteBuffer mappedByteBuffer = fc.map(FileChannel.MapMode.READ_ONLY, (doc_id - 1) * 20 + 8 + 4, 8);
-            long doc_len = mappedByteBuffer.getLong();
+            assert Path.of("data/docterms") != null;
+            FileChannel fc = FileChannel.open(Path.of("data/docterms"), StandardOpenOption.READ);
+            int doc_len = BinaryFile.readIntFromBuffer(fc, doc_id*4L);
             return (float) ((tf / (tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (doc_len / stats.getAvgDocLen())))));
         } catch (IOException e) {
             System.out.println(e);
             return -1F;
         }
-    }*/
+    }
 
 
 }

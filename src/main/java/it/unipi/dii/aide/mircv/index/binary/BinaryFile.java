@@ -2,6 +2,7 @@ package it.unipi.dii.aide.mircv.index.binary;
 
 import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
+import org.javatuples.Pair;
 
 import java.io.*;
 import java.nio.MappedByteBuffer;
@@ -230,6 +231,24 @@ public class BinaryFile {
            term.append(mbb.getChar());
         }
         return term.toString();
+    }
+
+    public static void writePairtoBuffer(FileChannel fc, Pair<Integer, Integer> pair) throws IOException {
+        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), 8L);
+        mbb.putInt(pair.getValue0());
+        mbb.putInt(pair.getValue1());
+    }
+
+    public static List<Pair<Integer, Integer>> readPairFromBuffer(FileChannel fc) throws IOException {
+        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+        List<Pair<Integer, Integer>> lst = new ArrayList<>();
+        for(int i = 0; i <  100; i++) {
+            Integer value0 = mbb.getInt();
+            Integer value1 = mbb.getInt();
+            Pair p = new Pair(value0, value1);
+            lst.add(p);
+        }
+        return lst;
     }
 
 

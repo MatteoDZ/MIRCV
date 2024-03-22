@@ -80,6 +80,14 @@ public class LexiconData {
         this.upperTFIDF = upperTFIDF;
     }
 
+    public float getUpperBM25() {
+        return upperBM25;
+    }
+
+    public void setUpperBM25(float upperBM25) {
+        this.upperBM25 = upperBM25;
+    }
+
 
     /**
      * Reads the LexiconEntry from the specified offset in the given FileChannel.
