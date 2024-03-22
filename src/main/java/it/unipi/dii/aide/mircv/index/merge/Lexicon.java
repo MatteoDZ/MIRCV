@@ -6,7 +6,6 @@ import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.List;
 import java.util.Objects;
 
 public class Lexicon {
@@ -16,13 +15,13 @@ public class Lexicon {
     private final LexiconData lexicon;
 
 
-    public Lexicon(String pathLexicon) {
+    public Lexicon() {
         lexicon = new LexiconData();
         try {
-            fc = FileChannel.open(Paths.get(Objects.requireNonNull(pathLexicon)),
+            fc = FileChannel.open(Paths.get(Objects.requireNonNull(Configuration.PATH_LEXICON)),
                     StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         } catch (IOException e) {
-            throw new RuntimeException("An error occurred while writing to the " + pathLexicon + " file.");
+            throw new RuntimeException("An error occurred while writing to the " + Configuration.PATH_LEXICON + " file.");
         }
     }
 

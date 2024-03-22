@@ -1,11 +1,11 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
-import it.unipi.dii.aide.mircv.index.ConfigTest;
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -19,10 +19,16 @@ public class MergerTest {
     String pathTest2 = Configuration.DIRECTORY_TEST + "/test2.bin";
     String pathTest3 = Configuration.DIRECTORY_TEST + "/test3.bin";
 
-    @Test
-    public void writeCompressionFalseTest() throws IOException {
+    @BeforeAll
+    static void setUp() {
+        Configuration.setUpPathTest();
         FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
         FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
+    }
+
+    @Test
+    public void writeCompressionFalseTest() throws IOException {
+        setUp();
         InvertedIndex inv1 = new InvertedIndex();
         inv1.add(List.of("a"), 1);
         inv1.add(List.of("b"), 2);
@@ -41,11 +47,10 @@ public class MergerTest {
         inv3.add(List.of("z", "m"), 5);
         inv3.add(List.of("c", "a"), 6);
         BinaryFile.writeBlock(inv3, pathTest3);
-        Merge merge = new Merge(List.of(pathTest1, pathTest2, pathTest3), ConfigTest.PATH_LEXICON, ConfigTest.PATH_DOC_IDS,
-                ConfigTest.PATH_FREQ, ConfigTest.PATH_STATISTICS, 2, ConfigTest.PATH_DOC_TERMS);
-        merge.write(ConfigTest.PATH_INV_INDEX, false);
-        InvertedIndexFile inv = new InvertedIndexFile(ConfigTest.PATH_INV_INDEX, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, 2);
-        Lexicon lex = new Lexicon(ConfigTest.PATH_LEXICON);
+        Merge merge = new Merge(List.of(pathTest1, pathTest2, pathTest3), 2);
+        merge.write(false);
+        InvertedIndexFile inv = new InvertedIndexFile( 2);
+        Lexicon lex = new Lexicon();
         assertEquals(List.of(1, 3, 6, 20), inv.getDocIds(lex.findTerm("a").getOffsetInvertedIndex(), false));
         assertEquals(List.of(2, 4), inv.getDocIds(lex.findTerm("b").getOffsetInvertedIndex(), false));
         assertEquals(List.of(4, 6), inv.getDocIds(lex.findTerm("c").getOffsetInvertedIndex(), false));
@@ -55,8 +60,7 @@ public class MergerTest {
 
     @Test
     public void writeCompressionTrueTest() throws IOException {
-        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
-        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
+        setUp();
         InvertedIndex inv1 = new InvertedIndex();
         inv1.add(List.of("a"), 1);
         inv1.add(List.of("b"), 2);
@@ -75,11 +79,10 @@ public class MergerTest {
         inv3.add(List.of("z", "m"), 5);
         inv3.add(List.of("c", "a"), 6);
         BinaryFile.writeBlock(inv3, pathTest3);
-        Merge merge = new Merge(List.of(pathTest1, pathTest2, pathTest3), ConfigTest.PATH_LEXICON, ConfigTest.PATH_DOC_IDS,
-                ConfigTest.PATH_FREQ, ConfigTest.PATH_STATISTICS, 2, ConfigTest.PATH_DOC_TERMS);
-        merge.write(ConfigTest.PATH_INV_INDEX, true);
-        InvertedIndexFile inv = new InvertedIndexFile(ConfigTest.PATH_INV_INDEX, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, 2);
-        Lexicon lex = new Lexicon(ConfigTest.PATH_LEXICON);
+        Merge merge = new Merge(List.of(pathTest1, pathTest2, pathTest3),  2);
+        merge.write( true);
+        InvertedIndexFile inv = new InvertedIndexFile( 2);
+        Lexicon lex = new Lexicon();
         assertEquals(List.of(1, 3, 6, 20), inv.getDocIds(lex.findTerm("a").getOffsetInvertedIndex(), true));
         assertEquals(List.of(2, 4), inv.getDocIds(lex.findTerm("b").getOffsetInvertedIndex(), true));
         assertEquals(List.of(4, 6), inv.getDocIds(lex.findTerm("c").getOffsetInvertedIndex(), true));
@@ -95,8 +98,7 @@ public class MergerTest {
 
     @Test
     public void findMinTermTest() throws IOException {
-        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
-        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
+        setUp();
         InvertedIndex inv1 = new InvertedIndex();
         inv1.add(List.of("c"), 1);
         inv1.add(List.of("d"), 2);

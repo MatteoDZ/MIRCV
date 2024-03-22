@@ -1,6 +1,5 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
-import it.unipi.dii.aide.mircv.index.ConfigTest;
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
@@ -16,13 +15,15 @@ public class BlockReaderTest {
 
     @Test
     public void readBlockTest() throws IOException {
+        Configuration.setUpPathTest();
         FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
-        FileUtils.createDirectory(ConfigTest.DIRECTORY_TMP);
+        FileUtils.createDirectory(Configuration.DIRECTORY_TEMP_FILES);
+
         InvertedIndex inv1 = new InvertedIndex();
         inv1.add(List.of("a"), 1);
         inv1.add(List.of("b"), 2);
-        BinaryFile.writeBlock(inv1, ConfigTest.PATH_BLOCKS);
-        BlockReader b = new BlockReader(ConfigTest.PATH_BLOCKS);
+        BinaryFile.writeBlock(inv1, Configuration.PATH_BLOCKS);
+        BlockReader b = new BlockReader(Configuration.PATH_BLOCKS);
         assertEquals("a", b.readTerm());
         assertEquals(List.of(1), b.readNumbers());
         assertEquals(List.of(1), b.readNumbers());
@@ -34,13 +35,15 @@ public class BlockReaderTest {
 
     @Test
     public void readBlockTest1() throws IOException {
+        Configuration.setUpPathTest();
         FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
-        FileUtils.createDirectory(ConfigTest.DIRECTORY_TMP);
+        FileUtils.createDirectory(Configuration.DIRECTORY_TEMP_FILES);
+
         InvertedIndex inv1 = new InvertedIndex();
         inv1.add(List.of("a", "a", "b"), 1);
         inv1.add(List.of("b", "c"), 2);
-        BinaryFile.writeBlock(inv1, ConfigTest.PATH_BLOCKS);
-        BlockReader b = new BlockReader(ConfigTest.PATH_BLOCKS);
+        BinaryFile.writeBlock(inv1, Configuration.PATH_BLOCKS);
+        BlockReader b = new BlockReader(Configuration.PATH_BLOCKS);
         assertEquals("a", b.readTerm());
         assertEquals(List.of(1), b.readNumbers());
         assertEquals(List.of(2), b.readNumbers());

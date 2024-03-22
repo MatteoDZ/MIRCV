@@ -2,13 +2,11 @@ package it.unipi.dii.aide.mircv.index;
 
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.merge.InvertedIndexFile;
-import it.unipi.dii.aide.mircv.index.merge.LFUCache;
 import it.unipi.dii.aide.mircv.index.merge.Lexicon;
 import it.unipi.dii.aide.mircv.index.merge.Merge;
 import it.unipi.dii.aide.mircv.index.spimi.Spimi;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import it.unipi.dii.aide.mircv.index.utils.Statistics;
-import org.javatuples.Pair;
 
 import java.io.*;
 import java.util.List;
@@ -33,7 +31,7 @@ public class Main {
         if (FileUtils.getNumberFiles(Configuration.DIRECTORY_TEMP_FILES) <= 0) {
             long startTime_spimi = System.currentTimeMillis();
             System.out.println("Spimi is starting....");
-            Spimi.spimi(Configuration.PATH_DOCUMENTS, Configuration.PATH_STATISTICS, Configuration.PATH_BLOCKS, Configuration.PATH_DOC_TERMS);
+            Spimi.spimi(Configuration.PATH_DOCUMENTS);
             long endTime_spimi = System.currentTimeMillis();
             System.out.println(printTime("Spimi", startTime_spimi, endTime_spimi));
         }
@@ -41,17 +39,15 @@ public class Main {
         if(!FileUtils.searchIfExists(Configuration.PATH_INVERTED_INDEX)){
             long startTime_merge = System.currentTimeMillis();
             System.out.println("Merge is starting....");
-            Merge merge = new Merge(Objects.requireNonNull(FileUtils.getFilesOfDirectory(Configuration.DIRECTORY_TEMP_FILES)),
-                    Configuration.PATH_LEXICON, Configuration.PATH_DOCIDS, Configuration.PATH_FEQUENCIES,
-                    Configuration.PATH_STATISTICS, Configuration.BLOCK_SIZE, Configuration.PATH_DOC_TERMS);
-            merge.write(Configuration.PATH_INVERTED_INDEX, Configuration.COMPRESSION);
+            Merge merge = new Merge(Objects.requireNonNull(FileUtils.getFilesOfDirectory(Configuration.DIRECTORY_TEMP_FILES)), Configuration.BLOCK_SIZE);
+            merge.write(Configuration.COMPRESSION);
             long endTime_merge = System.currentTimeMillis();
             System.out.println(printTime("Merge", startTime_merge, endTime_merge));
         }
 
-        InvertedIndexFile invRead = new InvertedIndexFile(Configuration.PATH_INVERTED_INDEX, Configuration.PATH_DOCIDS, Configuration.PATH_FEQUENCIES, Configuration.BLOCK_SIZE);
+        InvertedIndexFile invRead = new InvertedIndexFile(Configuration.BLOCK_SIZE);
 
-        Lexicon lexicon = new Lexicon(Configuration.PATH_LEXICON);
+        Lexicon lexicon = new Lexicon();
 
         System.out.println("SENZA CACHE");
         long savedtime = 0;
@@ -89,8 +85,6 @@ public class Main {
         Statistics statistics = new Statistics(Configuration.PATH_STATISTICS);
         statistics.readFromDisk();
         System.out.println(statistics);
-        
-        System.out.println(statistics.toString());
 
         // LFUCache<Pair<Long, Integer>, Integer> temp = invRead.getLfuCache();
         //System.out.println(ObjectSizeFetcher.getObjectSize(temp));

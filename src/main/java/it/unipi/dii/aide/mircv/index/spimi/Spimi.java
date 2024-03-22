@@ -1,13 +1,13 @@
 package it.unipi.dii.aide.mircv.index.spimi;
 
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
+import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
 import it.unipi.dii.aide.mircv.index.preprocess.Preprocess;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import it.unipi.dii.aide.mircv.index.utils.Statistics;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
-import org.javatuples.Pair;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
@@ -18,19 +18,19 @@ import java.util.Objects;
 
 public class Spimi {
 
-    public static void spimi(String pathCollection, String pathStatistics, String pathBlocks, String pathDocTerms) throws IOException {
+    public static void spimi(String pathCollection) throws IOException {
         final FileChannel fc;
         try {
             // Open file channel for reading and writing
-            fc = FileChannel.open(Paths.get(pathDocTerms),
+            fc = FileChannel.open(Paths.get(Configuration.PATH_DOC_TERMS),
                     StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         } catch (IOException e) {
-            throw new RuntimeException("An error occurred while writing to the " + pathDocTerms + " file.");
+            throw new RuntimeException("An error occurred while writing to the " + Configuration.PATH_DOC_TERMS + " file.");
         }
         try (TarArchiveInputStream tarInput = new TarArchiveInputStream(new GzipCompressorInputStream(new FileInputStream(Objects.requireNonNull(pathCollection))))) {
             tarInput.getNextTarEntry();
             try (BufferedReader br = new BufferedReader(new InputStreamReader(tarInput))) {
-                Statistics statistics = new Statistics(pathStatistics);
+                Statistics statistics = new Statistics(Configuration.PATH_STATISTICS);
                 String line;
                 int blockNumber = 0, numDocs = 0, total_length = 0;
                 InvertedIndex inv = new InvertedIndex();
@@ -49,7 +49,7 @@ public class Spimi {
                         }
                         numDocs++;
                         if (Runtime.getRuntime().freeMemory() < (Runtime.getRuntime().totalMemory() * 20 / 100)) { //if giusto che tiene conto della memoria occupata
-                            String pathBlockN = FileUtils.createPathFileBlockN(Objects.requireNonNull(pathBlocks),blockNumber);
+                            String pathBlockN = FileUtils.createPathFileBlockN(Objects.requireNonNull(Configuration.PATH_BLOCKS),blockNumber);
                             BinaryFile.writeBlock(inv, pathBlockN);
                             blockNumber++;
                             inv.clean();
@@ -58,7 +58,7 @@ public class Spimi {
                     }
                 }
                 if(!inv.getInvertedIndexBlock().isEmpty()){
-                    String pathBlockN = FileUtils.createPathFileBlockN(Objects.requireNonNull(pathBlocks),blockNumber);
+                    String pathBlockN = FileUtils.createPathFileBlockN(Objects.requireNonNull(Configuration.PATH_BLOCKS),blockNumber);
                     BinaryFile.writeBlock(inv, pathBlockN);
                     inv.clean();
                     System.gc();

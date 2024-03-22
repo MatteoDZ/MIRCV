@@ -20,17 +20,17 @@ public class InvertedIndexFile {
     private final LFUCache<Pair<Long, Integer>, Integer> lfuCache = new LFUCache<>(Configuration.INVERTED_INDEX_CACHE_SIZE);
 
     // Constructor
-    public InvertedIndexFile(String pathInvertedIndex, String pathDocIds, String pathFrequencies, int blockSize) {
+    public InvertedIndexFile(int blockSize) {
         try {
             // Open file channel for reading and writing
-            fc = FileChannel.open(Paths.get(pathInvertedIndex),
+            fc = FileChannel.open(Paths.get(Configuration.PATH_INVERTED_INDEX),
                     StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         } catch (IOException e) {
-            throw new RuntimeException("An error occurred while writing to the " + pathInvertedIndex + " file.");
+            throw new RuntimeException("An error occurred while writing to the " + Configuration.PATH_INVERTED_INDEX + " file.");
         }
         // Initialize FrequencyFileWriter and DocIdFileWriter
-        frequencyWriter = new FrequencyFile(pathFrequencies, blockSize);
-        docIdWriter = new DocIdFile(pathDocIds, blockSize);
+        frequencyWriter = new FrequencyFile(blockSize);
+        docIdWriter = new DocIdFile(blockSize);
     }
 
     /**

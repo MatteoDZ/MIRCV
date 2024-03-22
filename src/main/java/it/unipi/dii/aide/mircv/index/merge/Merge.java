@@ -7,19 +7,16 @@ import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
 import it.unipi.dii.aide.mircv.index.utils.Statistics;
 
 import java.io.IOException;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 
 public class Merge {
     private final HashMap<BlockReader, PostingIndex> readerLines = new HashMap<>();
-    private final String pathLexicon, pathDocIds, pathFreqs, pathStatistics, pathDocTerms;
     private final Integer blockSize;
 
-    public Merge(List<String> paths, String pathLexicon, String pathDocIds, String pathFreqs, String pathStatistics, Integer blockSize, String pathDocTerms) throws IOException {
+    public Merge(List<String> paths, Integer blockSize) throws IOException {
         for (String path : paths) {
             BlockReader reader = new BlockReader(path);
             String line = reader.readTerm();
@@ -28,19 +25,14 @@ public class Merge {
             // System.out.println("Path: " + path + " Riga: " + line + " DocId: " + docIds + " Freq: " + freqs);
             readerLines.put(reader, new PostingIndex(line, docIds, freqs));
         }
-        this.pathFreqs = pathFreqs;
-        this.pathDocIds = pathDocIds;
-        this.pathLexicon = pathLexicon;
-        this.pathStatistics = pathStatistics;
         this.blockSize = blockSize;
-        this.pathDocTerms = pathDocTerms;
     }
 
-    public void write(String path, boolean compress) throws IOException {
+    public void write(boolean compress) throws IOException {
         long lexSize = 0L;
 
-        InvertedIndexFile inv = new InvertedIndexFile(path, this.pathDocIds, this.pathFreqs, this.blockSize);
-        Lexicon lexicon = new Lexicon(this.pathLexicon);
+        InvertedIndexFile inv = new InvertedIndexFile( this.blockSize);
+        Lexicon lexicon = new Lexicon();
 
 
         while (!readerLines.isEmpty()) {
@@ -105,7 +97,7 @@ public class Merge {
             lexiconWrite(minPosting, offsetTerm, docIdsNew, freqsNew, lexicon);
 
         }
-        Statistics statistics = new Statistics(pathStatistics);
+        Statistics statistics = new Statistics(Configuration.PATH_STATISTICS);
         statistics.setTerms(lexSize);
         statistics.writeMergeToDisk();
     }
@@ -150,7 +142,7 @@ public class Merge {
         float actualBM25;
         int  tf  = 0;
 
-        Statistics stats = new Statistics(this.pathStatistics);
+        Statistics stats = new Statistics(Configuration.PATH_STATISTICS);
         stats.readSPIMI();
         int df = pi.getPostings().size();
         float idf = (float) ((Math.log((double) stats.getNumDocs() / df)));
@@ -171,12 +163,12 @@ public class Merge {
 
     protected float calculateBM25(float tf, long doc_id, Statistics stats){
         try {
-            FileChannel fc = FileChannel.open(Path.of(this.pathDocTerms), StandardOpenOption.READ, StandardOpenOption.WRITE);
+            FileChannel fc = FileChannel.open(Path.of(Configuration.PATH_DOC_TERMS), StandardOpenOption.READ, StandardOpenOption.WRITE);
             int doc_len = BinaryFile.readIntFromBuffer(fc, doc_id*4L);
             fc.close();
             return (float) ((tf / (tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (doc_len / stats.getAvgDocLen())))));
         } catch (IOException e) {
-            throw new RuntimeException("An error occurred while reading from the " + this.pathDocTerms + " file.");
+            throw new RuntimeException("An error occurred while reading from the " + Configuration.PATH_DOC_TERMS + " file.");
         }
     }
 

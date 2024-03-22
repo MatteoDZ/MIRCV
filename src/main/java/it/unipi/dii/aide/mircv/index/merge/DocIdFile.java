@@ -2,6 +2,7 @@ package it.unipi.dii.aide.mircv.index.merge;
 
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
 import it.unipi.dii.aide.mircv.index.compression.VariableByteCompressor;
+import it.unipi.dii.aide.mircv.index.config.Configuration;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;
@@ -22,15 +23,14 @@ public class DocIdFile {
     /**
      * Constructor for DocIdFileWriter.
      *
-     * @param path      The path of the file to be read/written.
      * @param blockSize The size of the data block.
      */
-    public DocIdFile(String path, int blockSize) {
+    public DocIdFile(int blockSize) {
         BLOCK_SIZE = blockSize;
         try {
-            fc = FileChannel.open(Paths.get(path), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+            fc = FileChannel.open(Paths.get(Configuration.PATH_DOCID), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         } catch (IOException e) {
-            throw new RuntimeException("An error occurred while writing to the " + path + " file.");
+            throw new RuntimeException("An error occurred while writing to the " + Configuration.PATH_DOCID + " file.");
         }
     }
 

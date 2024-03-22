@@ -1,9 +1,9 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
-import it.unipi.dii.aide.mircv.index.ConfigTest;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.io.IOException;
 import java.util.List;
@@ -13,18 +13,24 @@ import static org.junit.Assert.assertNull;
 
 public class LexiconTest {
 
+    @BeforeAll
+    static void setUp() throws IOException {
+        Configuration.setUpPathTest();
+        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
+        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
+    }
+
     @Test
     public void writeNoCompressionTest() throws IOException {
         List<Integer> docIdsA = List.of(0, 1, 20, 300, 401, 450, 461, 500, 6000, 70000, 800000, 8000000, 8800000, 8800001);
         List<Integer> freqA = List.of(10, 1, 2, 3, 41, 45, 46, 50, 600, 7000, 8000, 1000, 8800, 700);
         List<Integer> docIdsB = List.of(1, 11, 21, 35);
         List<Integer> freqB = List.of(10, 5, 4, 5);
-        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
-        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
-        InvertedIndexFile invIndex = new InvertedIndexFile(ConfigTest.PATH_INV_INDEX, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, 4);
+        setUp();
+        InvertedIndexFile invIndex = new InvertedIndexFile( 4);
         Long offsetA = invIndex.write(docIdsA, freqA,false);
         Long offsetB = invIndex.write(docIdsB, freqB,false);
-        Lexicon lexicon = new Lexicon(ConfigTest.PATH_LEXICON);
+        Lexicon lexicon = new Lexicon();
         lexicon.write("a",offsetA, 0, 0,0, 0);
         lexicon.write("b",offsetB, 0, 0,0, 0);
         Long offsetLexiconA = lexicon.get("a").getOffsetInvertedIndex();
@@ -49,12 +55,11 @@ public class LexiconTest {
         List<Integer> freqA = List.of(10, 1, 2, 3, 41, 45, 46, 50, 600, 7000, 8000, 1000, 8800, 700);
         List<Integer> docIdsB = List.of(1, 11, 21, 35);
         List<Integer> freqB = List.of(10, 5, 4, 5);
-        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
-        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
-        InvertedIndexFile invIndex = new InvertedIndexFile(ConfigTest.PATH_INV_INDEX, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, 4);
+        setUp();
+        InvertedIndexFile invIndex = new InvertedIndexFile( 4);
         Long offsetA = invIndex.write(docIdsA, freqA,true);
         Long offsetB = invIndex.write(docIdsB, freqB,true);
-        Lexicon lexicon = new Lexicon(ConfigTest.PATH_LEXICON);
+        Lexicon lexicon = new Lexicon();
         lexicon.write("a",offsetA, 0, 0,0, 0);
         lexicon.write("b",offsetB, 0, 0,0, 0);
         Long offsetLexiconA = lexicon.findTerm("a").getOffsetInvertedIndex();
@@ -95,12 +100,11 @@ public class LexiconTest {
         List<Integer> freqA = List.of(10, 1, 2, 3, 41, 45, 46, 50, 600, 7000, 8000, 1000, 8800, 700);
         List<Integer> docIdsB = List.of(1, 11, 21, 35);
         List<Integer> freqB = List.of(10, 5, 4, 5);
-        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
-        FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
-        InvertedIndexFile invIndex = new InvertedIndexFile(ConfigTest.PATH_INV_INDEX, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, 4);
+        setUp();
+        InvertedIndexFile invIndex = new InvertedIndexFile( 4);
         Long offsetA = invIndex.write(docIdsA, freqA,false);
         Long offsetB = invIndex.write(docIdsB, freqB,false);
-        Lexicon lexicon = new Lexicon(ConfigTest.PATH_LEXICON);
+        Lexicon lexicon = new Lexicon();
         lexicon.write("a",offsetA, 0, 0,0, 0);
         lexicon.write("b",offsetB, 0, 0,0, 0);
         assertEquals("a", lexicon.findTerm("a").getTerm());
