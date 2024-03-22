@@ -27,43 +27,9 @@ public class SpimiTest {
     public void spimiTest() throws IOException {
         FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
         FileUtils.createDirectory(ConfigTest.DIRECTORY_TMP);
-        Spimi.spimi(Configuration.PATH_DOCUMENTS_TEST, ConfigTest.PATH_STATISTICS, ConfigTest.PATH_BLOCKS);
+        Spimi.spimi(Configuration.PATH_DOCUMENTS_TEST, ConfigTest.PATH_STATISTICS, ConfigTest.PATH_BLOCKS, ConfigTest.PATH_DOC_TERMS);
         assertFalse(Objects.requireNonNull(FileUtils.getFilesOfDirectory(ConfigTest.DIRECTORY_TMP)).isEmpty());
         assertTrue(FileUtils.searchIfExists(ConfigTest.PATH_STATISTICS));
-
-        Merge merge = new Merge(List.of("data/test/tmp/testBlocks_0.bin"), ConfigTest.PATH_LEXICON, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, ConfigTest.PATH_STATISTICS, 2);
-        merge.write(ConfigTest.PATH_INV_INDEX, false);
     }
 
-    @Test
-    public void spimiRead() throws IOException {
-        final FileChannel fc;
-        try {
-            // Open file channel for reading and writing
-            fc = FileChannel.open(Paths.get("data/test/docprova"),
-                    StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
-        } catch (IOException e) {
-            throw new RuntimeException("An error occurred while writing to the " + "data/test/docprova" + " file.");
-        }
-
-        final FileChannel fc2;
-        try {
-            // Open file channel for reading and writing
-            fc2 = FileChannel.open(Paths.get("data/test/testDoc"),
-                    StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
-        } catch (IOException e) {
-            throw new RuntimeException("An error occurred while writing to the " + "data/test/docprova" + " file.");
-        }
-
-        InvertedIndexFile invRead = new InvertedIndexFile(ConfigTest.PATH_INV_INDEX, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, Configuration.BLOCK_SIZE);
-        Lexicon lexicon = new Lexicon(ConfigTest.PATH_LEXICON);
-
-        // "hellp" -> 20, 19 -> 1, 2   hashmap(doc_id, freq) -> [(20, 1), (19,2) ...]
-
-
-        List<Integer> lst = BinaryFile.readIntListFromBuffer(fc, 0L, fc.size());
-        for (Integer p : lst) {
-            System.out.println(p);
-        }
-    }
 }

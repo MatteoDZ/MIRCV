@@ -41,7 +41,8 @@ public class MergerTest {
         inv3.add(List.of("z", "m"), 5);
         inv3.add(List.of("c", "a"), 6);
         BinaryFile.writeBlock(inv3, pathTest3);
-        Merge merge = new Merge(List.of(pathTest1, pathTest2, pathTest3), ConfigTest.PATH_LEXICON, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, ConfigTest.PATH_STATISTICS, 2);
+        Merge merge = new Merge(List.of(pathTest1, pathTest2, pathTest3), ConfigTest.PATH_LEXICON, ConfigTest.PATH_DOC_IDS,
+                ConfigTest.PATH_FREQ, ConfigTest.PATH_STATISTICS, 2, ConfigTest.PATH_DOC_TERMS);
         merge.write(ConfigTest.PATH_INV_INDEX, false);
         InvertedIndexFile inv = new InvertedIndexFile(ConfigTest.PATH_INV_INDEX, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, 2);
         Lexicon lex = new Lexicon(ConfigTest.PATH_LEXICON);
@@ -74,7 +75,8 @@ public class MergerTest {
         inv3.add(List.of("z", "m"), 5);
         inv3.add(List.of("c", "a"), 6);
         BinaryFile.writeBlock(inv3, pathTest3);
-        Merge merge = new Merge(List.of(pathTest1, pathTest2, pathTest3), ConfigTest.PATH_LEXICON, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, ConfigTest.PATH_STATISTICS, 2);
+        Merge merge = new Merge(List.of(pathTest1, pathTest2, pathTest3), ConfigTest.PATH_LEXICON, ConfigTest.PATH_DOC_IDS,
+                ConfigTest.PATH_FREQ, ConfigTest.PATH_STATISTICS, 2, ConfigTest.PATH_DOC_TERMS);
         merge.write(ConfigTest.PATH_INV_INDEX, true);
         InvertedIndexFile inv = new InvertedIndexFile(ConfigTest.PATH_INV_INDEX, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, 2);
         Lexicon lex = new Lexicon(ConfigTest.PATH_LEXICON);

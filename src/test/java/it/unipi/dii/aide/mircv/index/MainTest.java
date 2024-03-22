@@ -24,7 +24,7 @@ public class MainTest {
 
         long startTime_spimi = System.currentTimeMillis();
         System.out.println("Spimi is starting....");
-        Spimi.spimi(Configuration.PATH_DOCUMENTS_TEST, ConfigTest.PATH_STATISTICS, ConfigTest.PATH_BLOCKS);
+        Spimi.spimi(Configuration.PATH_DOCUMENTS_TEST, ConfigTest.PATH_STATISTICS, ConfigTest.PATH_BLOCKS, ConfigTest.PATH_DOC_TERMS);
         long endTime_spimi = System.currentTimeMillis();
         System.out.println(Main.printTime("Spimi", startTime_spimi, endTime_spimi));
 
@@ -32,7 +32,8 @@ public class MainTest {
         System.out.println("Merge is starting....");
         Merge merge = new Merge(
                 Objects.requireNonNull(FileUtils.getFilesOfDirectory(ConfigTest.DIRECTORY_TMP)),
-                ConfigTest.PATH_LEXICON, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, ConfigTest.PATH_STATISTICS, Configuration.BLOCK_SIZE);
+                ConfigTest.PATH_LEXICON, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, ConfigTest.PATH_STATISTICS,
+                Configuration.BLOCK_SIZE, ConfigTest.PATH_DOC_TERMS);
         merge.write(ConfigTest.PATH_INV_INDEX, false);
         long endTime_merge = System.currentTimeMillis();
         System.out.println(Main.printTime("Merge", startTime_merge, endTime_merge));
@@ -69,7 +70,7 @@ public class MainTest {
 
         long startTime_spimi = System.currentTimeMillis();
         System.out.println("Spimi is starting....");
-        Spimi.spimi(Configuration.PATH_DOCUMENTS_TEST, ConfigTest.PATH_STATISTICS, ConfigTest.PATH_BLOCKS);
+        Spimi.spimi(Configuration.PATH_DOCUMENTS_TEST, ConfigTest.PATH_STATISTICS, ConfigTest.PATH_BLOCKS, ConfigTest.PATH_DOC_TERMS);
         long endTime_spimi = System.currentTimeMillis();
         System.out.println(Main.printTime("Spimi", startTime_spimi, endTime_spimi));
 
@@ -77,7 +78,7 @@ public class MainTest {
         System.out.println("Merge is starting....");
         Merge merge = new Merge(
                 Objects.requireNonNull(FileUtils.getFilesOfDirectory(ConfigTest.DIRECTORY_TMP)),
-                ConfigTest.PATH_LEXICON, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, ConfigTest.PATH_STATISTICS, Configuration.BLOCK_SIZE);
+                ConfigTest.PATH_LEXICON, ConfigTest.PATH_DOC_IDS, ConfigTest.PATH_FREQ, ConfigTest.PATH_STATISTICS, Configuration.BLOCK_SIZE, ConfigTest.PATH_DOC_TERMS);
         merge.write(ConfigTest.PATH_INV_INDEX, true);
         long endTime_merge = System.currentTimeMillis();
         System.out.println(Main.printTime("Merge", startTime_merge, endTime_merge));

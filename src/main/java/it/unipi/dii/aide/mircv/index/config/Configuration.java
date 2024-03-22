@@ -18,12 +18,14 @@ public class Configuration {
     public static final String PATH_FEQUENCIES = load("path_freqs");
     public static final String PATH_LEXICON = load("path_lexicon");
     public static final String PATH_STATISTICS = load("path_statistics");
+    public static final String PATH_DOC_TERMS = load(    "path_doc_terms");
     public static final Integer LEXICON_CACHE_SIZE =  Integer.parseInt(Objects.requireNonNull(load("lexicon_cache_size")));
     public static final Integer INVERTED_INDEX_CACHE_SIZE =  Integer.parseInt(Objects.requireNonNull(load("inverted_index_cache_size")));
     public static final Integer BLOCK_SIZE = Integer.parseInt(Objects.requireNonNull(load("block_size")));
     public static final Boolean COMPRESSION = Boolean.parseBoolean(load("compression"));
-    public static final Float BM25_K1 = Float.parseFloat(load("BM25_K1"));
-    public static final Float BM25_B = Float.parseFloat(load("BM25_B"));
+    public static final Float BM25_K1 = Float.parseFloat(Objects.requireNonNull(load("BM25_K1")));
+    public static final Float BM25_B = Float.parseFloat(Objects.requireNonNull(load("BM25_B")));
+
 
 
 

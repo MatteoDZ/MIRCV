@@ -33,7 +33,7 @@ public class Main {
         if (FileUtils.getNumberFiles(Configuration.DIRECTORY_TEMP_FILES) <= 0) {
             long startTime_spimi = System.currentTimeMillis();
             System.out.println("Spimi is starting....");
-            Spimi.spimi(Configuration.PATH_DOCUMENTS, Configuration.PATH_STATISTICS, Configuration.PATH_BLOCKS);
+            Spimi.spimi(Configuration.PATH_DOCUMENTS, Configuration.PATH_STATISTICS, Configuration.PATH_BLOCKS, Configuration.PATH_DOC_TERMS);
             long endTime_spimi = System.currentTimeMillis();
             System.out.println(printTime("Spimi", startTime_spimi, endTime_spimi));
         }
@@ -42,7 +42,8 @@ public class Main {
             long startTime_merge = System.currentTimeMillis();
             System.out.println("Merge is starting....");
             Merge merge = new Merge(Objects.requireNonNull(FileUtils.getFilesOfDirectory(Configuration.DIRECTORY_TEMP_FILES)),
-                    Configuration.PATH_LEXICON, Configuration.PATH_DOCIDS, Configuration.PATH_FEQUENCIES, Configuration.PATH_STATISTICS, Configuration.BLOCK_SIZE);
+                    Configuration.PATH_LEXICON, Configuration.PATH_DOCIDS, Configuration.PATH_FEQUENCIES,
+                    Configuration.PATH_STATISTICS, Configuration.BLOCK_SIZE, Configuration.PATH_DOC_TERMS);
             merge.write(Configuration.PATH_INVERTED_INDEX, Configuration.COMPRESSION);
             long endTime_merge = System.currentTimeMillis();
             System.out.println(printTime("Merge", startTime_merge, endTime_merge));
@@ -91,7 +92,7 @@ public class Main {
         
         System.out.println(statistics.toString());
 
-        LFUCache<Pair<Long, Integer>, Integer> temp = invRead.getLfuCache();
+        // LFUCache<Pair<Long, Integer>, Integer> temp = invRead.getLfuCache();
         //System.out.println(ObjectSizeFetcher.getObjectSize(temp));
         /*
         //soluzione non usata (per ora) per controllare la heap occupata

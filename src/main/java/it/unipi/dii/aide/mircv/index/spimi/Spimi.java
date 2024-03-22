@@ -18,14 +18,14 @@ import java.util.Objects;
 
 public class Spimi {
 
-    public static void spimi(String pathCollection, String pathStatistics, String pathBlocks) throws IOException {
+    public static void spimi(String pathCollection, String pathStatistics, String pathBlocks, String pathDocTerms) throws IOException {
         final FileChannel fc;
         try {
             // Open file channel for reading and writing
-            fc = FileChannel.open(Paths.get("data/docterms"),
+            fc = FileChannel.open(Paths.get(pathDocTerms),
                     StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         } catch (IOException e) {
-            throw new RuntimeException("An error occurred while writing to the " + "data/test/docprova" + " file.");
+            throw new RuntimeException("An error occurred while writing to the " + pathDocTerms + " file.");
         }
         try (TarArchiveInputStream tarInput = new TarArchiveInputStream(new GzipCompressorInputStream(new FileInputStream(Objects.requireNonNull(pathCollection))))) {
             tarInput.getNextTarEntry();

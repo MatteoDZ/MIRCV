@@ -16,10 +16,10 @@ import java.util.*;
 
 public class Merge {
     private final HashMap<BlockReader, PostingIndex> readerLines = new HashMap<>();
-    private final String pathLexicon, pathDocIds, pathFreqs, pathStatistics;
+    private final String pathLexicon, pathDocIds, pathFreqs, pathStatistics, pathDocTerms;
     private final Integer blockSize;
 
-    public Merge(List<String> paths, String pathLexicon, String pathDocIds, String pathFreqs, String pathStatistics, Integer blockSize) throws IOException {
+    public Merge(List<String> paths, String pathLexicon, String pathDocIds, String pathFreqs, String pathStatistics, Integer blockSize, String pathDocTerms) throws IOException {
         for (String path : paths) {
             BlockReader reader = new BlockReader(path);
             String line = reader.readTerm();
@@ -33,6 +33,7 @@ public class Merge {
         this.pathLexicon = pathLexicon;
         this.pathStatistics = pathStatistics;
         this.blockSize = blockSize;
+        this.pathDocTerms = pathDocTerms;
     }
 
     public void write(String path, boolean compress) throws IOException {
@@ -165,26 +166,17 @@ public class Merge {
                 tf = posting.getFrequency();
             }
         }
-
         lexicon.write(pi.getTerm(), offset, df, stats.getNumDocs(), tf, BM25Upper);
     }
 
-    /*
-    protected float calculateBM25(PostingIndex pi, float tf, long doc_id, Statistics stats){
-        int doc_len = pi.getDocIds().size();
-        return (float) ((tf / (tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (doc_len / stats.getAvgDocLen())))));
-    }
-    */
-
-    protected static float calculateBM25(float tf, long doc_id, Statistics stats){
+    protected float calculateBM25(float tf, long doc_id, Statistics stats){
         try {
-            assert Path.of("data/docterms") != null;
-            FileChannel fc = FileChannel.open(Path.of("data/docterms"), StandardOpenOption.READ);
+            FileChannel fc = FileChannel.open(Path.of(this.pathDocTerms), StandardOpenOption.READ, StandardOpenOption.WRITE);
             int doc_len = BinaryFile.readIntFromBuffer(fc, doc_id*4L);
+            fc.close();
             return (float) ((tf / (tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (doc_len / stats.getAvgDocLen())))));
         } catch (IOException e) {
-            System.out.println(e);
-            return -1F;
+            throw new RuntimeException("An error occurred while reading from the " + this.pathDocTerms + " file.");
         }
     }
 
