@@ -44,11 +44,16 @@ public class Configuration {
             } catch (IOException e) {
                 throw new RuntimeException("Error loading properties file", e);
             }
+            if(!prop.containsKey(key))
+                throw new RuntimeException("Key " + key + " not found in " + configFilePath + " file");
             return prop.getProperty(key);
         }
         return null;
     }
 
+    /**
+     * Set up paths for testing purposes.
+     */
     public static void setUpPathTest(){
         DIRECTORY_TEMP_FILES = Configuration.DIRECTORY_TEST + "/tmp";
         PATH_BLOCKS = DIRECTORY_TEMP_FILES + "/testBlocks.bin";
