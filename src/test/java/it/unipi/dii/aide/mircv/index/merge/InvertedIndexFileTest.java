@@ -5,8 +5,8 @@ import it.unipi.dii.aide.mircv.index.compression.UnaryCompressor;
 import it.unipi.dii.aide.mircv.index.compression.VariableByteCompressor;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeAll;
 
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
@@ -25,8 +25,8 @@ public class InvertedIndexFileTest {
     List<Integer> docIdsNew = List.of(10, 200, 8000, 7000000, 7100000);
     List<Integer> freqsNew = List.of(1, 2, 3 ,4, 2);
 
-    @BeforeAll
-    static void setUp() {
+    @Before
+    public void setUp() {
         Configuration.setUpPathTest();
         FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
         FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
@@ -36,7 +36,6 @@ public class InvertedIndexFileTest {
 
     @Test
     public void writeNoCompressionTest() throws IOException {
-        setUp();
         InvertedIndexFile invIndex = new InvertedIndexFile(4);
         Long offset = invIndex.write(docIds, freqs,false);
         FileChannel  fc = FileChannel.open(Paths.get(Configuration.PATH_INVERTED_INDEX), StandardOpenOption.READ, StandardOpenOption.WRITE);
@@ -60,7 +59,6 @@ public class InvertedIndexFileTest {
 
     @Test
     public void writeYesCompressionTest() throws IOException {
-        setUp();
         InvertedIndexFile invIndex = new InvertedIndexFile(4);
         Long offset = invIndex.write(docIds, freqs,true);
         FileChannel  fc = FileChannel.open(Paths.get(Configuration.PATH_INVERTED_INDEX), StandardOpenOption.READ, StandardOpenOption.WRITE);
@@ -93,7 +91,6 @@ public class InvertedIndexFileTest {
 
     @Test
     public void getFreqNoCompressionTest() throws IOException {
-        setUp();
         InvertedIndexFile invIndex = new InvertedIndexFile( 4);
         Long offset = invIndex.write(docIds, freqs,false);
         assertEquals(freqs.get(0), invIndex.getFreq(offset, docIds.get(0), false));
@@ -122,7 +119,6 @@ public class InvertedIndexFileTest {
 
     @Test
     public void getFreqYesCompressionTest() throws IOException {
-        setUp();
         InvertedIndexFile invIndex = new InvertedIndexFile( 4);
         Long offset = invIndex.write(docIds, freqs,true);
         assertEquals(freqs.get(0), invIndex.getFreq(offset, docIds.get(0), true));
@@ -152,7 +148,7 @@ public class InvertedIndexFileTest {
 
     @Test
     public void getDocIdsTestNoCompression() throws IOException {
-        setUp();
+
         InvertedIndexFile invIndex = new InvertedIndexFile( 4);
         Long offset = invIndex.write(docIds, freqs,false);
         assertEquals(docIds, invIndex.getDocIds(offset, false));
@@ -160,7 +156,7 @@ public class InvertedIndexFileTest {
 
     @Test
     public void getDocIdsTestYesCompression() throws IOException {
-        setUp();
+
         InvertedIndexFile invIndex = new InvertedIndexFile( 4);
         Long offset = invIndex.write(docIds, freqs,true);
         assertEquals(docIds, invIndex.getDocIds(offset, true));
@@ -168,7 +164,7 @@ public class InvertedIndexFileTest {
 
     @Test
     public void getOffsetsDocIdsNoCompressionTest() throws IOException {
-        setUp();
+
         InvertedIndexFile invIndex = new InvertedIndexFile( 4);
         Long offset = invIndex.write(docIds, freqs,false);
         FileChannel  fc = FileChannel.open(Paths.get(Configuration.PATH_INVERTED_INDEX), StandardOpenOption.READ);
@@ -181,7 +177,6 @@ public class InvertedIndexFileTest {
 
     @Test
     public void getOffsetsDocIdsYesCompressionTest() throws IOException {
-        setUp();
         InvertedIndexFile invIndex = new InvertedIndexFile( 4);
         Long offset = invIndex.write(docIds, freqs,true);
         FileChannel  fc = FileChannel.open(Paths.get(Configuration.PATH_INVERTED_INDEX), StandardOpenOption.READ);
@@ -198,7 +193,6 @@ public class InvertedIndexFileTest {
 
     @Test
     public void getOffsetsFreqsNoCompressionTest() throws IOException {
-        setUp();
         InvertedIndexFile invIndex = new InvertedIndexFile( 4);
         Long offset = invIndex.write(docIds, freqs,false);
         FileChannel  fc = FileChannel.open(Paths.get(Configuration.PATH_INVERTED_INDEX), StandardOpenOption.READ);
@@ -211,7 +205,6 @@ public class InvertedIndexFileTest {
 
     @Test
     public void getOffsetsFreqsYesCompressionTest() throws IOException {
-        setUp();
         InvertedIndexFile invIndex = new InvertedIndexFile(4);
         Long offset = invIndex.write(docIds, freqs,true);
         FileChannel  fc = FileChannel.open(Paths.get(Configuration.PATH_INVERTED_INDEX), StandardOpenOption.READ);
@@ -229,7 +222,6 @@ public class InvertedIndexFileTest {
 
     @Test
     public void findBlockIndexNoCompressionTest() throws IOException {
-        setUp();
         InvertedIndexFile invIndex = new InvertedIndexFile( 4);
         Long offset = invIndex.write(docIds, freqs,false);
         FileChannel  fc = FileChannel.open(Paths.get(Configuration.PATH_INVERTED_INDEX), StandardOpenOption.READ);
@@ -253,7 +245,6 @@ public class InvertedIndexFileTest {
 
     @Test
     public void findBlockIndexYesCompressionTest() throws IOException {
-        setUp();
         InvertedIndexFile invIndex = new InvertedIndexFile(4);
         Long offset = invIndex.write(docIds, freqs,true);
         FileChannel  fc = FileChannel.open(Paths.get(Configuration.PATH_INVERTED_INDEX), StandardOpenOption.READ);

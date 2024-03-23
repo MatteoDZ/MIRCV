@@ -82,7 +82,7 @@ public class Main {
         System.out.println(("Search: " + (end_search_time_cache-start_search_time_cache) + " ms"));
         System.out.println("Somma tempo frequenze: " + savedtime + " ms");
 
-        Statistics statistics = new Statistics(Configuration.PATH_STATISTICS);
+        Statistics statistics = new Statistics();
         statistics.readFromDisk();
         System.out.println(statistics);
 

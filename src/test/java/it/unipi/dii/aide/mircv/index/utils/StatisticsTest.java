@@ -13,8 +13,7 @@ public class StatisticsTest {
         Configuration.setUpPathTest();
         FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
         FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
-
-        Statistics statisticsWriter = new Statistics(Configuration.PATH_STATISTICS);
+        Statistics statisticsWriter = new Statistics();
         statisticsWriter.setTotalLenDoc(123456);
         statisticsWriter.setNumDocs(1000);
         statisticsWriter.setAvgDocLen((double) 123456/1000);
@@ -22,7 +21,7 @@ public class StatisticsTest {
         statisticsWriter.setTerms(7899);
         statisticsWriter.writeMergeToDisk();
 
-        Statistics statisticsReader = new Statistics(Configuration.PATH_STATISTICS);
+        Statistics statisticsReader = new Statistics();
         statisticsReader.readFromDisk();
 
         assertEquals(statisticsWriter.getAvgDocLen(), statisticsReader.getAvgDocLen(), 0.001);

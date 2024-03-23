@@ -1,6 +1,7 @@
 package it.unipi.dii.aide.mircv.index.utils;
 
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
+import it.unipi.dii.aide.mircv.index.config.Configuration;
 
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
@@ -18,13 +19,13 @@ public class Statistics {
     private final FileChannel fc;
 
 
-    public Statistics(String path) {
+    public Statistics() {
         try {
-            fc = FileChannel.open(Paths.get(path),
+            fc = FileChannel.open(Paths.get(Configuration.PATH_STATISTICS),
                     StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         } catch (
                 IOException e) {
-            throw new RuntimeException("An error occurred while writing to the " + path + " file.");
+            throw new RuntimeException("An error occurred while writing to the " + Configuration.PATH_STATISTICS + " file.");
         }
     }
 
@@ -133,12 +134,13 @@ public class Statistics {
         this.setTerms(mbb.getLong());
     }
 
-    public void readSPIMI() throws IOException {
-        mbb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+    public void readSpimiFromDisk() throws IOException {
+        mbb = fc.map(FileChannel.MapMode.READ_ONLY, 0, ENTRY_SIZE);
         this.setNumDocs(mbb.getInt());
         this.setAvgDocLen(mbb.getDouble());
         this.setTotalLenDoc(mbb.getLong());
     }
+
 
     /**
      * A description of the entire Java function.

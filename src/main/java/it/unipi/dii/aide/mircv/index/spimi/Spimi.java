@@ -30,7 +30,7 @@ public class Spimi {
         try (TarArchiveInputStream tarInput = new TarArchiveInputStream(new GzipCompressorInputStream(new FileInputStream(Objects.requireNonNull(pathCollection))))) {
             tarInput.getNextTarEntry();
             try (BufferedReader br = new BufferedReader(new InputStreamReader(tarInput))) {
-                Statistics statistics = new Statistics(Configuration.PATH_STATISTICS);
+                Statistics statistics = new Statistics();
                 String line;
                 int blockNumber = 0, numDocs = 0, total_length = 0;
                 InvertedIndex inv = new InvertedIndex();

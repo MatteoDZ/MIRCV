@@ -97,7 +97,7 @@ public class Merge {
             lexiconWrite(minPosting, offsetTerm, docIdsNew, freqsNew, lexicon);
 
         }
-        Statistics statistics = new Statistics(Configuration.PATH_STATISTICS);
+        Statistics statistics = new Statistics();
         statistics.setTerms(lexSize);
         statistics.writeMergeToDisk();
     }
@@ -142,8 +142,8 @@ public class Merge {
         float actualBM25;
         int  tf  = 0;
 
-        Statistics stats = new Statistics(Configuration.PATH_STATISTICS);
-        stats.readSPIMI();
+        Statistics stats = new Statistics();
+        stats.readSpimiFromDisk();
         int df = pi.getPostings().size();
         float idf = (float) ((Math.log((double) stats.getNumDocs() / df)));
 

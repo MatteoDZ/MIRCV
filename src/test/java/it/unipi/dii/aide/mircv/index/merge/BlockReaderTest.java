@@ -4,6 +4,7 @@ import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.List;
@@ -13,12 +14,15 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class BlockReaderTest {
 
-    @Test
-    public void readBlockTest() throws IOException {
+    @BeforeEach
+    public void setUp(){
         Configuration.setUpPathTest();
         FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
         FileUtils.createDirectory(Configuration.DIRECTORY_TEMP_FILES);
+    }
 
+    @Test
+    public void readBlockTest() throws IOException {
         InvertedIndex inv1 = new InvertedIndex();
         inv1.add(List.of("a"), 1);
         inv1.add(List.of("b"), 2);
@@ -35,10 +39,6 @@ public class BlockReaderTest {
 
     @Test
     public void readBlockTest1() throws IOException {
-        Configuration.setUpPathTest();
-        FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
-        FileUtils.createDirectory(Configuration.DIRECTORY_TEMP_FILES);
-
         InvertedIndex inv1 = new InvertedIndex();
         inv1.add(List.of("a", "a", "b"), 1);
         inv1.add(List.of("b", "c"), 2);

@@ -5,10 +5,14 @@ import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
-import org.junit.jupiter.api.BeforeAll;
+import it.unipi.dii.aide.mircv.index.utils.Statistics;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.List;
 
@@ -19,16 +23,28 @@ public class MergerTest {
     String pathTest2 = Configuration.DIRECTORY_TEST + "/test2.bin";
     String pathTest3 = Configuration.DIRECTORY_TEST + "/test3.bin";
 
-    @BeforeAll
-    static void setUp() {
+    Statistics stats = new Statistics();
+
+    @BeforeEach
+    public void setUp() {
         Configuration.setUpPathTest();
         FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
         FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
+        try {
+            FileChannel fc = FileChannel.open(Paths.get(Configuration.PATH_DOC_TERMS),
+                    StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+            BinaryFile.writeIntListToBuffer(fc, List.of(1,1,1,1,1,2,1,1,1,2,2)); // number to control maybe they are not correct
+        } catch (IOException e) {
+            throw new RuntimeException("An error occurred while writing to the " + Configuration.PATH_DOC_TERMS + " file.");
+        }
     }
 
     @Test
     public void writeCompressionFalseTest() throws IOException {
-        setUp();
+        stats.setNumDocs(12);
+        stats.setAvgDocLen(1.3);
+        stats.setTotalLenDoc(15);
+        stats.writeSpimiToDisk(); // number to control maybe they are not correct
         InvertedIndex inv1 = new InvertedIndex();
         inv1.add(List.of("a"), 1);
         inv1.add(List.of("b"), 2);
@@ -60,7 +76,10 @@ public class MergerTest {
 
     @Test
     public void writeCompressionTrueTest() throws IOException {
-        setUp();
+        stats.setNumDocs(12);
+        stats.setAvgDocLen(1.3);
+        stats.setTotalLenDoc(15);
+        stats.writeSpimiToDisk(); // number to control maybe they are not correct
         InvertedIndex inv1 = new InvertedIndex();
         inv1.add(List.of("a"), 1);
         inv1.add(List.of("b"), 2);
@@ -98,7 +117,6 @@ public class MergerTest {
 
     @Test
     public void findMinTermTest() throws IOException {
-        setUp();
         InvertedIndex inv1 = new InvertedIndex();
         inv1.add(List.of("c"), 1);
         inv1.add(List.of("d"), 2);
