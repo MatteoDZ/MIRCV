@@ -15,6 +15,7 @@ import java.util.*;
 public class Merge {
     private final HashMap<BlockReader, PostingIndex> readerLines = new HashMap<>();
     private final Integer blockSize;
+    private final Statistics stats = new Statistics();
 
     public Merge(List<String> paths, Integer blockSize) throws IOException {
         for (String path : paths) {
@@ -26,6 +27,7 @@ public class Merge {
             readerLines.put(reader, new PostingIndex(line, docIds, freqs));
         }
         this.blockSize = blockSize;
+        stats.readSpimiFromDisk();
     }
 
     public void write(boolean compress) throws IOException {
@@ -58,7 +60,7 @@ public class Merge {
                 if (postingList.getTerm().equals(minTerm)) {
                     //we are inside a reader with the min term
                     minPosting.appendList(postingList);
-                    postingList.getFrequencies().get(0);
+                    // postingList.getFrequencies().get(0);
 
                     // System.out.println("Term IF " + postingList.getTerm());
 
@@ -83,7 +85,7 @@ public class Merge {
             List<Integer> freqsNew = minPosting.getFrequencies();
             int docId;
 
-            while ((docId = findDuplicate(docIdsNew)) != 0) {
+            while ((docId = findDuplicate(docIdsNew)) != 0) { // cosa accade quando docId=0 ed è duplicato?
                 // System.out.println("Prima DocIds: " + docIdsNew + " Freqs: " + freqsNew + " DocId: " + docId);
                 docIdsNew.remove(docId);
                 int freq = freqsNew.get(docId);
@@ -117,7 +119,7 @@ public class Merge {
                 return listContainingDuplicates.indexOf(yourInt);
             }
         }
-        return 0;
+        return 0; //oppure -1?
     }
 
 
@@ -142,13 +144,11 @@ public class Merge {
         float actualBM25;
         int  tf  = 0;
 
-        Statistics stats = new Statistics();
-        stats.readSpimiFromDisk();
         int df = pi.getPostings().size();
         float idf = (float) ((Math.log((double) stats.getNumDocs() / df)));
 
         for (Posting posting : pi.getPostings()) {
-            actualBM25 = calculateBM25(tf, posting.getDoc_id(), stats);
+            actualBM25 = calculateBM25(tf, posting.getDoc_id());
 
             if (actualBM25 != -1 && actualBM25 > BM25Upper){
                 BM25Upper = actualBM25;
@@ -161,7 +161,7 @@ public class Merge {
         lexicon.write(pi.getTerm(), offset, df, stats.getNumDocs(), tf, BM25Upper);
     }
 
-    protected float calculateBM25(float tf, long doc_id, Statistics stats){
+    protected float calculateBM25(float tf, long doc_id){
         try {
             FileChannel fc = FileChannel.open(Path.of(Configuration.PATH_DOC_TERMS), StandardOpenOption.READ, StandardOpenOption.WRITE);
             int doc_len = BinaryFile.readIntFromBuffer(fc, doc_id*4L);
