@@ -85,7 +85,7 @@ public class Merge {
             List<Integer> freqsNew = minPosting.getFrequencies();
             int docId;
 
-            while ((docId = findDuplicate(docIdsNew)) != 0) { // cosa accade quando docId=0 ed è duplicato?
+            while ((docId = findDuplicate(docIdsNew)) != -1) {
                 // System.out.println("Prima DocIds: " + docIdsNew + " Freqs: " + freqsNew + " DocId: " + docId);
                 docIdsNew.remove(docId);
                 int freq = freqsNew.get(docId);
@@ -119,7 +119,7 @@ public class Merge {
                 return listContainingDuplicates.indexOf(yourInt);
             }
         }
-        return 0; //oppure -1?
+        return -1;
     }
 
 
