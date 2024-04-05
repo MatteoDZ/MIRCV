@@ -155,6 +155,6 @@ public class PostingIndex {
      * @return  a string representation of the object
      */
     public String toString() {
-        return term + " " + getDocIds().toString() + " " + getFrequencies().toString();}
+        return term + " " + getDocIds().toString() + " " + getFrequencies().toString() + " " + getIdf();}
 
 }

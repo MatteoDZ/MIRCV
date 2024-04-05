@@ -7,10 +7,13 @@ import it.unipi.dii.aide.mircv.index.merge.Merge;
 import it.unipi.dii.aide.mircv.index.spimi.Spimi;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import it.unipi.dii.aide.mircv.index.utils.Statistics;
+import org.javatuples.Pair;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Scanner;
 
 public class Main {
 
@@ -98,6 +101,65 @@ public class Main {
         maxMemory=heapMemoryUsage.getMax();
         usedMemory= heapMemoryUsage.getUsed();
          */
+
+        Scanner scanner = new Scanner(System.in);
+        long timerStart, timerEnd;
+        TopKPriorityQueue<Pair<Float,Integer>> topKPriorityQueue;
+        ArrayList<Integer> queryResult;
+        String query, scoreFun;
+
+
+        do {
+            System.out.print("Query-> ");
+            query = scanner.nextLine();
+            if (query.trim().isEmpty()) {
+                System.out.println("empty query");
+                continue;
+            }
+
+            System.out.print("Daat(1) or exit(2)?");
+            int chose = Integer.parseInt(scanner.nextLine());
+            if (chose != 1 && chose != 2) {
+                System.out.println("no good choice, please repeat");
+                continue;
+            } else if (chose == 2) {
+                break;
+            }
+
+            System.out.print("Conjunctive(1) or Disjunctive(2)?");
+            int chose1 = Integer.parseInt(scanner.nextLine());
+            if (chose1 != 1 && chose1 != 2) {
+                System.out.println("no conjunctive nor disjunctive selected, please restart");
+                continue;
+            }
+
+            System.out.print("Score function bm25 or tfidf->");
+            scoreFun = scanner.nextLine();
+            if (!scoreFun.equals("bm25") && !scoreFun.equals("tfidf")) {
+                System.out.println("no tfidf or bm25");
+                continue;
+            }
+
+            timerStart = System.currentTimeMillis();
+            topKPriorityQueue = (Processer.processQuery(query, 10, chose1 == 1, scoreFun));
+            timerEnd = System.currentTimeMillis();
+            queryResult=Processer.getRankedQuery(topKPriorityQueue);
+
+            List<Integer>  lst2 = invRead.getDocIds(offsetTerm, Configuration.COMPRESSION);
+
+            if (queryResult == null) {
+                System.out.println("no docs for the query");
+            } else {
+                System.out.print("Results of DocNos-> ");
+                for (int i : queryResult) {
+                    System.out.print(i + " ");
+                }
+                System.out.println("with time->" + (timerEnd - timerStart) + "ms");
+            }
+
+        } while (true);
+
+        scanner.close();
     }
 
     public static String printTime(String phase, long startTime, long endTime){
