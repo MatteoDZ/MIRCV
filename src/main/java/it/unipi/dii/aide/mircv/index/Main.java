@@ -7,6 +7,8 @@ import it.unipi.dii.aide.mircv.index.merge.Merge;
 import it.unipi.dii.aide.mircv.index.spimi.Spimi;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import it.unipi.dii.aide.mircv.index.utils.Statistics;
+import it.unipi.dii.aide.mircv.query.Processer;
+import it.unipi.dii.aide.mircv.query.TopKPriorityQueue;
 import org.javatuples.Pair;
 
 import java.io.*;
@@ -48,7 +50,7 @@ public class Main {
             System.out.println(printTime("Merge", startTime_merge, endTime_merge));
         }
 
-        InvertedIndexFile invRead = new InvertedIndexFile(Configuration.BLOCK_SIZE);
+        /*InvertedIndexFile invRead = new InvertedIndexFile(Configuration.BLOCK_SIZE);
 
         Lexicon lexicon = new Lexicon();
 
@@ -87,7 +89,7 @@ public class Main {
 
         Statistics statistics = new Statistics();
         statistics.readFromDisk();
-        System.out.println(statistics);
+        System.out.println(statistics);*/
 
         // LFUCache<Pair<Long, Integer>, Integer> temp = invRead.getLfuCache();
         //System.out.println(ObjectSizeFetcher.getObjectSize(temp));
@@ -102,7 +104,7 @@ public class Main {
         usedMemory= heapMemoryUsage.getUsed();
          */
 
-        Scanner scanner = new Scanner(System.in);
+        /*Scanner scanner = new Scanner(System.in);
         long timerStart, timerEnd;
         TopKPriorityQueue<Pair<Float,Integer>> topKPriorityQueue;
         ArrayList<Integer> queryResult;
@@ -159,7 +161,7 @@ public class Main {
 
         } while (true);
 
-        scanner.close();
+        scanner.close();*/
     }
 
     public static String printTime(String phase, long startTime, long endTime){

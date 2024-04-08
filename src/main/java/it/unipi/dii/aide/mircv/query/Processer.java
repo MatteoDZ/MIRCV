@@ -1,5 +1,7 @@
-package it.unipi.dii.aide.mircv.index;
+package it.unipi.dii.aide.mircv.query;
 
+import it.unipi.dii.aide.mircv.index.config.Configuration;
+import it.unipi.dii.aide.mircv.index.merge.InvertedIndexFile;
 import it.unipi.dii.aide.mircv.index.merge.Lexicon;
 import it.unipi.dii.aide.mircv.index.merge.LexiconData;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
@@ -21,9 +23,10 @@ public class Processer {
      * @param conjunctive Boolean flag indicating conjunctive (AND) or disjunctive (OR) operation.
      * @return ArrayList of PostingIndex objects representing the posting lists of the query terms.
      */
-    public static ArrayList<PostingIndex> getQueryPostingLists(ArrayList<String> query, boolean conjunctive, String scoringFun) throws IOException {
+    private static ArrayList<PostingIndex> getQueryPostingLists(ArrayList<String> query, boolean conjunctive, String scoringFun) throws IOException {
         ArrayList<PostingIndex> postingOfQuery = new ArrayList<>();
         Lexicon lexicon = new Lexicon();
+
         PostingIndex postingIndex;
         for (String term : query) {
             LexiconData lexiconEntry = lexicon.get(term);
@@ -33,7 +36,21 @@ public class Processer {
                 }
                 continue;
             }
-            postingIndex=new PostingIndex(lexiconEntry.getTerm());
+
+            // NON HA SENSO STA COSA!!!
+            InvertedIndexFile invertedIndexFile = new InvertedIndexFile(Configuration.BLOCK_SIZE);
+            List<Integer> docIds = invertedIndexFile.getDocIds(lexiconEntry.getOffsetInvertedIndex(), Configuration.COMPRESSION);
+            List<Integer> frequencies = new ArrayList<>();
+            docIds.forEach(docId -> {
+                try {
+                    frequencies.add(invertedIndexFile.getFreq(lexiconEntry.getOffsetInvertedIndex(), docId, Configuration.COMPRESSION));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            postingIndex=new PostingIndex(lexiconEntry.getTerm(), docIds, frequencies);
+
+            // postingIndex = new PostingIndex(lexiconEntry.getTerm(), lexiconEntry.getOffsetInvertedIndex());
             postingIndex.setIdf(lexiconEntry.getIdf());
             System.out.println("POSTINGINDEX: " + postingIndex);
             if(false){ //PathAdnFlags.DYNAMIC_PRUNING
@@ -61,6 +78,7 @@ public class Processer {
         // Clean and preprocess the query.
         String queryP = Preprocess.removeStopwords(query);
         List<String> cleaned = Preprocess.processText(queryP);
+        // List<String> cleaned = Preprocess.processText(queryP, Configuration.STOPWORD_STEM_ENABLED);
 
         /*
         // Apply stopword removal and stemming if enabled.
@@ -68,7 +86,6 @@ public class Processer {
             cleaned = Preprocess.removeStopwords(cleaned);
             cleaned = Preprocess.applyStemming(cleaned);
         }
-
          */
 
 
@@ -104,7 +121,8 @@ public class Processer {
 
          */
         priorityQueue = DAAT.scoreCollection(queryPostings, k, scoringFun, conjunctive);
-        assert priorityQueue != null;
+        // priorityQueue = DAAT1.scoreCollection(queryPostings, k, scoringFun, conjunctive);
+        // assert priorityQueue != null;
         System.out.println("Processer 105: " + priorityQueue.size());
 
         return priorityQueue;

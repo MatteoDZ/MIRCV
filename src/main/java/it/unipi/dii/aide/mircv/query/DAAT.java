@@ -1,7 +1,6 @@
-package it.unipi.dii.aide.mircv.index;
+package it.unipi.dii.aide.mircv.query;
 
 
-import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.posting.Posting;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
 import it.unipi.dii.aide.mircv.index.utils.Statistics;
@@ -21,7 +20,7 @@ public class DAAT {
      * @param postings List of PostingIndex objects.
      * @return Minimum document ID.
      */
-    private static int getMinDocId(ArrayList<PostingIndex> postings) {
+    protected static int getMinDocId(ArrayList<PostingIndex> postings) {
         Statistics stats = new Statistics();
         int min_doc = stats.getNumDocs();
         for (PostingIndex postingIndex : postings) {
@@ -119,7 +118,7 @@ public class DAAT {
         System.out.println("DAAT 119 " + postingIndices);
         for (PostingIndex postingIndex : postingIndices) {
             System.out.println("DAAT 121 "  + postingIndex.getPostings());
-            if (postingIndex != null) {
+            if (postingIndex.getPostingActual() != null) {
                 max_doc = Math.max(max_doc, postingIndex.getDocIds().get(0));
             } else {
                 System.out.println("DAAT 125 ");

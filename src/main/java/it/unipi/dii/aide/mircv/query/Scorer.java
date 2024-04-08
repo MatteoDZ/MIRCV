@@ -1,4 +1,4 @@
-package it.unipi.dii.aide.mircv.index;
+package it.unipi.dii.aide.mircv.query;
 
 
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;

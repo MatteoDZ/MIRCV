@@ -187,6 +187,20 @@ public class InvertedIndexFile {
         return -1;
     }
 
+    public boolean findDocId(Long offset, int docId, boolean compress) throws IOException {
+        short numBlocks = BinaryFile.readShortFromBuffer(fc, offset);
+        mbb = fc.map(FileChannel.MapMode.READ_ONLY, offset + 2L, numBlocks * 4);
+        int blockIndex = -1;
+        for (int i = 0; i < numBlocks; i++) {
+            if (mbb.getInt() >= docId) {
+                blockIndex=i;
+            }
+        }
+        List<Integer> docIdsBlock = docIdWriter.readDocIdsBlock(getOffsetsDocIds(offset, numBlocks, blockIndex).get(0),
+                getOffsetsDocIds(offset, numBlocks, blockIndex).get(1),compress);
+        return docIdsBlock.contains(docId);
+    }
+
     public LFUCache<Pair<Long, Integer>, Integer> getLfuCache() {
         return lfuCache;
     }

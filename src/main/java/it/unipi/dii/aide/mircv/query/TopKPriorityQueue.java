@@ -1,4 +1,4 @@
-package it.unipi.dii.aide.mircv.index;
+package it.unipi.dii.aide.mircv.query;
 
 import java.util.Comparator;
 import java.util.PriorityQueue;
@@ -9,7 +9,6 @@ import java.util.PriorityQueue;
  * @param <E> Type of elements in the priority queue.
  */
 public class TopKPriorityQueue<E> extends PriorityQueue<E> {
-
     private final int maxSize;
 
     /**
