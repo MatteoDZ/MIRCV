@@ -1,4 +1,4 @@
-package it.unipi.dii.aide.mircv.index;
+package it.unipi.dii.aide.mircv.query;
 
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.merge.InvertedIndexFile;
@@ -69,6 +69,7 @@ public class Processer {
         // Clean and preprocess the query.
         String queryP = Preprocess.removeStopwords(query);
         List<String> cleaned = Preprocess.processText(queryP);
+        // List<String> cleaned = Preprocess.processText(queryP, Configuration.STOPWORD_STEM_ENABLED);
 
         /*
         // Apply stopword removal and stemming if enabled.

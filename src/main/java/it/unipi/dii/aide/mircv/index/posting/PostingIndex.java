@@ -12,6 +12,7 @@ public class PostingIndex {
     private Iterator<Posting> postingIterator;  // Iterator for postings
     private float upperBound;
     private float idf;
+    private long offsetInvertedIndex;
 
     public float getUpperBound() {
         return upperBound;
@@ -68,6 +69,11 @@ public class PostingIndex {
     public PostingIndex(String term, Integer docId) {
         this.term = term;
         addPosting(docId);
+    }
+
+    public PostingIndex(String term, long offsetInvertedIndex) {
+        this.term = term;
+        this.offsetInvertedIndex = offsetInvertedIndex;
     }
 
     /**
@@ -157,4 +163,11 @@ public class PostingIndex {
     public String toString() {
         return term + " " + getDocIds().toString() + " " + getFrequencies().toString() + " " + getIdf();}
 
+    public long getOffsetInvertedIndex() {
+        return offsetInvertedIndex;
+    }
+
+    public void setOffsetInvertedIndex(long offsetInvertedIndex) {
+        this.offsetInvertedIndex = offsetInvertedIndex;
+    }
 }
