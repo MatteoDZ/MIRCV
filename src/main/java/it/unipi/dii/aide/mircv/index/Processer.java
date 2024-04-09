@@ -1,7 +1,10 @@
 package it.unipi.dii.aide.mircv.index;
 
+import it.unipi.dii.aide.mircv.index.config.Configuration;
+import it.unipi.dii.aide.mircv.index.merge.InvertedIndexFile;
 import it.unipi.dii.aide.mircv.index.merge.Lexicon;
 import it.unipi.dii.aide.mircv.index.merge.LexiconData;
+import it.unipi.dii.aide.mircv.index.posting.Posting;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
 import it.unipi.dii.aide.mircv.index.preprocess.Preprocess;
 import org.javatuples.Pair;
@@ -24,16 +27,21 @@ public class Processer {
     public static ArrayList<PostingIndex> getQueryPostingLists(ArrayList<String> query, boolean conjunctive, String scoringFun) throws IOException {
         ArrayList<PostingIndex> postingOfQuery = new ArrayList<>();
         Lexicon lexicon = new Lexicon();
-        PostingIndex postingIndex;
+        InvertedIndexFile invertedIndex = new InvertedIndexFile(Configuration.BLOCK_SIZE);
         for (String term : query) {
             LexiconData lexiconEntry = lexicon.get(term);
+            List<Integer> docIds = invertedIndex.getDocIds(lexiconEntry.getOffsetInvertedIndex(), false);
+            List<Integer> freqs = new ArrayList<>();
+            for (Integer i : docIds){
+                freqs.add(invertedIndex.getFreq(lexiconEntry.getOffsetInvertedIndex(), i, false));
+            }
             if (lexiconEntry == null) {
                 if (conjunctive) {
                     return null;
                 }
                 continue;
             }
-            postingIndex=new PostingIndex(lexiconEntry.getTerm());
+            PostingIndex postingIndex = new PostingIndex(term, docIds, freqs);
             postingIndex.setIdf(lexiconEntry.getIdf());
             System.out.println("POSTINGINDEX: " + postingIndex);
             if(false){ //PathAdnFlags.DYNAMIC_PRUNING
@@ -84,7 +92,7 @@ public class Processer {
 
         // Retrieve posting lists for the query terms.
         ArrayList<PostingIndex> queryPostings = getQueryPostingLists(new ArrayList<>(queryDistinctWords), conjunctive,scoringFun);
-        System.out.println("PROCESSER 87 " + queryPostings);
+        System.out.println("PROCESSER 87 ");
         // Return null if no posting lists are retrieved.
         if (queryPostings == null || queryPostings.isEmpty()) {
             System.out.println("PROCESSER 90");
@@ -104,8 +112,9 @@ public class Processer {
 
          */
         priorityQueue = DAAT.scoreCollection(queryPostings, k, scoringFun, conjunctive);
+        System.out.println("Processer 115: " + priorityQueue);
         assert priorityQueue != null;
-        System.out.println("Processer 105: " + priorityQueue.size());
+        System.out.println("Processer 117: " + priorityQueue.size());
 
         return priorityQueue;
 
