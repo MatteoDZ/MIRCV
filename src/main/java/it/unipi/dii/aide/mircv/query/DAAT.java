@@ -171,45 +171,52 @@ public class DAAT {
         }
 
         for (int i = 0; i < postingIndices.size(); i++) {
-            //for (Posting p : postingIndices.get(i).getPostings()) {} TODO: IMPLEMENTARE
-            System.out.println("DAAT 170 ");
-            // Check if all posting indices have equal document IDs.
-            if (areEquals(postingIndices)) {
-                return doc_id;
-            }
+            int j =0;
+            System.out.println(postingIndices.get(i).getPostings().size());
+            for (Posting p : postingIndices.get(i).getPostings()) {
+                j++;
+                System.out.println("177 LINEA: " +j);
 
-            // Handle the case where a posting is null or has a higher document ID.
-            if (postingIndices.get(i).getPostings().get(0) == null) {
-                System.out.println("DAAT 172");
-                return 0;
-            }
+                System.out.println("DAAT 170 ");
+                // Check if all posting indices have equal document IDs.
+                if (areEquals(postingIndices)) {
+                    return doc_id;
+                }
 
-            if (postingIndices.get(i).getPostings().get(0).getDoc_id() > doc_id) {
-                doc_id = postingIndices.get(i).getPostings().get(0).getDoc_id();
-                i = -1; // Reset i to restart the loop.
-                System.out.println("DAAT 182");
-                continue;
-            }
-
-            // Move to the next document ID if the current one is lower.
-            if (postingIndices.get(i).getPostings().get(0).getDoc_id() < doc_id) {
-                //Posting geq = postingIndices.get(i).nextGEQ(doc_id); TODO: NON SO SE FUNZIONA
-                Posting geq = postingIndices.get(i).getPostings().get(0);
-                if (geq == null) {
+                // Handle the case where a posting is null or has a higher document ID.
+                if (p == null) {
+                    System.out.println("DAAT 172");
                     return 0;
                 }
-                if (geq.getDoc_id() > doc_id) {
-                    doc_id = geq.getDoc_id();
+
+                if (p.getDoc_id() > doc_id) {
+                    doc_id = p.getDoc_id();
                     i = -1; // Reset i to restart the loop.
+                    System.out.println("DAAT 182");
                     continue;
                 }
-                if(geq.getDoc_id()==doc_id){
-                    if(areEquals(postingIndices)){
-                        return doc_id;
+
+                // Move to the next document ID if the current one is lower.
+                if (p.getDoc_id() < doc_id) {
+                    //Posting geq = postingIndices.get(i).nextGEQ(doc_id); TODO: NON SO SE FUNZIONA
+                    Posting geq = postingIndices.get(i).getPostings().get(0);
+                    if (geq == null) {
+                        return 0;
                     }
-                    i=-1;
+                    if (geq.getDoc_id() > doc_id) {
+                        doc_id = geq.getDoc_id();
+                        i = -1; // Reset i to restart the loop.
+                        continue;
+                    }
+                    if(geq.getDoc_id()==doc_id){
+                        if(areEquals(postingIndices)){
+                            return doc_id;
+                        }
+                        i=-1;
+                    }
                 }
             }
+
         }
         System.out.println("DAAT 208");
         return 0;

@@ -30,7 +30,7 @@ public class Processer {
         InvertedIndexFile invertedIndex = new InvertedIndexFile(Configuration.BLOCK_SIZE);
         for (String term : query) {
             LexiconData lexiconEntry = lexicon.get(term);
-            List<Integer> docIds = invertedIndex.getDocIds(lexiconEntry.getOffsetInvertedIndex(), false);
+            /*List<Integer> docIds = invertedIndex.getDocIds(lexiconEntry.getOffsetInvertedIndex(), false);
             List<Integer> freqs = new ArrayList<>();
             for (Integer i : docIds){
                 freqs.add(invertedIndex.getFreq(lexiconEntry.getOffsetInvertedIndex(), i, false));
@@ -41,7 +41,9 @@ public class Processer {
                 }
                 continue;
             }
-            PostingIndex postingIndex = new PostingIndex(term, docIds, freqs);
+            PostingIndex postingIndex = new PostingIndex(term, docIds, freqs);*/
+
+            PostingIndex postingIndex = new PostingIndex(term, lexiconEntry.getOffsetInvertedIndex());
             postingIndex.setIdf(lexiconEntry.getIdf());
             System.out.println("POSTINGINDEX: " + postingIndex);
             if(false){ //PathAdnFlags.DYNAMIC_PRUNING
@@ -112,7 +114,8 @@ public class Processer {
         }
 
          */
-        priorityQueue = DAAT.scoreCollection(queryPostings, k, scoringFun, conjunctive);
+        // priorityQueue = DAAT.scoreCollection(queryPostings, k, scoringFun, conjunctive);
+        priorityQueue = DAAT1.scoreCollection(queryPostings, k, scoringFun, conjunctive);
         System.out.println("Processer 115: " + priorityQueue);
         assert priorityQueue != null;
         System.out.println("Processer 117: " + priorityQueue.size());

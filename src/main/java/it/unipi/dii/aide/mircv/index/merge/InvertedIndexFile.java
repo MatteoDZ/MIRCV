@@ -105,11 +105,15 @@ public class InvertedIndexFile {
 
         int blockIndex = findBlockIndex(offset, numBlocks, docId);
 
-        if(blockIndex == -1) return 0;
+        if(blockIndex == -1) return -1;
 
         //leggiamo i docId
         List<Integer> docIdsBlock = docIdWriter.readDocIdsBlock(getOffsetsDocIds(offset, numBlocks, blockIndex).get(0),
                 getOffsetsDocIds(offset, numBlocks, blockIndex).get(1),compress);
+
+        int indexDocId = docIdsBlock.indexOf(docId);
+
+        if(indexDocId == -1) return -1;
 
         // System.out.println("InvertedIndexWriter DocIds"  + docIdsBlock);
 
@@ -117,11 +121,10 @@ public class InvertedIndexFile {
         List<Short> freqsBlock = frequencyWriter.readFreqsBlock(getOffsetsFreqs(offset, numBlocks, blockIndex).get(0),
                 getOffsetsFreqs(offset, numBlocks, blockIndex).get(1),compress);
 
-        int indexDocId = docIdsBlock.indexOf(docId);
         // System.out.println("InvertedIndexWriter Freqs"  + freqsBlock);
         // System.out.println("InvertedIndexWriter Freqs Index"  + indexDocId);
         // if(indexDocId != -1)  System.out.println("InvertedIndexWriter Freq "  + freqsBlock.get(indexDocId));
-        return (indexDocId == -1) ? 0 : (int)freqsBlock.get(indexDocId);
+        return (int)freqsBlock.get(indexDocId);
     }
 
     public Integer getFreqCache(Long offset, int docId, boolean compress) throws IOException {
@@ -185,20 +188,6 @@ public class InvertedIndexFile {
             }
         }
         return -1;
-    }
-
-    public boolean findDocId(Long offset, int docId, boolean compress) throws IOException {
-        short numBlocks = BinaryFile.readShortFromBuffer(fc, offset);
-        mbb = fc.map(FileChannel.MapMode.READ_ONLY, offset + 2L, numBlocks * 4);
-        int blockIndex = -1;
-        for (int i = 0; i < numBlocks; i++) {
-            if (mbb.getInt() >= docId) {
-                blockIndex=i;
-            }
-        }
-        List<Integer> docIdsBlock = docIdWriter.readDocIdsBlock(getOffsetsDocIds(offset, numBlocks, blockIndex).get(0),
-                getOffsetsDocIds(offset, numBlocks, blockIndex).get(1),compress);
-        return docIdsBlock.contains(docId);
     }
 
     public LFUCache<Pair<Long, Integer>, Integer> getLfuCache() {
