@@ -19,6 +19,6 @@ head -n "$n_rows" collection.tsv > "${tsv_filename}"
 tar -czvf ${targz_filename} ${tsv_filename}
 
 # Clean up temporary files
-rm collection.tsv ${tsv_filename}
+rm collection.tsv
 
 echo "Subset creation complete. Output: ${targz_filename}"
