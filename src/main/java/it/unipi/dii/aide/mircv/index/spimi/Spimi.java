@@ -36,7 +36,7 @@ public class Spimi {
                 InvertedIndex inv = new InvertedIndex();
                 while ((line = br.readLine()) != null) { //loop giusto. sotto c'è quello provvisorio per vedere se va il tutto
                     String[] parts = line.split("\t");
-                    List<String> term = Preprocess.processText(parts[1]);
+                    List<String> term = Preprocess.processText(parts[1], Configuration.STEMMING_AND_STOPWORDS);
                     term.removeAll(List.of("", " "));
                     total_length += term.size();
                     if (!parts[1].isEmpty() || !term.isEmpty()) { //è sufficiente che una delle due non sia empty per fare inserire il tutto

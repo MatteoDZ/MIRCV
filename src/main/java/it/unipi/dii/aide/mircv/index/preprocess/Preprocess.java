@@ -21,32 +21,6 @@ public class Preprocess {
         }
     }
 
-
-    /**
-     * Processes the input text by applying a series of preprocessing steps.
-     *
-     * @param text The input text to be processed.
-     * @return The processed text after removing URLs, HTML tags, punctuation,
-     *         consecutive whitespaces, converting to lowercase, removing stopwords,
-     *         and applying stemming.
-     */
-    public static List<String> processText(String text) {
-        return Stream.of(text)
-                .map(Preprocess::removeUrls)
-                .map(Preprocess::removeHtmlTags)
-                .map(Preprocess::removePunctuation)
-                .map(Preprocess::removeDiacritics)
-                .map(Preprocess::removeDigits)
-                .map(Preprocess::removeWordsThreeEqualLetter)
-                .map(Preprocess::removeWhitespaces)
-                .map(String::toLowerCase)
-                .map(Preprocess::removeStopwords)
-                .map(Preprocess::applyStemming)
-                .map(Preprocess::tokenize)
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
-    }
-
     /**
      * Processes the given text by applying a series of preprocessing steps.
      *

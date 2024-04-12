@@ -81,6 +81,8 @@ public class Merge {
                 }
             }
 
+
+
             List<Integer> docIdsNew = minPosting.getDocIds();
             List<Integer> freqsNew = minPosting.getFrequencies();
             int docId;

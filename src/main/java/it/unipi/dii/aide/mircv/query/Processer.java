@@ -70,7 +70,7 @@ public class Processer {
     public static TopKPriorityQueue<Pair<Float,Integer>> processQuery(String query, int k, boolean conjunctive, String scoringFun) throws IOException {
         // Clean and preprocess the query.
         String queryP = Preprocess.removeStopwords(query);
-        List<String> cleaned = Preprocess.processText(queryP);
+        List<String> cleaned = Preprocess.processText(queryP, Configuration.STEMMING_AND_STOPWORDS);
         // List<String> cleaned = Preprocess.processText(queryP, Configuration.STOPWORD_STEM_ENABLED);
 
         /*

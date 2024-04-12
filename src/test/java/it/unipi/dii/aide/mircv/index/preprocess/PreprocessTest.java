@@ -12,23 +12,23 @@ class PreprocessTest {
     @Test
     void processText() {
         assertLinesMatch(List.of("text", "url", "content"),
-                Preprocess.processText("This is a 'text' -   with - a URL https://www.example.com and some content."));
+                Preprocess.processText("This is a 'text' -   with - a URL https://www.example.com and some content.", true));
         assertLinesMatch(List.of("text", "case", "punctuat", "remain"),
-                Preprocess.processText("This text, with Case AnD Punctuation, remains."));
+                Preprocess.processText("This text, with Case AnD Punctuation, remains.", true));
         assertLinesMatch(List.of("cat", "tabl"),
-                Preprocess.processText("The cat is on the table."));
+                Preprocess.processText("The cat is on the table.", true));
         assertLinesMatch(List.of("twinkl", "twinkl", "littl", "bat", "wonder", "world", "fly", "like", "tea", "trai", "sky"),
                 Preprocess.processText("""
                         Twinkle, twinkle, little bat.
                          How I wonder what you’re at!
                          Up above the world you fly.
-                         Like a tea-tray in the sky."""));
+                         Like a tea-tray in the sky.""", true));
         assertLinesMatch(List.of("cat", "tabl", "attent"),
-                Preprocess.processText("The      cat is on the table. Attention! â"));
+                Preprocess.processText("The      cat is on the table. Attention! â", true));
         assertLinesMatch(List.of("url", "univers", "pisa"),
-                Preprocess.processText("this is the url of university of Pisa \n https://www.unipi.it"));
+                Preprocess.processText("this is the url of university of Pisa \n https://www.unipi.it", true));
         assertLinesMatch(List.of("1000", "2020"),
-                Preprocess.processText("1000 2020 00001 tuttte"));
+                Preprocess.processText("1000 2020 00001 tuttte", true));
     }
 
     @Test
