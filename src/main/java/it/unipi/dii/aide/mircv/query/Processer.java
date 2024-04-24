@@ -25,23 +25,24 @@ public class Processer {
      * @return ArrayList of PostingIndex objects representing the posting lists of the query terms.
      */
     public static ArrayList<PostingIndex> getQueryPostingLists(ArrayList<String> query, boolean conjunctive, String scoringFun) throws IOException {
-        ArrayList<PostingIndex> postingOfQuery = new ArrayList<>();
+        /*ArrayList<PostingIndex> postingOfQuery = new ArrayList<>();
         Lexicon lexicon = new Lexicon();
         InvertedIndexFile invertedIndex = new InvertedIndexFile(Configuration.BLOCK_SIZE);
         for (String term : query) {
             LexiconData lexiconEntry = lexicon.get(term);
-            /*List<Integer> docIds = invertedIndex.getDocIds(lexiconEntry.getOffsetInvertedIndex(), false);
+            List<Integer> docIds = invertedIndex.getDocIds(lexiconEntry.getOffsetInvertedIndex(), false);
             List<Integer> freqs = new ArrayList<>();
             for (Integer i : docIds){
                 freqs.add(invertedIndex.getFreq(lexiconEntry.getOffsetInvertedIndex(), i, false));
             }
+            PostingIndex postingIndex = new PostingIndex(term, docIds, freqs);
+
             if (lexiconEntry == null) {
                 if (conjunctive) {
                     return null;
                 }
                 continue;
             }
-            PostingIndex postingIndex = new PostingIndex(term, docIds, freqs);*/
 
             PostingIndex postingIndex = new PostingIndex(term, lexiconEntry.getOffsetInvertedIndex());
             postingIndex.setIdf(lexiconEntry.getIdf());
@@ -55,7 +56,36 @@ public class Processer {
             }
             postingOfQuery.add(postingIndex);
         }
+        return postingOfQuery;*/
+
+
+
+
+        ArrayList<PostingIndex> postingOfQuery = new ArrayList<>();
+        PostingIndex postingIndex;
+        for (String term : query) {
+            LexiconData lexiconEntry = Lexicon.getInstance().get(term);
+            if (lexiconEntry == null) {
+                if (conjunctive) {
+                    return null;
+                }
+                continue;
+            }
+            postingIndex=new PostingIndex(lexiconEntry.getTerm());
+            postingIndex.setIdf(lexiconEntry.getIdf());
+            /*if(PathAndFlags.DYNAMIC_PRUNING){
+                if(scoringFun.equals("tfidf")){
+                    postingIndex.setUpperBound(lexiconEntry.getUpperTFIDF());
+                }else{
+                    postingIndex.setUpperBound(lexiconEntry.getUpperBM25());
+                }
+            }*/
+            postingOfQuery.add(postingIndex);
+        }
         return postingOfQuery;
+
+
+
     }
 
     /**
@@ -69,8 +99,8 @@ public class Processer {
      */
     public static TopKPriorityQueue<Pair<Float,Integer>> processQuery(String query, int k, boolean conjunctive, String scoringFun) throws IOException {
         // Clean and preprocess the query.
-        String queryP = Preprocess.removeStopwords(query);
-        List<String> cleaned = Preprocess.processText(queryP, Configuration.STEMMING_AND_STOPWORDS);
+        // String queryP = Preprocess.removeStopwords(query);
+        List<String> cleaned = Preprocess.processText(query, Configuration.STEMMING_AND_STOPWORDS);
         // List<String> cleaned = Preprocess.processText(queryP, Configuration.STOPWORD_STEM_ENABLED);
 
         /*
@@ -114,8 +144,12 @@ public class Processer {
         }
 
          */
+
+        System.out.println(queryPostings);
+
         // priorityQueue = DAAT.scoreCollection(queryPostings, k, scoringFun, conjunctive);
-        priorityQueue = DAAT1.scoreCollection(queryPostings, k, scoringFun, conjunctive);
+        // priorityQueue = DAAT1.scoreCollection(queryPostings, k, scoringFun, conjunctive);
+        priorityQueue = DAATchang.scoreCollection(queryPostings, k, scoringFun, conjunctive);
         System.out.println("Processer 115: " + priorityQueue);
         assert priorityQueue != null;
         System.out.println("Processer 117: " + priorityQueue.size());

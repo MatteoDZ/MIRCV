@@ -19,6 +19,7 @@ public class Configuration {
     public static  String PATH_LEXICON = load("path_lexicon");
     public static  String PATH_STATISTICS = load("path_statistics");
     public static  String PATH_DOC_TERMS = load(    "path_doc_terms");
+    public static  String SKIPPING_BLOCK_PATH = load(    "skipping_block");
     public static final Integer LEXICON_CACHE_SIZE =  Integer.parseInt(Objects.requireNonNull(load("lexicon_cache_size")));
     public static final Integer INVERTED_INDEX_CACHE_SIZE =  Integer.parseInt(Objects.requireNonNull(load("inverted_index_cache_size")));
     public static final Integer BLOCK_SIZE = Integer.parseInt(Objects.requireNonNull(load("block_size")));
@@ -60,6 +61,7 @@ public class Configuration {
         PATH_BLOCKS = DIRECTORY_TEMP_FILES + "/testBlocks.bin";
         PATH_DOCID = Configuration.DIRECTORY_TEST + "/testDoc";
         PATH_FREQ = Configuration.DIRECTORY_TEST + "/testFreq";
+        SKIPPING_BLOCK_PATH = Configuration.DIRECTORY_TEST + "/testSkipping";
         PATH_INVERTED_INDEX = Configuration.DIRECTORY_TEST + "/testIndex";
         PATH_LEXICON = Configuration.DIRECTORY_TEST + "/testLexicon";
         PATH_STATISTICS = Configuration.DIRECTORY_TEST + "/testStatistics";

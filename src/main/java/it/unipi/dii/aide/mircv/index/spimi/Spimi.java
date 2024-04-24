@@ -43,7 +43,6 @@ public class Spimi {
                         inv.add(term, Integer.parseInt(parts[0]));
                         int size = term.size();
                         BinaryFile.writeIntToBuffer(fc, size);
-                        // inv.add(term, Integer.parseInt(parts[0]), term.size());
                         if (numDocs % 1000000 == 0) {
                             System.out.println("Now at document: " + numDocs + " and block: " + blockNumber);
                         }

@@ -31,8 +31,7 @@ public class DAAT1 {
             float score = 0.0F;
             int freqP1 = invertedIndexFile.getFreqCache(offsetP1, docId, Configuration.COMPRESSION);
             for (PostingIndex postingIndex : postings) {
-                long offset = postingIndex.getOffsetInvertedIndex();
-                int freq = invertedIndexFile.getFreqCache(offset, docId, Configuration.COMPRESSION);
+                int freq = invertedIndexFile.getFreqCache(postingIndex.getOffsetInvertedIndex(), docId, Configuration.COMPRESSION);
                 // System.out.println(docId + "->" + freqP1 + " " + freq);
                 if (freq  !=-1) {
                     Posting posting = new Posting(docId, freq + freqP1);
@@ -54,6 +53,7 @@ public class DAAT1 {
             for(Integer docId: docIds){
                 int freq = invertedIndexFile.getFreqCache(offset, docId, Configuration.COMPRESSION);
                 if(docIdsTotal.containsKey(docId)){
+                    // docIdsTotal.get(docId).getValue1()+ postingIndex.getIdf(); -> NON SO SE VA BENE
                     docIdsTotal.put(docId, new Pair<>(
                             docIdsTotal.get(docId).getValue0() + freq, docIdsTotal.get(docId).getValue1() + postingIndex.getIdf()));
                 }else {

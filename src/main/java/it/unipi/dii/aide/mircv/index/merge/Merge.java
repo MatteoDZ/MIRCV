@@ -9,6 +9,7 @@ import it.unipi.dii.aide.mircv.index.utils.Statistics;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 
@@ -23,7 +24,6 @@ public class Merge {
             String line = reader.readTerm();
             List<Integer> docIds = reader.readNumbers();
             List<Integer> freqs = reader.readNumbers();
-            // System.out.println("Path: " + path + " Riga: " + line + " DocId: " + docIds + " Freq: " + freqs);
             readerLines.put(reader, new PostingIndex(line, docIds, freqs));
         }
         this.blockSize = blockSize;
@@ -33,9 +33,14 @@ public class Merge {
     public void write(boolean compress) throws IOException {
         long lexSize = 0L;
 
-        InvertedIndexFile inv = new InvertedIndexFile( this.blockSize);
+        // InvertedIndexFile inv = new InvertedIndexFile( this.blockSize);
         Lexicon lexicon = new Lexicon();
 
+        FileChannel fcSkippingBlock = FileChannel.open(Paths.get(Configuration.SKIPPING_BLOCK_PATH),
+                StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+
+        FrequencyFile frequencyWriter = new FrequencyFile(blockSize);
+        DocIdFile docIdWriter = new DocIdFile(blockSize);
 
         while (!readerLines.isEmpty()) {
 
@@ -95,12 +100,29 @@ public class Merge {
                 freqsNew.add(docId, freq + freqsNew.get(docId + 1));
                 // System.out.println("Dopo DocIds: " + docIdsNew + " Freqs: " + freqsNew + " DocId: " + docId);
             }
-            // System.out.println("Term: " + minPosting.getTerm() + " DocIds: " + docIdsNew + " Freqs: " + freqsNew);
+            // System.out.println("Term: " + minPosting.getTerm() + " DocIds: " + docIdsNew.size() + " Freqs: " + freqsNew.size());
 
-            long offsetTerm = inv.write(docIdsNew, freqsNew, compress);
-            lexiconWrite(minPosting, offsetTerm, docIdsNew, freqsNew, lexicon);
+
+            lexiconWrite(minPosting, fcSkippingBlock.size(), docIdsNew, freqsNew, lexicon);
+
+            SkippingBlock skippingBlock = new SkippingBlock();
+
+            skippingBlock.setDoc_id_offset(docIdWriter.writeDocIds(docIdsNew, compress).get(0));
+            skippingBlock.setFreq_offset(frequencyWriter.writeFrequencies(freqsNew, compress).get(0));
+            skippingBlock.setDoc_id_max(docIdsNew.get(docIdsNew.size() - 1));
+            skippingBlock.setDoc_id_size(docIdsNew.size());
+            skippingBlock.setFreq_size(freqsNew.size());
+            skippingBlock.setNum_posting_of_block((int) lexSize);
+
+            skippingBlock.writeOnDisk(fcSkippingBlock);
+
+            // long offsetTerm = inv.write(docIdsNew, freqsNew, compress);
+            // lexiconWrite(minPosting, offsetTerm, docIdsNew, freqsNew, lexicon);
 
         }
+        fcSkippingBlock.close();
+
+
         Statistics statistics = new Statistics();
         statistics.setTerms(lexSize);
         statistics.writeMergeToDisk();

@@ -1,5 +1,9 @@
 package it.unipi.dii.aide.mircv.index.posting;
 
+import it.unipi.dii.aide.mircv.index.merge.Lexicon;
+import it.unipi.dii.aide.mircv.index.merge.SkippingBlock;
+
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -13,6 +17,9 @@ public class PostingIndex {
     private float upperBound;
     private float idf;
     private long offsetInvertedIndex;
+    private SkippingBlock skippingBlockActual;  // Currently active skipping block
+    private Iterator<SkippingBlock> skippingBlockIterator;  // Iterator for skipping blocks
+    private ArrayList<SkippingBlock> blocks;  // List of skipping blocks for efficient iteration
 
     public float getUpperBound() {
         return upperBound;
@@ -71,7 +78,7 @@ public class PostingIndex {
         addPosting(docId);
     }
 
-    public PostingIndex(String term, long offsetInvertedIndex) {
+    public PostingIndex(String term, Long offsetInvertedIndex) {
         this.term = term;
         this.offsetInvertedIndex = offsetInvertedIndex;
     }
@@ -169,5 +176,68 @@ public class PostingIndex {
 
     public void setOffsetInvertedIndex(long offsetInvertedIndex) {
         this.offsetInvertedIndex = offsetInvertedIndex;
+    }
+
+    /**
+     * Opens the posting list by reading associated skipping blocks from the lexicon.
+     */
+    public void openList() throws IOException {
+        blocks = Lexicon.getInstance().get(term).readBlocks();
+        if (blocks == null) {
+            return;
+        }
+        skippingBlockIterator = blocks.iterator();
+        postingIterator = postings.iterator();
+    }
+
+    /**
+     * Moves to the next posting in the list.
+     *
+     * @return The next posting or null if the end is reached.
+     */
+    public Posting next() {
+        if (!postingIterator.hasNext()) {
+            if (!skippingBlockIterator.hasNext()) {
+                postingActual = null;
+                return null;
+            }
+            skippingBlockActual = skippingBlockIterator.next();
+            postings.clear();
+            postings.addAll(skippingBlockActual.getSkippingBlockPostings());
+            postingIterator = postings.iterator();
+        }
+        postingActual = postingIterator.next();
+        return postingActual;
+    }
+
+    /**
+     * Moves to the next posting with a document ID greater than or equal to the specified value.
+     *
+     * @param doc_id The document ID to compare.
+     * @return The next posting with a document ID greater than or equal to doc_id, or null if not found.
+     */
+    public Posting nextGEQ(int doc_id) {
+        boolean nextBlock = false;
+        while (skippingBlockActual == null || skippingBlockActual.getDoc_id_max() < doc_id) {
+            if (!skippingBlockIterator.hasNext()) {
+                postingActual = null;
+                return null;
+            }
+            skippingBlockActual = skippingBlockIterator.next();
+            nextBlock = true;
+        }
+        if (nextBlock) {
+            postings.clear();
+            postings.addAll(skippingBlockActual.getSkippingBlockPostings());
+            postingIterator = postings.iterator();
+        }
+        while (postingIterator.hasNext()) {
+            postingActual = postingIterator.next();
+            if (postingActual.getDoc_id() >= doc_id) {
+                return postingActual;
+            }
+        }
+        postingActual = null;
+        return null;
     }
 }

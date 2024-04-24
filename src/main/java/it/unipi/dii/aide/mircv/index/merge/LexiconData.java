@@ -1,9 +1,15 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
+import it.unipi.dii.aide.mircv.index.config.Configuration;
+
+import java.io.File;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 
 public class LexiconData {
     private String term;
@@ -19,6 +25,22 @@ public class LexiconData {
     private int numBlocks = 1;
     private static final long BYTES_ATTRIBUTES = 4 * 6 + 8 * 3; //4bytes * (n_int + n_float) + 8bytes * (n_long)
     protected static final long ENTRY_SIZE = BYTES_ATTRIBUTES + Lexicon.MAX_LEN_OF_TERM;
+
+    private static FileChannel fileChannel = null;
+
+
+    static{
+        try {
+            File file = new File(Configuration.SKIPPING_BLOCK_PATH);
+            if(file.exists()) {
+                fileChannel = FileChannel.open(Paths.get(Configuration.SKIPPING_BLOCK_PATH), StandardOpenOption.READ);
+            }
+        }catch (IOException e){
+            e.printStackTrace();
+            System.out.println("problems with opening file with lexicon entry with block file");
+        }
+    }
+
 
     public LexiconData(){
 
@@ -137,6 +159,37 @@ public class LexiconData {
             mappedByteBuffer.putLong(offset_skip_pointer);
         } catch (IOException e) {
             throw new RuntimeException("An error occurred while writing a LexiconData in to the lexicon file");
+        }
+    }
+
+    /**
+     * Reads the skipping blocks associated with the LexiconEntry from the block file.
+     *
+     * @return The list of SkippingBlocks.
+     */
+    public ArrayList<SkippingBlock> readBlocks() {
+        try {
+            ArrayList<SkippingBlock> blocks = new ArrayList<>();
+            MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, offset_skip_pointer, (long) numBlocks * SkippingBlock.size_of_element);
+            if (mappedByteBuffer == null) {
+                return null;
+            }
+
+            for (int i = 0; i < numBlocks; i++) {
+                SkippingBlock skippingBlock = new SkippingBlock();
+                skippingBlock.setDoc_id_offset(mappedByteBuffer.getLong());
+                skippingBlock.setDoc_id_size(mappedByteBuffer.getInt());
+                skippingBlock.setFreq_offset(mappedByteBuffer.getLong());
+                skippingBlock.setFreq_size(mappedByteBuffer.getInt());
+                skippingBlock.setDoc_id_max(mappedByteBuffer.getInt());
+                skippingBlock.setNum_posting_of_block(mappedByteBuffer.getInt());
+                blocks.add(skippingBlock);
+            }
+            return blocks;
+        } catch (IOException e) {
+            System.out.println("Problems with reading blocks in the lexicon entry");
+            e.printStackTrace();
+            return null;
         }
     }
 

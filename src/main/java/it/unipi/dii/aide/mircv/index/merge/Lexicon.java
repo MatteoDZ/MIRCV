@@ -13,6 +13,7 @@ public class Lexicon {
     private final LFUCache<String, LexiconData> lfuCache = new LFUCache<>(Configuration.LEXICON_CACHE_SIZE);
     protected static final int MAX_LEN_OF_TERM = 32;
     private final LexiconData lexicon;
+    private static Lexicon instance = new Lexicon();
 
 
     public Lexicon() {
@@ -23,6 +24,15 @@ public class Lexicon {
         } catch (IOException e) {
             throw new RuntimeException("An error occurred while writing to the " + Configuration.PATH_LEXICON + " file.");
         }
+    }
+
+    /**
+     * Retrieves the singleton instance of the Lexicon class.
+     *
+     * @return The Lexicon instance.
+     */
+    public static Lexicon getInstance() {
+        return instance;
     }
 
 
