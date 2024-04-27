@@ -65,12 +65,13 @@ public class DAATchang {
         int doc_id = conjunctive ? get_doc_id(postings) : getMinDocId(postings);
 
         // If there are no documents matching the query, return null.
-        if (doc_id == 0) {
+        /*if (doc_id == 0) {
             return null;
-        }
+        }*/
 
         // Process each document and calculate the score.
         int doc_len = stats.getNumDocs();
+
 
         while (doc_id != doc_len) {
             float score = 0.0F;
@@ -103,6 +104,7 @@ public class DAATchang {
                 break;
             }
         }
+
 
         return topK;
     }

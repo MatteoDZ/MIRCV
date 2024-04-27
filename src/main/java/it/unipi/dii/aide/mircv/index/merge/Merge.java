@@ -106,17 +106,8 @@ public class Merge {
             lexiconWrite(minPosting, fcSkippingBlock.size(), docIdsNew, freqsNew, lexicon);
 
             SkippingBlock skippingBlock = new SkippingBlock();
-
-            List<Long> offsetTerm = docIdWriter.writeDocIds(docIdsNew, compress);
-            List<Long> offsetTermF = frequencyWriter.writeFrequencies(freqsNew, compress);
-
-            System.out.println(minTerm + " " +offsetTermF + " " + freqsNew + " " + docIdsNew);
-            // [rica [39, 40, 41, 42, 43, 44, 45, 46, 47, 48] [65537, 65538, 131073, 196609, 131073, 65537, 65537, 65537, 131073, 65537] 1.0
-            // rica  [39, 40, 41, 42, 43, 44, 45, 46, 47, 48] [1, 1, 1, 2, 2, 1, 3, 1, 2, 1]
-            // SkippingBlock{doc_id_offset=7460, doc_id_size=10, freq_offset=3730, freq_size=10, doc_id_max=48, num_posting_of_block=10, file_offset=0}
-
-            skippingBlock.setDoc_id_offset(offsetTerm.get(0));
-            skippingBlock.setFreq_offset(offsetTermF.get(0));
+            skippingBlock.setDoc_id_offset(docIdWriter.writeDocIds(docIdsNew, compress).get(0));
+            skippingBlock.setFreq_offset(frequencyWriter.writeFrequencies(freqsNew, compress).get(0));
             skippingBlock.setDoc_id_max(docIdsNew.get(docIdsNew.size() - 1));
             skippingBlock.setDoc_id_size(docIdsNew.size());
             skippingBlock.setFreq_size(freqsNew.size());

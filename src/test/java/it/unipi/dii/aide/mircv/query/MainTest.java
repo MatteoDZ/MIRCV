@@ -24,7 +24,7 @@ public class MainTest {
         ArrayList<Integer> queryResult;
         String query, scoreFun;
 
-        query = "atom bomb";
+        query = "atomic bomb";
         int chose = 1; // System.out.print("Daat(1) or exit(2)?");
         int chose1 = 1; //System.out.print("Conjunctive(1) or Disjunctive(2)?");
         scoreFun = "tfidf"; //System.out.print("Score function bm25 or tfidf->");
