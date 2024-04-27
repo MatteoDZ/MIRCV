@@ -25,6 +25,7 @@ public class SkippingBlock {
     public static final int size_of_element = (8 + 4) * 2 + 4 + 4;
     private static MappedByteBuffer bufferDocId = null;
     private static MappedByteBuffer bufferFreq = null;
+    private static FileChannel fcSkippingBlock = null;
 
     static {
         try {
@@ -33,6 +34,7 @@ public class SkippingBlock {
             if(file.exists()&&file1.exists()){
                 FileChannel fileChannel = FileChannel.open(Paths.get(Configuration.PATH_DOCID), StandardOpenOption.READ);
                 FileChannel fileChannel1 = FileChannel.open(Paths.get(Configuration.PATH_FREQ), StandardOpenOption.READ);
+                fcSkippingBlock = FileChannel.open(Paths.get(Configuration.SKIPPING_BLOCK_PATH), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
                 bufferDocId = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
                 bufferFreq = fileChannel1.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel1.size());
             }
@@ -42,6 +44,19 @@ public class SkippingBlock {
             System.out.println("Problems with opening the file channel");
         }
     }
+
+    public long write(Long doc_id_offset, Integer doc_id_size, Long freq_offset, Integer freq_size, Integer doc_id_max, Integer num_posting_of_block) throws IOException {
+        MappedByteBuffer skippedBlockMmb = fcSkippingBlock.map(FileChannel.MapMode.READ_WRITE, file_offset, size_of_element);
+        skippedBlockMmb.putLong(doc_id_offset);
+        skippedBlockMmb.putInt(doc_id_size);
+        skippedBlockMmb.putLong(freq_offset);
+        skippedBlockMmb.putInt(freq_size);
+        skippedBlockMmb.putInt(doc_id_max);
+        skippedBlockMmb.putInt(num_posting_of_block);
+        file_offset += size_of_element;
+        return file_offset;
+    }
+
 
     /**
      * Writes the skipping block information to disk.
@@ -72,10 +87,17 @@ public class SkippingBlock {
         }
     }
 
+
+
+
     // Getters and setters...
 
     public void setDoc_id_offset(long doc_id_offset) {
         this.doc_id_offset = doc_id_offset;
+    }
+
+    public Long getDoc_id_offset(){
+        return doc_id_offset;
     }
 
 
@@ -130,6 +152,7 @@ public class SkippingBlock {
             System.out.println("problems with file channels");
             return null;
         }
+
         bufferDocId.position((int) doc_id_offset);
         bufferFreq.position((int) freq_offset);
 
@@ -150,7 +173,7 @@ public class SkippingBlock {
             }
         } else {
             for (int i = 0; i < num_posting_of_block; i++) {
-                Posting posting = new Posting(bufferDocId.getInt(), bufferFreq.getInt());
+                Posting posting = new Posting(bufferDocId.getInt(), bufferFreq.getShort());
                 postings.add(posting);
             }
         }

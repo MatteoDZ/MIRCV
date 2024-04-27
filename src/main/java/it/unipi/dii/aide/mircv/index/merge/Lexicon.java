@@ -36,14 +36,17 @@ public class Lexicon {
     }
 
 
-    public void write(String term, long offset, int df, double docnum, int tf, float bm25) throws IOException {
+    public void write(String term, Long offset, Integer df, Double docnum, Integer tf, Float bm25) throws IOException {
+        // long startLexiconDataSetting = System.currentTimeMillis();
         lexicon.setTerm(term);
         lexicon.setOffsetInvertedIndex(offset);
         lexicon.setDf(df);
-        lexicon.setIdf((float) Math.log10(docnum/df));
+        lexicon.setIdf((float) Math.log10((double) docnum /df));
         lexicon.setUpperTFIDF((float) ((1 + Math.log(tf)) * lexicon.getIdf()));
         lexicon.setUpperTF(1);
         lexicon.setUpperBM25(bm25);
+        // long endLexiconDataSetting = System.currentTimeMillis();
+        // System.out.println("LexiconData setting time: " + (endLexiconDataSetting - startLexiconDataSetting));
         lexicon.writeEntryToDisk(fc);
     }
 

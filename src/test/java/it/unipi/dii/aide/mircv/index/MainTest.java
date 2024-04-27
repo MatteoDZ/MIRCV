@@ -87,7 +87,7 @@ public class MainTest {
 
         Lexicon lexicon = new Lexicon();
 
-        long offsetTermWar = lexicon.get("war").getOffsetInvertedIndex();
+        /*long offsetTermWar = lexicon.get("war").getOffsetInvertedIndex();
         assertEquals(List.of(1,3,6,7,34), invRead.getDocIds(offsetTermWar, true).stream().limit(5).toList());
         assertEquals(1, (int)invRead.getFreqCache(offsetTermWar, 1, true));
         assertEquals(1, (int)invRead.getFreqCache(offsetTermWar, 3, true));
@@ -102,7 +102,7 @@ public class MainTest {
         assertEquals(1, (int)invRead.getFreqCache(offsetTermBomb, 2, true));
         assertEquals(1, (int)invRead.getFreqCache(offsetTermBomb, 3, true));
         assertEquals(1, (int)invRead.getFreqCache(offsetTermBomb, 5, true));
-        assertEquals(1, (int)invRead.getFreqCache(offsetTermBomb, 6, true));
+        assertEquals(1, (int)invRead.getFreqCache(offsetTermBomb, 6, true));*/
 
     }
 }

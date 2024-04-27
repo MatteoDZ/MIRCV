@@ -1,10 +1,8 @@
 package it.unipi.dii.aide.mircv.query;
 
 import it.unipi.dii.aide.mircv.index.config.Configuration;
-import it.unipi.dii.aide.mircv.index.merge.InvertedIndexFile;
 import it.unipi.dii.aide.mircv.index.merge.Lexicon;
 import it.unipi.dii.aide.mircv.index.merge.LexiconData;
-import it.unipi.dii.aide.mircv.index.posting.Posting;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
 import it.unipi.dii.aide.mircv.index.preprocess.Preprocess;
 import org.javatuples.Pair;
@@ -97,10 +95,11 @@ public class Processer {
      * @param scoringFun   The scoring function to be used.
      * @return ArrayList of document IDs matching the query.
      */
-    public static TopKPriorityQueue<Pair<Float,Integer>> processQuery(String query, int k, boolean conjunctive, String scoringFun) throws IOException {
+    public static TopKPriorityQueue<Pair<Float,Integer>> processQuery(String query, Integer k, Boolean conjunctive, String scoringFun) throws IOException {
         // Clean and preprocess the query.
         // String queryP = Preprocess.removeStopwords(query);
         List<String> cleaned = Preprocess.processText(query, Configuration.STEMMING_AND_STOPWORDS);
+
         // List<String> cleaned = Preprocess.processText(queryP, Configuration.STOPWORD_STEM_ENABLED);
 
         /*
@@ -125,10 +124,9 @@ public class Processer {
 
         // Retrieve posting lists for the query terms.
         ArrayList<PostingIndex> queryPostings = getQueryPostingLists(new ArrayList<>(queryDistinctWords), conjunctive,scoringFun);
-        System.out.println("PROCESSER 87 ");
+
         // Return null if no posting lists are retrieved.
         if (queryPostings == null || queryPostings.isEmpty()) {
-            System.out.println("PROCESSER 90");
             return null;
         }
 
@@ -142,17 +140,12 @@ public class Processer {
         } else {
             priorityQueue = DAAT.scoreCollection(queryPostings, k, scoringFun, conjunctive);
         }
-
          */
-
-        System.out.println(queryPostings);
 
         // priorityQueue = DAAT.scoreCollection(queryPostings, k, scoringFun, conjunctive);
         // priorityQueue = DAAT1.scoreCollection(queryPostings, k, scoringFun, conjunctive);
         priorityQueue = DAATchang.scoreCollection(queryPostings, k, scoringFun, conjunctive);
-        System.out.println("Processer 115: " + priorityQueue);
         assert priorityQueue != null;
-        System.out.println("Processer 117: " + priorityQueue.size());
 
         return priorityQueue;
 

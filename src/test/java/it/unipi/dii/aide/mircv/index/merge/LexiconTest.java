@@ -31,8 +31,8 @@ public class LexiconTest {
         Long offsetA = invIndex.write(docIdsA, freqA,false);
         Long offsetB = invIndex.write(docIdsB, freqB,false);
         Lexicon lexicon = new Lexicon();
-        lexicon.write("a",offsetA, 0, 0,0, 0);
-        lexicon.write("b",offsetB, 0, 0,0, 0);
+        lexicon.write("a",offsetA, 0, 0d,0, 0f);
+        lexicon.write("b",offsetB, 0, 0d,0, 0f);
         Long offsetLexiconA = lexicon.get("a").getOffsetInvertedIndex();
         Long offsetLexiconB = lexicon.get("b").getOffsetInvertedIndex();
 
@@ -55,8 +55,8 @@ public class LexiconTest {
         Long offsetA = invIndex.write(docIdsA, freqA,true);
         Long offsetB = invIndex.write(docIdsB, freqB,true);
         Lexicon lexicon = new Lexicon();
-        lexicon.write("a",offsetA, 0, 0,0, 0);
-        lexicon.write("b",offsetB, 0, 0,0, 0);
+        lexicon.write("a",offsetA, 0, 0d,0, 0f);
+        lexicon.write("b",offsetB, 0, 0d,0, 0f);
         Long offsetLexiconA = lexicon.findTerm("a").getOffsetInvertedIndex();
         Long offsetLexiconB = lexicon.findTerm("b").getOffsetInvertedIndex();
 
@@ -95,8 +95,8 @@ public class LexiconTest {
         Long offsetA = invIndex.write(docIdsA, freqA,false);
         Long offsetB = invIndex.write(docIdsB, freqB,false);
         Lexicon lexicon = new Lexicon();
-        lexicon.write("a",offsetA, 0, 0,0, 0);
-        lexicon.write("b",offsetB, 0, 0,0, 0);
+        lexicon.write("a",offsetA, 0, 0d,0, 0f);
+        lexicon.write("b",offsetB, 0, 0d,0, 0f);
         assertEquals("a", lexicon.findTerm("a").getTerm());
         assertNull(lexicon.findTerm("c"));
     }

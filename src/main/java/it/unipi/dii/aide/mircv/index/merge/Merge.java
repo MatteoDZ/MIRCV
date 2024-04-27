@@ -32,21 +32,8 @@ public class Merge {
 
     public void write(boolean compress) throws IOException {
         long lexSize = 0L;
-        long time_to_min_term = 0;
-        long time_to_while_cycle = 0;
-        long time_of_while_cycle = 0;
-        long time_docs_freqs_removeduplicates = 0;
-        long time_after_everything_dc = 0;
-        long time_skip_1 = 0;
-        long time_skip_2 = 0;
-        long time_skip_3 = 0;
-        long time_skip_4 = 0;
-        long time_skip_5 = 0;
-        long time_skip_6 = 0;
-        long time_skip_7 = 0;
-        long time_lexicon = 0;
 
-        //InvertedIndexFile inv = new InvertedIndexFile( this.blockSize);
+        // InvertedIndexFile inv = new InvertedIndexFile( this.blockSize);
         Lexicon lexicon = new Lexicon();
 
         FileChannel fcSkippingBlock = FileChannel.open(Paths.get(Configuration.SKIPPING_BLOCK_PATH),
@@ -55,7 +42,6 @@ public class Merge {
         FrequencyFile frequencyWriter = new FrequencyFile(blockSize);
         DocIdFile docIdWriter = new DocIdFile(blockSize);
 
-        long time = System.currentTimeMillis();
         while (!readerLines.isEmpty()) {
             long time_read_term = System.currentTimeMillis();
 
@@ -64,25 +50,18 @@ public class Merge {
 
             lexSize++;
 
-            long time_min_term = System.currentTimeMillis();
-            time_to_min_term += (time_min_term - time_read_term);
-
             String minTerm = findMinTerm(readerLines);
-
             // System.out.println("minTerm: " + minTerm);
 
             PostingIndex minPosting = new PostingIndex(minTerm);
             Iterator<Map.Entry<BlockReader, PostingIndex>> iterator = readerLines.entrySet().iterator();
 
-            long time_to_while = System.currentTimeMillis();
-            time_to_while_cycle += (time_to_while - time_min_term);
-
             while (iterator.hasNext()) {
-
                 Map.Entry<BlockReader, PostingIndex> entry = iterator.next();
                 PostingIndex postingList = entry.getValue();
 
                 // System.out.println("Term PostingList: " + postingList.getTerm());
+
 
                 if (postingList.getTerm().equals(minTerm)) {
                     //we are inside a reader with the min term
@@ -108,9 +87,6 @@ public class Merge {
                 }
             }
 
-            long time_after_while = System.currentTimeMillis();
-            time_of_while_cycle += time_after_while - time_to_while;
-
 
 
             List<Integer> docIdsNew = minPosting.getDocIds();
@@ -127,72 +103,40 @@ public class Merge {
             }
             // System.out.println("Term: " + minPosting.getTerm() + " DocIds: " + docIdsNew.size() + " Freqs: " + freqsNew.size());
 
-            long time_docids_freqs = System.currentTimeMillis();
-            time_docs_freqs_removeduplicates += time_docids_freqs - time_after_while;
-
             lexiconWrite(minPosting, fcSkippingBlock.size(), docIdsNew, freqsNew, lexicon);
-            long time_after_lexicon = System.currentTimeMillis();
-            time_lexicon += time_after_lexicon - time_docids_freqs;
 
             SkippingBlock skippingBlock = new SkippingBlock();
 
-            long time_skipping_pre = System.currentTimeMillis();
-            skippingBlock.setDoc_id_offset(docIdWriter.writeDocIds(docIdsNew, compress).get(0));
-            long time_skipping_docidoffset = System.currentTimeMillis();
-            time_skip_1 += time_skipping_docidoffset - time_skipping_pre;
+            List<Long> offsetTerm = docIdWriter.writeDocIds(docIdsNew, compress);
+            List<Long> offsetTermF = frequencyWriter.writeFrequencies(freqsNew, compress);
 
-            skippingBlock.setFreq_offset(frequencyWriter.writeFrequencies(freqsNew, compress).get(0));
-            long time_skipping_freqsoffset = System.currentTimeMillis();
-            time_skip_2 += time_skipping_freqsoffset - time_skipping_docidoffset;
+            System.out.println(minTerm + " " +offsetTermF + " " + freqsNew + " " + docIdsNew);
+            // [rica [39, 40, 41, 42, 43, 44, 45, 46, 47, 48] [65537, 65538, 131073, 196609, 131073, 65537, 65537, 65537, 131073, 65537] 1.0
+            // rica  [39, 40, 41, 42, 43, 44, 45, 46, 47, 48] [1, 1, 1, 2, 2, 1, 3, 1, 2, 1]
+            // SkippingBlock{doc_id_offset=7460, doc_id_size=10, freq_offset=3730, freq_size=10, doc_id_max=48, num_posting_of_block=10, file_offset=0}
 
+            skippingBlock.setDoc_id_offset(offsetTerm.get(0));
+            skippingBlock.setFreq_offset(offsetTermF.get(0));
             skippingBlock.setDoc_id_max(docIdsNew.get(docIdsNew.size() - 1));
-            long time_skipping_docidmax = System.currentTimeMillis();
-            time_skip_3 += time_skipping_docidmax - time_skipping_freqsoffset;
-
             skippingBlock.setDoc_id_size(docIdsNew.size());
-            long time_skipping_docidsize = System.currentTimeMillis();
-            time_skip_4 += time_skipping_docidsize - time_skipping_docidmax;
-
             skippingBlock.setFreq_size(freqsNew.size());
-            long time_skipping_freqsize = System.currentTimeMillis();
-            time_skip_5 += time_skipping_freqsize - time_skipping_docidsize;
-
-            skippingBlock.setNum_posting_of_block((int) lexSize);
-            long time_skipping_numblock = System.currentTimeMillis();
-            time_skip_6 += time_skipping_numblock - time_skipping_freqsize;
-
+            skippingBlock.setNum_posting_of_block(docIdsNew.size() % blockSize);
             skippingBlock.writeOnDisk(fcSkippingBlock);
-            long time_skipping_post = System.currentTimeMillis();
-            time_skip_7 += time_skipping_post - time_skipping_numblock;
+
+
+            /*long offsetTerm = skippingBlock.write(docIdWriter.writeDocIds(docIdsNew, compress).get(0), docIdsNew.size(),
+                    frequencyWriter.writeFrequencies(freqsNew, compress).get(0), freqsNew.size(),
+                    docIdsNew.get(docIdsNew.size() - 1),docIdsNew.size() % blockSize);
+            lexiconWrite(minPosting, offsetTerm - SkippingBlock.size_of_element, docIdsNew, freqsNew, lexicon);*/
 
 
 
             //long offsetTerm = inv.write(docIdsNew, freqsNew, compress);
             //lexiconWrite(minPosting, offsetTerm, docIdsNew, freqsNew, lexicon);
-            long time_after_writing = System.currentTimeMillis();
-            time_after_everything_dc += time_after_writing - time_docids_freqs;
 
 
         }
         fcSkippingBlock.close();
-
-        System.out.println("Time min term: " + time_to_min_term);
-        System.out.println("Time before starting while: " + time_to_while_cycle);
-        System.out.println("Time of internal while cycle: " + time_of_while_cycle);
-        System.out.println("Time retrieving docs freqs and removing duplicates: " + time_docs_freqs_removeduplicates);
-        System.out.println("Time writing lexicon and skipping block: " + time_after_everything_dc);
-
-        System.out.println("It' lexiconing time: " + time_lexicon);
-
-        System.out.println("Skip 1: " + time_skip_1);
-        System.out.println("Skip 2: " + time_skip_2);
-        System.out.println("Skip 3: " + time_skip_3);
-        System.out.println("Skip 4: " + time_skip_4);
-        System.out.println("Skip 5: " + time_skip_5);
-        System.out.println("Skip 6: " + time_skip_6);
-        System.out.println("Skip 7: " + time_skip_7);
-
-
 
         Statistics statistics = new Statistics();
         statistics.setTerms(lexSize);
@@ -253,7 +197,7 @@ public class Merge {
                 tf = posting.getFrequency();
             }
         }
-        lexicon.write(pi.getTerm(), offset, df, stats.getNumDocs(), tf, BM25Upper);
+        lexicon.write(pi.getTerm(), offset, df, (double) stats.getNumDocs(), tf, BM25Upper);
     }
 
     protected float calculateBM25(float tf, long doc_id){

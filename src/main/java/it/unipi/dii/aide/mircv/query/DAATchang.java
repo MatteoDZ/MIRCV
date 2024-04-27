@@ -60,6 +60,7 @@ public class DAATchang {
         TopKPriorityQueue<Pair<Float, Integer>> topK =
                 new TopKPriorityQueue<>(k, Comparator.comparing(Pair::getValue0));
 
+
         // Determine the starting document ID based on the query type.
         int doc_id = conjunctive ? get_doc_id(postings) : getMinDocId(postings);
 

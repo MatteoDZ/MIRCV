@@ -182,7 +182,9 @@ public class PostingIndex {
      * Opens the posting list by reading associated skipping blocks from the lexicon.
      */
     public void openList() throws IOException {
+        Lexicon.getInstance().get(term).setOffset_skip_pointer(Lexicon.getInstance().get(term).getOffsetInvertedIndex());
         blocks = Lexicon.getInstance().get(term).readBlocks();
+
         if (blocks == null) {
             return;
         }

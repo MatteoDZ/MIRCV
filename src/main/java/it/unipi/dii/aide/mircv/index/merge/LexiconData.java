@@ -110,6 +110,14 @@ public class LexiconData {
         this.upperBM25 = upperBM25;
     }
 
+    public float getOffset_skip_pointer() {
+        return offset_skip_pointer;
+    }
+
+    public void setOffset_skip_pointer(long skipPointer) {
+        this.offset_skip_pointer = skipPointer;
+    }
+
 
     /**
      * Reads the LexiconEntry from the specified offset in the given FileChannel.
@@ -144,6 +152,7 @@ public class LexiconData {
      * @param fileChannel The FileChannel to which to write.
      */
     public void writeEntryToDisk(FileChannel fileChannel) {
+        // long startLexiconDataWrite = System.currentTimeMillis();
         try {
             MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, fileChannel.size(), ENTRY_SIZE);
 
@@ -157,6 +166,9 @@ public class LexiconData {
             mappedByteBuffer.putLong(offset_frequency);
             mappedByteBuffer.putInt(numBlocks);
             mappedByteBuffer.putLong(offset_skip_pointer);
+            // long endLexiconDataWrite = System.currentTimeMillis();
+            // System.out.println("LexiconData write time: " + (endLexiconDataWrite - startLexiconDataWrite));
+            // System.out.println("-------------------------------------");
         } catch (IOException e) {
             throw new RuntimeException("An error occurred while writing a LexiconData in to the lexicon file");
         }
@@ -192,6 +204,8 @@ public class LexiconData {
             return null;
         }
     }
+
+
 
     /**
      * Returns a string representation of the LexiconEntry.
