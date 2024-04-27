@@ -1,21 +1,12 @@
 package it.unipi.dii.aide.mircv.index;
 
 import it.unipi.dii.aide.mircv.index.config.Configuration;
-import it.unipi.dii.aide.mircv.index.merge.InvertedIndexFile;
-import it.unipi.dii.aide.mircv.index.merge.Lexicon;
 import it.unipi.dii.aide.mircv.index.merge.Merge;
 import it.unipi.dii.aide.mircv.index.spimi.Spimi;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
-import it.unipi.dii.aide.mircv.index.utils.Statistics;
-import it.unipi.dii.aide.mircv.query.Processer;
-import it.unipi.dii.aide.mircv.query.TopKPriorityQueue;
-import org.javatuples.Pair;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import java.util.Scanner;
 
 public class Main {
 
@@ -41,7 +32,7 @@ public class Main {
             System.out.println(printTime("Spimi", startTime_spimi, endTime_spimi));
         }
 
-        if(!FileUtils.searchIfExists(Configuration.PATH_INVERTED_INDEX)){
+        if(!FileUtils.fileExists()){
             long startTime_merge = System.currentTimeMillis();
             System.out.println("Merge is starting....");
             Merge merge = new Merge(Objects.requireNonNull(FileUtils.getFilesOfDirectory(Configuration.DIRECTORY_TEMP_FILES)), Configuration.BLOCK_SIZE);

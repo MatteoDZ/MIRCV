@@ -13,7 +13,7 @@ public class Lexicon {
     private final LFUCache<String, LexiconData> lfuCache = new LFUCache<>(Configuration.LEXICON_CACHE_SIZE);
     protected static final int MAX_LEN_OF_TERM = 32;
     private final LexiconData lexicon;
-    private static Lexicon instance = new Lexicon();
+    private static final Lexicon instance = new Lexicon();
 
 
     public Lexicon() {
@@ -37,16 +37,13 @@ public class Lexicon {
 
 
     public void write(String term, Long offset, Integer df, Double docnum, Integer tf, Float bm25) throws IOException {
-        // long startLexiconDataSetting = System.currentTimeMillis();
         lexicon.setTerm(term);
-        lexicon.setOffsetInvertedIndex(offset);
+        lexicon.setOffset_skip_pointer(offset);
         lexicon.setDf(df);
         lexicon.setIdf((float) Math.log10((double) docnum /df));
         lexicon.setUpperTFIDF((float) ((1 + Math.log(tf)) * lexicon.getIdf()));
-        lexicon.setUpperTF(1);
+        lexicon.setUpperTF(1); // PERCHE 1???
         lexicon.setUpperBM25(bm25);
-        // long endLexiconDataSetting = System.currentTimeMillis();
-        // System.out.println("LexiconData setting time: " + (endLexiconDataSetting - startLexiconDataSetting));
         lexicon.writeEntryToDisk(fc);
     }
 
@@ -76,6 +73,12 @@ public class Lexicon {
         return nullIndex >= 0 ? trimmed.substring(0, nullIndex) : trimmed;
     }
 
+    /**
+     * Find a specific term within the lexicon data using binary search.
+     *
+     * @param  termToFind    the term to search for
+     * @return               the LexiconData object representing the found term, or null if not found
+     */
     public LexiconData findTerm(String termToFind) throws IOException {
         long bot = 0;
         long mid;

@@ -1,5 +1,6 @@
 package it.unipi.dii.aide.mircv.query;
 
+import it.unipi.dii.aide.mircv.index.config.Configuration;
 import org.javatuples.Pair;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,12 +29,12 @@ public class Main {
                 continue;
             }
 
-            System.out.print("Daat(1) or exit(2)?");
+            System.out.print("Daat(1) or Dynamic Pruning(2) or exit(3)?");
             int chose = Integer.parseInt(scanner.nextLine());
-            if (chose != 1 && chose != 2) {
+            if (chose != 1 && chose != 2 && chose != 3) {
                 System.out.println("no good choice, please repeat");
                 continue;
-            } else if (chose == 2) {
+            } else if (chose == 3) {
                 break;
             }
 
@@ -51,8 +52,9 @@ public class Main {
                 continue;
             }
 
+            Configuration.DYNAMIC_PRUNING = chose != 1;
             timerStart = System.currentTimeMillis();
-            topKPriorityQueue = (Processer.processQuery(query, 10, chose1 == 1, scoreFun));
+            topKPriorityQueue = (Processer.processQuery(query, 10, chose1 == 1, scoreFun, Configuration.COMPRESSION, Configuration.DYNAMIC_PRUNING));
             timerEnd = System.currentTimeMillis();
             queryResult=Processer.getRankedQuery(topKPriorityQueue);
 

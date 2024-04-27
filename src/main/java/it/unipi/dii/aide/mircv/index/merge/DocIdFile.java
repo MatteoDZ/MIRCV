@@ -18,7 +18,6 @@ public class DocIdFile {
     private final FileChannel fc; // File channel for reading and writing
     private final Integer BLOCK_SIZE; // Size of the data block
     private final List<Integer> block = new ArrayList<>(); // Temporary block to store document IDs
-    private final List<Integer> termUpperBounds = new ArrayList<>(); // Upper bounds of terms
 
     /**
      * Constructor for DocIdFileWriter.
@@ -35,15 +34,6 @@ public class DocIdFile {
     }
 
     /**
-     * Retrieves the list of term upper bounds.
-     *
-     * @return a list of integers representing the upper bounds of the terms.
-     */
-    public List<Integer> getTermUpperBounds() {
-        return termUpperBounds;
-    }
-
-    /**
      * Writes document IDs to the file and returns the offsets of the written blocks.
      *
      * @param docIds      The list of document IDs to write.
@@ -51,27 +41,23 @@ public class DocIdFile {
      * @return The list of offsets.
      * @throws IOException If an I/O error occurs.
      */
-    public List<Long> writeDocIds(List<Integer> docIds, boolean compression) throws IOException {
-        List<Long> offsets = new ArrayList<>();
-        termUpperBounds.clear();
-        offsets.add(fc.size());
+    public Long writeDocIds(List<Integer> docIds, boolean compression) throws IOException {
+        long offset = fc.size();
 
         for (Integer docId : docIds) {
             block.add(docId);
             if (block.size() == BLOCK_SIZE) {
-                offsets.add(writeBlock(block, compression));
-                termUpperBounds.add(calculateTermUpperBounds(block));
+                writeBlock(block, compression);
                 block.clear();
             }
         }
 
         if (!block.isEmpty()) {
-            offsets.add(writeBlock(block, compression));
-            termUpperBounds.add(calculateTermUpperBounds(block));
+            writeBlock(block, compression);
             block.clear();
         }
 
-        return offsets;
+        return offset;
     }
 
     /**
@@ -79,59 +65,14 @@ public class DocIdFile {
      *
      * @param block       The list of integers to write.
      * @param compression The encoding to use for the block.
-     * @return The size of the file channel after writing the block.
      * @throws IOException If an I/O error occurs.
      */
-    private long writeBlock(List<Integer> block, boolean compression) throws IOException {
+    private void  writeBlock(List<Integer> block, boolean compression) throws IOException {
         if (!compression) {
             BinaryFile.writeIntListToBuffer(fc, block);
         } else {
             BinaryFile.writeArrayByteToBuffer(fc, VariableByteCompressor.encode(block));
         }
-
-        return fc.size();
     }
 
-    /**
-     * Reads a block of document IDs from the file.
-     *
-     * @param offsetsStart The starting offset in the file.
-     * @param offsetsEnd   The ending offset in the file.
-     * @param compression  Indicates whether the data is compressed.
-     * @return A list of document IDs read from the file.
-     * @throws IOException If an I/O error occurs while reading the file.
-     */
-    public List<Integer> readDocIdsBlock(Long offsetsStart, Long offsetsEnd, boolean compression) throws IOException {
-        if (!compression) {
-            return BinaryFile.readIntListFromBuffer(fc, offsetsStart, offsetsEnd);
-        } else {
-            return VariableByteCompressor.decode(BinaryFile.readArrayByteFromBuffer(fc, offsetsStart, offsetsEnd));
-        }
-    }
-
-    /**
-     * Calculates the upper bounds of the term in the given block.
-     *
-     * @param block The list of integers representing the block.
-     * @return The last element in the block.
-     */
-    public Integer calculateTermUpperBounds(List<Integer> block) {
-        return block.stream().max(Integer::compareTo).get();
-    }
-
-    /**
-     * Reads a list of document IDs based on a list of offsets.
-     *
-     * @param offsets     A list of offsets indicating the start and end positions of each block of document IDs.
-     * @param compression Indicates whether to use compression.
-     * @return A list of document IDs read from the offsets.
-     * @throws IOException If there is an error reading the document IDs.
-     */
-    public List<Integer> readDocIds(List<Long> offsets, boolean compression) throws IOException {
-        List<Integer> docIds = new ArrayList<>();
-        for (int i = 0; i < offsets.size() - 1; i++) {
-            docIds.addAll(readDocIdsBlock(offsets.get(i), offsets.get(i + 1), compression));
-        }
-        return docIds;
-    }
 }

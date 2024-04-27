@@ -25,7 +25,6 @@ public class SkippingBlock {
     public static final int size_of_element = (8 + 4) * 2 + 4 + 4;
     private static MappedByteBuffer bufferDocId = null;
     private static MappedByteBuffer bufferFreq = null;
-    private static FileChannel fcSkippingBlock = null;
 
     static {
         try {
@@ -34,27 +33,13 @@ public class SkippingBlock {
             if(file.exists()&&file1.exists()){
                 FileChannel fileChannel = FileChannel.open(Paths.get(Configuration.PATH_DOCID), StandardOpenOption.READ);
                 FileChannel fileChannel1 = FileChannel.open(Paths.get(Configuration.PATH_FREQ), StandardOpenOption.READ);
-                fcSkippingBlock = FileChannel.open(Paths.get(Configuration.SKIPPING_BLOCK_PATH), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
                 bufferDocId = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
                 bufferFreq = fileChannel1.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel1.size());
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
             System.out.println("Problems with opening the file channel");
         }
-    }
-
-    public long write(Long doc_id_offset, Integer doc_id_size, Long freq_offset, Integer freq_size, Integer doc_id_max, Integer num_posting_of_block) throws IOException {
-        MappedByteBuffer skippedBlockMmb = fcSkippingBlock.map(FileChannel.MapMode.READ_WRITE, file_offset, size_of_element);
-        skippedBlockMmb.putLong(doc_id_offset);
-        skippedBlockMmb.putInt(doc_id_size);
-        skippedBlockMmb.putLong(freq_offset);
-        skippedBlockMmb.putInt(freq_size);
-        skippedBlockMmb.putInt(doc_id_max);
-        skippedBlockMmb.putInt(num_posting_of_block);
-        file_offset += size_of_element;
-        return file_offset;
     }
 
 
@@ -86,8 +71,6 @@ public class SkippingBlock {
             return false;
         }
     }
-
-
 
 
     // Getters and setters...
@@ -141,12 +124,7 @@ public class SkippingBlock {
      *
      * @return ArrayList of Posting objects representing the postings in the skipping block.
      */
-    public ArrayList<Posting> getSkippingBlockPostings() {
-        //try {
-        //FileChannel fileChannelDocID = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_DOC_ID), StandardOpenOption.READ);
-        //FileChannel fileChannelFreqs = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_FREQ), StandardOpenOption.READ);
-        //MappedByteBuffer mappedByteBufferDocID = fileChannelDocID.map(FileChannel.MapMode.READ_ONLY, doc_id_offset, doc_id_size);
-        //MappedByteBuffer mappedByteBufferFreq = fileChannelFreqs.map(FileChannel.MapMode.READ_ONLY, freq_offset, freq_size)
+    public ArrayList<Posting> getSkippingBlockPostings(Boolean compression) {
 
         if (bufferDocId == null || bufferFreq == null) {
             System.out.println("problems with file channels");
@@ -158,7 +136,7 @@ public class SkippingBlock {
 
         ArrayList<Posting> postings = new ArrayList<>();
 
-        if (Configuration.COMPRESSION) {
+        if (compression) {
             byte[] doc_ids = new byte[doc_id_size];
             byte[] freqs = new byte[freq_size];
             bufferDocId.get(doc_ids, 0, doc_id_size);

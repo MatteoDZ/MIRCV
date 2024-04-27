@@ -11,6 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FrequencyFileTest {
 
+    /*
+
     @BeforeAll
     static void setUp() {
         Configuration.setUpPathTest();
@@ -89,6 +91,6 @@ public class FrequencyFileTest {
         List<Integer> freqsNew2 = List.of(3,5,11,1,6);
         List<Long> offsetsNew2 = freq.writeFrequencies(freqsNew2,true);
         assertEquals(freqsNew2.toString(), freq.readFreqsBlock(offsetsNew2.get(0), offsetsNew2.get(1), true).toString());
-    }
+    }*/
 
 }

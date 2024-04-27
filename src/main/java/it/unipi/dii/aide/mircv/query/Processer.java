@@ -22,43 +22,7 @@ public class Processer {
      * @param conjunctive Boolean flag indicating conjunctive (AND) or disjunctive (OR) operation.
      * @return ArrayList of PostingIndex objects representing the posting lists of the query terms.
      */
-    public static ArrayList<PostingIndex> getQueryPostingLists(ArrayList<String> query, boolean conjunctive, String scoringFun) throws IOException {
-        /*ArrayList<PostingIndex> postingOfQuery = new ArrayList<>();
-        Lexicon lexicon = new Lexicon();
-        InvertedIndexFile invertedIndex = new InvertedIndexFile(Configuration.BLOCK_SIZE);
-        for (String term : query) {
-            LexiconData lexiconEntry = lexicon.get(term);
-            List<Integer> docIds = invertedIndex.getDocIds(lexiconEntry.getOffsetInvertedIndex(), false);
-            List<Integer> freqs = new ArrayList<>();
-            for (Integer i : docIds){
-                freqs.add(invertedIndex.getFreq(lexiconEntry.getOffsetInvertedIndex(), i, false));
-            }
-            PostingIndex postingIndex = new PostingIndex(term, docIds, freqs);
-
-            if (lexiconEntry == null) {
-                if (conjunctive) {
-                    return null;
-                }
-                continue;
-            }
-
-            PostingIndex postingIndex = new PostingIndex(term, lexiconEntry.getOffsetInvertedIndex());
-            postingIndex.setIdf(lexiconEntry.getIdf());
-            System.out.println("POSTINGINDEX: " + postingIndex);
-            if(false){ //PathAdnFlags.DYNAMIC_PRUNING
-                if(scoringFun.equals("tfidf")){
-                    postingIndex.setUpperBound(lexiconEntry.getUpperTFIDF());
-                }else{
-                    postingIndex.setUpperBound(lexiconEntry.getUpperBM25());
-                }
-            }
-            postingOfQuery.add(postingIndex);
-        }
-        return postingOfQuery;*/
-
-
-
-
+    public static ArrayList<PostingIndex> getQueryPostingLists(ArrayList<String> query, boolean conjunctive, String scoringFun, boolean pruning) throws IOException {
         ArrayList<PostingIndex> postingOfQuery = new ArrayList<>();
         PostingIndex postingIndex;
         for (String term : query) {
@@ -71,13 +35,13 @@ public class Processer {
             }
             postingIndex=new PostingIndex(lexiconEntry.getTerm());
             postingIndex.setIdf(lexiconEntry.getIdf());
-            /*if(PathAndFlags.DYNAMIC_PRUNING){
+            if(pruning){
                 if(scoringFun.equals("tfidf")){
                     postingIndex.setUpperBound(lexiconEntry.getUpperTFIDF());
                 }else{
                     postingIndex.setUpperBound(lexiconEntry.getUpperBM25());
                 }
-            }*/
+            }
             postingOfQuery.add(postingIndex);
         }
         return postingOfQuery;
@@ -95,22 +59,9 @@ public class Processer {
      * @param scoringFun   The scoring function to be used.
      * @return ArrayList of document IDs matching the query.
      */
-    public static TopKPriorityQueue<Pair<Float,Integer>> processQuery(String query, Integer k, Boolean conjunctive, String scoringFun) throws IOException {
+    public static TopKPriorityQueue<Pair<Float,Integer>> processQuery(String query, Integer k, Boolean conjunctive, String scoringFun, Boolean compression, Boolean pruning) throws IOException {
         // Clean and preprocess the query.
-        // String queryP = Preprocess.removeStopwords(query);
         List<String> cleaned = Preprocess.processText(query, Configuration.STEMMING_AND_STOPWORDS);
-
-        // List<String> cleaned = Preprocess.processText(queryP, Configuration.STOPWORD_STEM_ENABLED);
-
-        /*
-        // Apply stopword removal and stemming if enabled.
-        if (PathAndFlags.STOPWORD_STEM_ENABLED) {
-            cleaned = Preprocess.removeStopwords(cleaned);
-            cleaned = Preprocess.applyStemming(cleaned);
-        }
-
-         */
-
 
 
         // Check if the query is empty after preprocessing.
@@ -123,7 +74,7 @@ public class Processer {
         Set<String> queryDistinctWords = new HashSet<>(cleaned);
 
         // Retrieve posting lists for the query terms.
-        ArrayList<PostingIndex> queryPostings = getQueryPostingLists(new ArrayList<>(queryDistinctWords), conjunctive,scoringFun);
+        ArrayList<PostingIndex> queryPostings = getQueryPostingLists(new ArrayList<>(queryDistinctWords), conjunctive,scoringFun, pruning);
 
         // Return null if no posting lists are retrieved.
         if (queryPostings == null || queryPostings.isEmpty()) {
@@ -133,23 +84,25 @@ public class Processer {
         // Initialize a priority queue for the top-K results.
         TopKPriorityQueue<Pair<Float, Integer>> priorityQueue;
 
-        /*
         // Choose between dynamic pruning and DAAT scoring based on the flag.
-        if (PathAndFlags.DYNAMIC_PRUNING) {
-            priorityQueue = MaxScoreDynamicPruning.maxScore(queryPostings,k,scoringFun,conjunctive);
+        if (pruning) {
+            priorityQueue = MaxScoreDynamicPruningLeo.maxScore(queryPostings,k,scoringFun,conjunctive, compression);
         } else {
-            priorityQueue = DAAT.scoreCollection(queryPostings, k, scoringFun, conjunctive);
+            priorityQueue = DAAT.scoreCollection(queryPostings, k, scoringFun, conjunctive, compression);
         }
-         */
 
-        // priorityQueue = DAAT.scoreCollection(queryPostings, k, scoringFun, conjunctive);
-        // priorityQueue = DAAT1.scoreCollection(queryPostings, k, scoringFun, conjunctive);
-        priorityQueue = DAATchang.scoreCollection(queryPostings, k, scoringFun, conjunctive);
         assert priorityQueue != null;
 
         return priorityQueue;
 
     }
+
+    /**
+     * Retrieves the ranked query from the given priority queue.
+     *
+     * @param  priorityQueue  the priority queue containing the query results
+     * @return                an ArrayList of integers representing the ranked query
+     */
     public static ArrayList<Integer> getRankedQuery(TopKPriorityQueue<Pair<Float,Integer>>priorityQueue){
         // Return null if the priority queue is null.
         if (priorityQueue == null) {

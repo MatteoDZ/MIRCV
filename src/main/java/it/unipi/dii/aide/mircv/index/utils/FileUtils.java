@@ -1,5 +1,7 @@
 package it.unipi.dii.aide.mircv.index.utils;
 
+import it.unipi.dii.aide.mircv.index.config.Configuration;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -110,6 +112,16 @@ public class FileUtils {
      */
     public static String createPathFileBlockN(String path, int blockNumber){
         return path.split("\\.")[0] + "_" + blockNumber + "." + path.split("\\.")[1];
+    }
+
+    /**
+     * Check if multiple files exist.
+     *
+     * @return         true if all files exist, false otherwise
+     */
+    public static Boolean fileExists(){
+        return searchIfExists(Configuration.SKIPPING_BLOCK_PATH) && searchIfExists(Configuration.PATH_DOCID) &&
+                searchIfExists(Configuration.PATH_FREQ) && searchIfExists(Configuration.PATH_DOC_TERMS);
     }
 
 

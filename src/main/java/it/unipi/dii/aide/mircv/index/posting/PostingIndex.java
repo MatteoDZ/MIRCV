@@ -182,7 +182,6 @@ public class PostingIndex {
      * Opens the posting list by reading associated skipping blocks from the lexicon.
      */
     public void openList() throws IOException {
-        Lexicon.getInstance().get(term).setOffset_skip_pointer(Lexicon.getInstance().get(term).getOffsetInvertedIndex());
         blocks = Lexicon.getInstance().get(term).readBlocks();
 
         if (blocks == null) {
@@ -197,7 +196,7 @@ public class PostingIndex {
      *
      * @return The next posting or null if the end is reached.
      */
-    public Posting next() {
+    public Posting next(Boolean compression) {
         if (!postingIterator.hasNext()) {
             if (!skippingBlockIterator.hasNext()) {
                 postingActual = null;
@@ -205,7 +204,7 @@ public class PostingIndex {
             }
             skippingBlockActual = skippingBlockIterator.next();
             postings.clear();
-            postings.addAll(skippingBlockActual.getSkippingBlockPostings());
+            postings.addAll(skippingBlockActual.getSkippingBlockPostings(compression));
             postingIterator = postings.iterator();
         }
         postingActual = postingIterator.next();
@@ -218,7 +217,7 @@ public class PostingIndex {
      * @param doc_id The document ID to compare.
      * @return The next posting with a document ID greater than or equal to doc_id, or null if not found.
      */
-    public Posting nextGEQ(int doc_id) {
+    public Posting nextGEQ(int doc_id, boolean compression) {
         boolean nextBlock = false;
         while (skippingBlockActual == null || skippingBlockActual.getDoc_id_max() < doc_id) {
             if (!skippingBlockIterator.hasNext()) {
@@ -230,7 +229,7 @@ public class PostingIndex {
         }
         if (nextBlock) {
             postings.clear();
-            postings.addAll(skippingBlockActual.getSkippingBlockPostings());
+            postings.addAll(skippingBlockActual.getSkippingBlockPostings(compression));
             postingIterator = postings.iterator();
         }
         while (postingIterator.hasNext()) {

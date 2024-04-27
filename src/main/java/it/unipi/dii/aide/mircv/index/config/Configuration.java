@@ -9,11 +9,12 @@ public class Configuration {
 
     public static final String PATH_DOCUMENTS = load("path_documents");
     public static final String PATH_DOCUMENTS_TEST = load("path_documents_test");
+    public static final String PATH_QUERIES = load("path_queries");
     public static final String PATH_STOPWORDS = load("path_stopwords");
     public static String PATH_BLOCKS = load("path_blocks");
     public static String DIRECTORY_TEMP_FILES = load("directory_temporary_files");
     public static final String DIRECTORY_TEST = load("directory_test");
-    public static String PATH_INVERTED_INDEX = load("path_inverted_index");
+    public static Boolean DYNAMIC_PRUNING = Boolean.parseBoolean(load("dynamic_pruning"));
     public static  String PATH_DOCID = load("path_docids");
     public static  String PATH_FREQ = load("path_freqs");
     public static  String PATH_LEXICON = load("path_lexicon");
@@ -62,7 +63,6 @@ public class Configuration {
         PATH_DOCID = Configuration.DIRECTORY_TEST + "/testDoc";
         PATH_FREQ = Configuration.DIRECTORY_TEST + "/testFreq";
         SKIPPING_BLOCK_PATH = Configuration.DIRECTORY_TEST + "/testSkipping";
-        PATH_INVERTED_INDEX = Configuration.DIRECTORY_TEST + "/testIndex";
         PATH_LEXICON = Configuration.DIRECTORY_TEST + "/testLexicon";
         PATH_STATISTICS = Configuration.DIRECTORY_TEST + "/testStatistics";
         PATH_DOC_TERMS = Configuration.DIRECTORY_TEST + "/docTerms";

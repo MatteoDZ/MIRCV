@@ -1,18 +1,26 @@
 package it.unipi.dii.aide.mircv.query;
 
-
 import it.unipi.dii.aide.mircv.index.posting.Posting;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
 import it.unipi.dii.aide.mircv.index.utils.Statistics;
 import org.javatuples.Pair;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
 
-/**
- * Class representing Document At A Time (DAAT) query processing.
- */
 public class DAAT {
+
+    private static final Statistics stats;
+
+    static {
+        stats = new Statistics();
+        try {
+            stats.readFromDisk();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Retrieves the minimum document ID from a list of PostingIndex objects.
@@ -20,8 +28,7 @@ public class DAAT {
      * @param postings List of PostingIndex objects.
      * @return Minimum document ID.
      */
-    protected static int getMinDocId(ArrayList<PostingIndex> postings) {
-        Statistics stats = new Statistics();
+    private static int getMinDocId(ArrayList<PostingIndex> postings) {
         int min_doc = stats.getNumDocs();
         for (PostingIndex postingIndex : postings) {
             if (postingIndex.getPostingActual() != null) {
@@ -41,57 +48,48 @@ public class DAAT {
      * @return Top-K results with their scores.
      */
     public static TopKPriorityQueue<Pair<Float, Integer>> scoreCollection(
-            ArrayList<PostingIndex> postings, int k, String TFIDFOrBM25, boolean conjunctive) throws IOException {
+            ArrayList<PostingIndex> postings, int k, String TFIDFOrBM25, boolean conjunctive, boolean compression) throws IOException {
 
-        /*
         // Initialize the posting lists.
         for (PostingIndex index : postings) {
-            index.
             index.openList();
-            index.next();
+            index.next(compression);
         }
 
-         */
-        System.out.println("DAAT 56 ");
         // Initialize the priority queue for top-K results.
         TopKPriorityQueue<Pair<Float, Integer>> topK =
                 new TopKPriorityQueue<>(k, Comparator.comparing(Pair::getValue0));
 
+
         // Determine the starting document ID based on the query type.
-        int doc_id = conjunctive ? get_doc_id(postings) : getMinDocId(postings);
-        System.out.println("Check docId: " + doc_id);
+        int doc_id = conjunctive ? get_doc_id(postings, compression) : getMinDocId(postings);
 
         // If there are no documents matching the query, return null.
-        if (doc_id == 0) {
-            System.out.println("SONO QUI");
+        /*if (doc_id == 0) {
             return null;
-        }
+        }*/
 
         // Process each document and calculate the score.
-        Statistics stats = new Statistics();
         int doc_len = stats.getNumDocs();
 
-        int numWords = 0;
-        while (numWords != postings.size()) {
+
+        while (doc_id != doc_len) {
             float score = 0.0F;
 
             // Calculate the score for each posting in the list.
             for (PostingIndex postingIndex : postings) {
-                for (Posting posting : postingIndex.getPostings()) {
-                    if (posting != null) {
-                        if (posting.getDoc_id() == doc_id) {
-                            score += Scorer.score(
-                                    posting,
-                                    postingIndex.getIdf(),
-                                    TFIDFOrBM25);
-                            //postingIndex.next();
-                        }
-                    } else if (conjunctive) {
-                        System.out.println("DAAT 88: " + topK.size());
-                        return topK;
+                Posting posting = postingIndex.getPostingActual();
+                if (posting != null) {
+                    if (posting.getDoc_id() == doc_id) {
+                        score += Scorer.score(
+                                posting,
+                                postingIndex.getIdf(),
+                                TFIDFOrBM25);
+                        postingIndex.next(compression);
                     }
+                } else if (conjunctive) {
+                    return topK;
                 }
-                //Posting posting = postingIndex.getPostings().get(0);
             }
 
 
@@ -99,16 +97,15 @@ public class DAAT {
             topK.offer(new Pair<>(score, doc_id));
 
             // Move to the next document based on the query type.
-            doc_id = conjunctive ? get_doc_id(postings) : getMinDocId(postings);
+            doc_id = conjunctive ? get_doc_id(postings, compression) : getMinDocId(postings);
 
             // If there are no more documents, exit the loop.
             if (doc_id == 0) {
                 break;
             }
-            numWords++;
         }
 
-        System.out.println("DAAT 106: " + topK.size());
+
         return topK;
     }
 
@@ -120,17 +117,13 @@ public class DAAT {
      */
     private static int get_max_doc_id(ArrayList<PostingIndex> postingIndices) {
         int max_doc = 0;
-        System.out.println("DAAT 119 ");
         for (PostingIndex postingIndex : postingIndices) {
-            System.out.println("DAAT 121 ");
-            if (postingIndex != null) {
-                max_doc = Math.max(max_doc, postingIndex.getDocIds().get(0));
+            if (postingIndex.getPostingActual() != null) {
+                max_doc = Math.max(max_doc, postingIndex.getPostingActual().getDoc_id());
             } else {
-                System.out.println("DAAT 125 ");
                 return 0;
             }
         }
-        System.out.println("DAAT 130: " + max_doc);
         return max_doc;
     }
 
@@ -141,15 +134,15 @@ public class DAAT {
      * @return True if document IDs are equal, false otherwise.
      */
     private static boolean areEquals(ArrayList<PostingIndex> postingIndices) {
-        if (postingIndices.get(0).getPostings().get(0) == null) {
+        if (postingIndices.get(0).getPostingActual() == null) {
             return false;
         }
-        int doc_id = postingIndices.get(0).getPostings().get(0).getDoc_id();
+        int doc_id = postingIndices.get(0).getPostingActual().getDoc_id();
         for (int i = 1; i < postingIndices.size(); i++) {
-            if (postingIndices.get(i).getPostings().get(0) == null) {
+            if (postingIndices.get(i).getPostingActual() == null) {
                 return false;
             }
-            if (doc_id != postingIndices.get(i).getPostings().get(0).getDoc_id()) {
+            if (doc_id != postingIndices.get(i).getPostingActual().getDoc_id()) {
                 return false;
             }
         }
@@ -162,63 +155,49 @@ public class DAAT {
      * @param postingIndices List of PostingIndex objects.
      * @return Document ID.
      */
-    private static int get_doc_id(ArrayList<PostingIndex> postingIndices) {
-        System.out.println("GETDOCID: " + postingIndices.get(0).getPostings().size());
+    private static int get_doc_id(ArrayList<PostingIndex> postingIndices, Boolean compression) {
         int doc_id = get_max_doc_id(postingIndices);
         if (doc_id == 0) {
-            System.out.println("DAAT 160");
             return 0;
         }
 
         for (int i = 0; i < postingIndices.size(); i++) {
-            int j =0;
-            System.out.println(postingIndices.get(i).getPostings().size());
-            for (Posting p : postingIndices.get(i).getPostings()) {
-                j++;
-                System.out.println("177 LINEA: " +j);
-
-                System.out.println("DAAT 170 ");
-                // Check if all posting indices have equal document IDs.
-                if (areEquals(postingIndices)) {
-                    return doc_id;
-                }
-
-                // Handle the case where a posting is null or has a higher document ID.
-                if (p == null) {
-                    System.out.println("DAAT 172");
-                    return 0;
-                }
-
-                if (p.getDoc_id() > doc_id) {
-                    doc_id = p.getDoc_id();
-                    i = -1; // Reset i to restart the loop.
-                    System.out.println("DAAT 182");
-                    continue;
-                }
-
-                // Move to the next document ID if the current one is lower.
-                if (p.getDoc_id() < doc_id) {
-                    //Posting geq = postingIndices.get(i).nextGEQ(doc_id); TODO: NON SO SE FUNZIONA
-                    Posting geq = postingIndices.get(i).getPostings().get(0);
-                    if (geq == null) {
-                        return 0;
-                    }
-                    if (geq.getDoc_id() > doc_id) {
-                        doc_id = geq.getDoc_id();
-                        i = -1; // Reset i to restart the loop.
-                        continue;
-                    }
-                    if(geq.getDoc_id()==doc_id){
-                        if(areEquals(postingIndices)){
-                            return doc_id;
-                        }
-                        i=-1;
-                    }
-                }
+            // Check if all posting indices have equal document IDs.
+            if (areEquals(postingIndices)) {
+                return doc_id;
             }
 
+            // Handle the case where a posting is null or has a higher document ID.
+            if (postingIndices.get(i).getPostingActual() == null) {
+                return 0;
+            }
+
+            if (postingIndices.get(i).getPostingActual().getDoc_id() > doc_id) {
+                doc_id = postingIndices.get(i).getPostingActual().getDoc_id();
+                i = -1; // Reset i to restart the loop.
+                continue;
+            }
+
+            // Move to the next document ID if the current one is lower.
+            if (postingIndices.get(i).getPostingActual().getDoc_id() < doc_id) {
+                Posting geq = postingIndices.get(i).nextGEQ(doc_id, compression);
+                if (geq == null) {
+                    return 0;
+                }
+                if (geq.getDoc_id() > doc_id) {
+                    doc_id = geq.getDoc_id();
+                    i = -1; // Reset i to restart the loop.
+                    continue;
+                }
+                if(geq.getDoc_id()==doc_id){
+                    if(areEquals(postingIndices)){
+                        return doc_id;
+                    }
+                    i=-1;
+                }
+            }
         }
-        System.out.println("DAAT 208");
         return 0;
     }
+
 }

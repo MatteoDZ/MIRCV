@@ -40,25 +40,24 @@ public class FrequencyFile {
      * @return The list of offsets.
      * @throws IOException If an I/O error occurs.
      */
-    public List<Long> writeFrequencies(List<Integer> freqs, boolean compress) throws IOException {
-        List<Long> offsets = new ArrayList<>();
-        offsets.add(fc.size());
+    public Long writeFrequencies(List<Integer> freqs, boolean compress) throws IOException {
+        long offset = fc.size();
         List<Integer> block = new ArrayList<>();
 
         for (Integer freq : freqs) {
             block.add(freq);
             if (block.size() == BLOCK_SIZE) {
-                offsets.add(writeBlock(block, compress));
+                writeBlock(block, compress);
                 block.clear();
             }
         }
 
         if (!block.isEmpty()) {
-            offsets.add(writeBlock(block, compress));
+            writeBlock(block, compress);
             block.clear();
         }
 
-        return offsets;
+        return offset;
     }
 
     /**
@@ -66,10 +65,9 @@ public class FrequencyFile {
      *
      * @param block     A list of integers representing the block of data.
      * @param compress  The encoding type for the data.
-     * @return The offset of the end of the block.
      * @throws IOException If an I/O error occurs while writing to the file.
      */
-    private long writeBlock(List<Integer> block, boolean compress) throws IOException {
+    private void writeBlock(List<Integer> block, boolean compress) throws IOException {
         if (!compress) {
             BinaryFile.writeShortListToBuffer(fc, block);
         } else {
@@ -78,39 +76,5 @@ public class FrequencyFile {
                     .toArray());
             BinaryFile.writeArrayByteToBuffer(fc, compressed);
         }
-        return fc.size();
-    }
-
-    /**
-     * Reads the frequencies block between the specified offsets.
-     *
-     * @param offsetsStart The starting offset.
-     * @param offsetsEnd   The ending offset.
-     * @param compression  Indicates whether compression is enabled.
-     * @return A list of Short values representing the frequencies.
-     * @throws IOException If there is an error reading the file.
-     */
-    public List<Short> readFreqsBlock(Long offsetsStart, Long offsetsEnd, boolean compression) throws IOException {
-        if (!compression) {
-            return BinaryFile.readShortListFromBuffer(fc, offsetsStart, offsetsEnd);
-        } else {
-            return UnaryCompressor.integerArrayDecompression(BinaryFile.readArrayByteFromBuffer(fc, offsetsStart, offsetsEnd), BLOCK_SIZE);
-        }
-    }
-
-    /**
-     * Reads the frequencies of documents from the given list of offsets.
-     *
-     * @param offsets     A list of offsets representing the positions of the document frequencies.
-     * @param compression Indicates whether to use compression.
-     * @return A list of short values representing the document IDs.
-     * @throws IOException If an I/O error occurs while reading the frequencies.
-     */
-    public List<Short> readFreqs(List<Long> offsets, boolean compression) throws IOException {
-        List<Short> frequencies = new ArrayList<>();
-        for (int i = 0; i < offsets.size() - 1; i++) {
-            frequencies.addAll(readFreqsBlock(offsets.get(i), offsets.get(i + 1), compression));
-        }
-        return frequencies;
     }
 }

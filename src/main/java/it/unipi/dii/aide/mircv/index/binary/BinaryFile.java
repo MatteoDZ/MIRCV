@@ -42,29 +42,6 @@ public class BinaryFile {
     }
 
     /**
-     * Writes a short value to the provided FileChannel using a MappedByteBuffer.
-     *
-     * @param  fc     the FileChannel to write to
-     * @param  value  the short value to be written
-     */
-        public static void writeShortToBuffer(FileChannel fc, short value) throws IOException {
-        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), 2);
-        mbb.putShort(value);
-    }
-
-    /**
-     * Reads a short value from the given FileChannel at the specified offset.
-     *
-     * @param  fc     the FileChannel to read from
-     * @param  offset the offset in the FileChannel where to start reading
-     * @return        the short value read from the FileChannel
-     */
-    public static short readShortFromBuffer(FileChannel fc, Long offset) throws IOException {
-        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_ONLY, offset, 2);
-        return mbb.getShort();
-    }
-
-    /**
      * A description of the entire Java function.
      *
      * @param  fc       description of parameter
@@ -101,18 +78,6 @@ public class BinaryFile {
     }
 
     /**
-     * Reads a long from the given FileChannel at the specified offset.
-     *
-     * @param  fc     the FileChannel to read from
-     * @param  offset the offset at which to start reading
-     * @return        the long read from the FileChannel
-     */
-    public static long readLongFromBuffer(FileChannel fc, Long offset) throws IOException {
-        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_ONLY, offset, 8);
-        return mbb.getLong();
-    }
-
-    /**
      * Writes a byte array to a file channel using a mapped byte buffer.
      *
      * @param  fc      the file channel to write the byte array to
@@ -124,20 +89,6 @@ public class BinaryFile {
         mbb.put(values);
     }
 
-    /**
-     * A description of the entire Java function.
-     *
-     * @param  fc       description of parameter
-     * @param  offsetStart       description of parameter
-     * @param  offsetEnd       description of parameter
-     * @return         	description of return value
-     */
-    public static byte[] readArrayByteFromBuffer(FileChannel fc, Long offsetStart, Long offsetEnd) throws IOException {
-        byte[] bytesToRead = new byte[(int) (offsetEnd - offsetStart)];
-        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_ONLY, offsetStart, offsetEnd);
-        mbb.get(bytesToRead);
-        return bytesToRead;
-    }
 
     /**
      * Writes a list of integers to a file channel as a short list.
@@ -151,22 +102,6 @@ public class BinaryFile {
         values.stream().map(b -> (short) b.intValue()).toList().forEach(mbb::putShort);
     }
 
-    /**
-     * This function reads a list of Short values from a given FileChannel within the specified offsets.
-     *
-     * @param  fc         the FileChannel to read from
-     * @param  offsetStart the starting offset within the FileChannel
-     * @param  offsetEnd   the ending offset within the FileChannel
-     * @return            a List of Short values read from the FileChannel
-     */
-    public static List<Short> readShortListFromBuffer(FileChannel fc, Long offsetStart, Long offsetEnd) throws IOException {
-        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_ONLY, offsetStart, offsetEnd);
-        List<Short> freqs = new ArrayList<>();
-        for (long i = offsetStart; i < offsetEnd; i += 2) {
-            freqs.add(mbb.getShort());
-        }
-        return freqs;
-    }
 
     /**
      * Writes a list of integers to a file channel buffer.
@@ -180,76 +115,6 @@ public class BinaryFile {
         values.forEach(mbb::putInt);
     }
 
-    /**
-     * Reads a list of integers from a specified range in a file channel.
-     *
-     * @param  fc         the FileChannel to read from
-     * @param  offsetStart the starting offset in the file
-     * @param  offsetEnd   the ending offset in the file
-     * @return            a List of integers read from the specified range
-     */
-    public static List<Integer> readIntListFromBuffer(FileChannel fc, Long offsetStart, Long offsetEnd) throws IOException {
-        List<Integer> listIntToRead = new ArrayList<>();
-        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_ONLY, offsetStart, offsetEnd);
-        for (long i = offsetStart; i < offsetEnd; i += 4) {
-            listIntToRead.add(mbb.getInt());
-        }
-        return listIntToRead;
-    }
-
-    public static List<Integer> readIntListFromBuffer(FileChannel fc) throws IOException {
-        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
-        List<Integer> listInt = new ArrayList<>();
-        int valueInt;
-        while ((valueInt = mbb.getInt()) != -1) {
-            listInt.add(valueInt);
-        }
-        return listInt;
-    }
-
-    /**
-     * Writes a list of long values to the specified file channel.
-     *
-     * @param  fc      the file channel to write the values to
-     * @param  values  the list of long values to write
-     * @throws IOException if an I/O error occurs
-     */
-    public static void writeLongListToBuffer(FileChannel fc, List<Long> values) throws IOException {
-        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), values.size() * 8L);
-        values.forEach(mbb::putLong);
-    }
-
-    public static void writeStringToBuffer(FileChannel fc, String term) throws IOException {
-        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), term.length() * 2L);
-        term.chars().forEach(character->mbb.putChar((char) character));
-    }
-
-    public static String readStringFromBuffer(FileChannel fc, Integer lenTerm, Long offset) throws IOException {
-        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_WRITE, offset, offset + lenTerm * 2L);
-        StringBuilder term = new StringBuilder();
-        for(int i=0;i<term.length();i++){
-           term.append(mbb.getChar());
-        }
-        return term.toString();
-    }
-
-    public static void writePairtoBuffer(FileChannel fc, Pair<Integer, Integer> pair) throws IOException {
-        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_WRITE, fc.size(), 8L);
-        mbb.putInt(pair.getValue0());
-        mbb.putInt(pair.getValue1());
-    }
-
-    public static List<Pair<Integer, Integer>> readPairFromBuffer(FileChannel fc) throws IOException {
-        MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
-        List<Pair<Integer, Integer>> lst = new ArrayList<>();
-        for(int i = 0; i <  100; i++) {
-            Integer value0 = mbb.getInt();
-            Integer value1 = mbb.getInt();
-            Pair p = new Pair(value0, value1);
-            lst.add(p);
-        }
-        return lst;
-    }
 
 
 

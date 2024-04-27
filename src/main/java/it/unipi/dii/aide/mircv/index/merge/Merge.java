@@ -33,7 +33,6 @@ public class Merge {
     public void write(boolean compress) throws IOException {
         long lexSize = 0L;
 
-        // InvertedIndexFile inv = new InvertedIndexFile( this.blockSize);
         Lexicon lexicon = new Lexicon();
 
         FileChannel fcSkippingBlock = FileChannel.open(Paths.get(Configuration.SKIPPING_BLOCK_PATH),
@@ -106,24 +105,15 @@ public class Merge {
             lexiconWrite(minPosting, fcSkippingBlock.size(), docIdsNew, freqsNew, lexicon);
 
             SkippingBlock skippingBlock = new SkippingBlock();
-            skippingBlock.setDoc_id_offset(docIdWriter.writeDocIds(docIdsNew, compress).get(0));
-            skippingBlock.setFreq_offset(frequencyWriter.writeFrequencies(freqsNew, compress).get(0));
+            skippingBlock.setDoc_id_offset(docIdWriter.writeDocIds(docIdsNew, compress));
+            skippingBlock.setFreq_offset(frequencyWriter.writeFrequencies(freqsNew, compress));
             skippingBlock.setDoc_id_max(docIdsNew.get(docIdsNew.size() - 1));
             skippingBlock.setDoc_id_size(docIdsNew.size());
             skippingBlock.setFreq_size(freqsNew.size());
             skippingBlock.setNum_posting_of_block(docIdsNew.size() % blockSize);
-            skippingBlock.writeOnDisk(fcSkippingBlock);
-
-
-            /*long offsetTerm = skippingBlock.write(docIdWriter.writeDocIds(docIdsNew, compress).get(0), docIdsNew.size(),
-                    frequencyWriter.writeFrequencies(freqsNew, compress).get(0), freqsNew.size(),
-                    docIdsNew.get(docIdsNew.size() - 1),docIdsNew.size() % blockSize);
-            lexiconWrite(minPosting, offsetTerm - SkippingBlock.size_of_element, docIdsNew, freqsNew, lexicon);*/
-
-
-
-            //long offsetTerm = inv.write(docIdsNew, freqsNew, compress);
-            //lexiconWrite(minPosting, offsetTerm, docIdsNew, freqsNew, lexicon);
+            if(!skippingBlock.writeOnDisk(fcSkippingBlock)) {
+                System.out.println("Problems with writing the block of postings to disk.");
+            }
 
 
         }
@@ -175,7 +165,7 @@ public class Merge {
         int  tf  = 0;
 
         int df = pi.getPostings().size();
-        float idf = (float) ((Math.log((double) stats.getNumDocs() / df)));
+        float idf = (float) ((Math.log((double) stats.getNumDocs() / df))); // a cosa serve?
 
         for (Posting posting : pi.getPostings()) {
             actualBM25 = calculateBM25(tf, posting.getDoc_id());

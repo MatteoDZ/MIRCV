@@ -13,15 +13,13 @@ import java.util.ArrayList;
 
 public class LexiconData {
     private String term;
-    private long offsetInvertedIndex= 0; //old offset_doc_id
     private int upperTF = 0;
     private int tf = 0; //not written in the file
     private float idf = 0;
     private float upperTFIDF = 0;
     private int df = 0;
     private float upperBM25 = 0;
-    private long offset_frequency = 0;
-    private long offset_skip_pointer = 0;
+    private Long offset_skip_pointer = 0L;
     private int numBlocks = 1;
     private static final long BYTES_ATTRIBUTES = 4 * 6 + 8 * 3; //4bytes * (n_int + n_float) + 8bytes * (n_long)
     protected static final long ENTRY_SIZE = BYTES_ATTRIBUTES + Lexicon.MAX_LEN_OF_TERM;
@@ -43,15 +41,10 @@ public class LexiconData {
 
 
     public LexiconData(){
-
     }
 
     public String getTerm() {
         return term;
-    }
-
-    public long getOffsetInvertedIndex() {
-        return offsetInvertedIndex;
     }
 
     public int getUpperTF() {
@@ -74,14 +67,6 @@ public class LexiconData {
 
     public void setTerm(String term) {
         this.term = term;
-    }
-
-    public void setOffsetInvertedIndex(long offsetInvertedIndex) {
-        this.offsetInvertedIndex = offsetInvertedIndex;
-    }
-
-    public void setOffset_frequency(long offset_frequency) {
-        this.offset_frequency = offset_frequency;
     }
 
     public void setUpperTF(int upperTF) {
@@ -110,7 +95,7 @@ public class LexiconData {
         this.upperBM25 = upperBM25;
     }
 
-    public float getOffset_skip_pointer() {
+    public long getOffset_skip_pointer() {
         return offset_skip_pointer;
     }
 
@@ -137,10 +122,8 @@ public class LexiconData {
             upperTF = (mappedByteBuffer.getInt());
             upperTFIDF = (mappedByteBuffer.getFloat());
             upperBM25 = (mappedByteBuffer.getFloat());
-            offsetInvertedIndex = (mappedByteBuffer.getLong());
-            offset_frequency = (mappedByteBuffer.getLong());
-            numBlocks = (mappedByteBuffer.getInt());
             offset_skip_pointer = (mappedByteBuffer.getLong());
+            numBlocks = (mappedByteBuffer.getInt());
         } catch (IOException e) {
             throw new RuntimeException("An error occurred while reading a LexiconData from the lexicon file.");
         }
@@ -152,6 +135,8 @@ public class LexiconData {
      * @param fileChannel The FileChannel to which to write.
      */
     public void writeEntryToDisk(FileChannel fileChannel) {
+
+
         // long startLexiconDataWrite = System.currentTimeMillis();
         try {
             MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, fileChannel.size(), ENTRY_SIZE);
@@ -162,10 +147,8 @@ public class LexiconData {
             mappedByteBuffer.putInt(upperTF);
             mappedByteBuffer.putFloat(upperTFIDF);
             mappedByteBuffer.putFloat(upperBM25);
-            mappedByteBuffer.putLong(offsetInvertedIndex);
-            mappedByteBuffer.putLong(offset_frequency);
-            mappedByteBuffer.putInt(numBlocks);
             mappedByteBuffer.putLong(offset_skip_pointer);
+            mappedByteBuffer.putInt(numBlocks);
             // long endLexiconDataWrite = System.currentTimeMillis();
             // System.out.println("LexiconData write time: " + (endLexiconDataWrite - startLexiconDataWrite));
             // System.out.println("-------------------------------------");
@@ -215,13 +198,11 @@ public class LexiconData {
     @Override
     public String toString() {
         return "Term: " + term + " " +
-                "Offset Doc ID: " + offsetInvertedIndex + " " +
                 "Upper TF: " + upperTF + " " +
                 "DF: " + df + " " +
                 "IDF: " + idf + " " +
                 "Upper TF-IDF: " + upperTFIDF + " " +
                 "Upper BM25: " + upperBM25 + " " +
-                "Offset Frequency: " + offset_frequency + " " +
                 "Offset Skip Pointer: " + offset_skip_pointer + " " +
                 "Num Blocks: " + numBlocks + " ";
     }

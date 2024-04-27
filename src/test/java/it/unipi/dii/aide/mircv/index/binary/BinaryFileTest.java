@@ -44,12 +44,6 @@ public class BinaryFileTest {
         assertEquals(List.of(3, 3, 3), b.readNumbers());
     }
 
-    @Test
-    public void shortToBufferTest() throws IOException {
-        FileChannel  fc = FileChannel.open(Paths.get(Configuration.PATH_BLOCKS), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
-        BinaryFile.writeShortToBuffer(fc, (short)1);
-        assertEquals(1, BinaryFile.readShortFromBuffer(fc, (long)0));
-    }
 
     @Test
     public void intToBufferTest() throws IOException {
@@ -58,35 +52,7 @@ public class BinaryFileTest {
         assertEquals(1, BinaryFile.readIntFromBuffer(fc, (long)0));
     }
 
-    @Test
-    public void longToBufferTest() throws IOException {
-        FileChannel  fc = FileChannel.open(Paths.get(Configuration.PATH_BLOCKS), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
-        BinaryFile.writeLongToBuffer(fc, 1);
-        assertEquals(1, BinaryFile.readLongFromBuffer(fc, (long)0));
-    }
 
-    @Test
-    public void arrayByteToBufferTest() throws IOException {
-        FileChannel  fc = FileChannel.open(Paths.get(Configuration.PATH_BLOCKS), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
-        BinaryFile.writeArrayByteToBuffer(fc, new byte[]{1});
-        assertArrayEquals(new byte[]{1}, BinaryFile.readArrayByteFromBuffer(fc, (long)0, (long) new byte[]{1}.length));
-    }
-
-    @Test
-    public void shortListToBuffer() throws IOException {
-        FileChannel  fc = FileChannel.open(Paths.get(Configuration.PATH_BLOCKS), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
-        BinaryFile.writeShortListToBuffer(fc, List.of(1));
-        assertEquals(List.of(1).toString(),
-                BinaryFile.readShortListFromBuffer(fc, (long)0, (long) List.of(1).size()*2).toString());
-    }
-
-    @Test
-    public void intListToBuffer() throws IOException {
-        FileChannel  fc = FileChannel.open(Paths.get(Configuration.PATH_BLOCKS), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
-        BinaryFile.writeIntListToBuffer(fc, List.of(1));
-        assertEquals(List.of(1).toString(),
-                BinaryFile.readIntListFromBuffer(fc, (long)0, (long) List.of(1).size()*4).toString());
-    }
 
 
 

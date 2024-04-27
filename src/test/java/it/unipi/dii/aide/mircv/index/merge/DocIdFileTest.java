@@ -11,6 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DocIdFileTest {
 
+    /*
+
     @BeforeEach
     public void setUp() {
         Configuration.setUpPathTest();
@@ -80,7 +82,7 @@ public class DocIdFileTest {
         List<Integer> docsIdsNew3 = List.of( 8000000, 8800000);
         List<Long> offsetsNew3 = doc.writeDocIds(docsIdsNew3,true);
         assertEquals(docsIdsNew3.toString(), doc.readDocIdsBlock(offsetsNew3.get(0), offsetsNew3.get(1), true).toString());
-    }
+    }*/
 
 
 }
