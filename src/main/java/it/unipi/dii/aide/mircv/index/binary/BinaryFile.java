@@ -2,14 +2,12 @@ package it.unipi.dii.aide.mircv.index.binary;
 
 import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
-import org.javatuples.Pair;
 
 import java.io.*;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 import java.util.List;
 
 public class BinaryFile {
