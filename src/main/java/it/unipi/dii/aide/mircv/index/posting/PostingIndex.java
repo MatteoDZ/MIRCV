@@ -16,7 +16,6 @@ public class PostingIndex {
     private Iterator<Posting> postingIterator;  // Iterator for postings
     private float upperBound;
     private float idf;
-    private long offsetInvertedIndex;
     private SkippingBlock skippingBlockActual;  // Currently active skipping block
     private Iterator<SkippingBlock> skippingBlockIterator;  // Iterator for skipping blocks
     private ArrayList<SkippingBlock> blocks;  // List of skipping blocks for efficient iteration
@@ -40,7 +39,7 @@ public class PostingIndex {
     /**
      * Retrieves the list of document IDs.
      *
-     * @return         	the list of document IDs
+     * @return the list of document IDs
      */
     public List<Integer> getDocIds() {
         return new ArrayList<>(postings.stream().map(Posting::getDoc_id).toList());
@@ -53,10 +52,7 @@ public class PostingIndex {
     /**
      * Initializes a new instance of the PostingIndex class.
      */
-    public PostingIndex() {}
-
-    public PostingIndex(Posting p) {
-        postings.add(p);
+    public PostingIndex() {
     }
 
     public PostingIndex(String term, List<Integer> docIds, List<Integer> frequencies) {
@@ -78,10 +74,6 @@ public class PostingIndex {
         addPosting(docId);
     }
 
-    public PostingIndex(String term, Long offsetInvertedIndex) {
-        this.term = term;
-        this.offsetInvertedIndex = offsetInvertedIndex;
-    }
 
     /**
      * Gets the currently active posting.
@@ -122,7 +114,7 @@ public class PostingIndex {
     /**
      * A method that adds a posting to the list of postings.
      *
-     * @param  documentId   the id of the document to add
+     * @param documentId the id of the document to add
      */
     public void addPosting(int documentId) {
         Posting existingPosting = postings.stream()
@@ -138,21 +130,9 @@ public class PostingIndex {
     }
 
 
-    public void addPosting(Posting posting) {
-        Posting existingPosting = postings.stream()
-                .filter(p -> p.getDoc_id() == posting.getDoc_id())
-                .findFirst()
-                .orElse(null);
-
-        if (existingPosting != null) {
-            existingPosting.setFrequency(existingPosting.getFrequency() + posting.getFrequency());
-        } else {
-            postings.add(new Posting(posting.getDoc_id(), posting.getFrequency()));
-        }
-    }
-
     /**
      * This method is used to merge the posting list of the intermediate index, in order to create the final posting list
+     *
      * @param intermediatePostingList is the posting list of the intermediate index for a specific term
      */
     public void appendList(PostingIndex intermediatePostingList) {
@@ -165,18 +145,12 @@ public class PostingIndex {
     /**
      * Returns a string representation of the object.
      *
-     * @return  a string representation of the object
+     * @return a string representation of the object
      */
     public String toString() {
-        return term + " " + getDocIds().toString() + " " + getFrequencies().toString() + " " + getIdf();}
-
-    public long getOffsetInvertedIndex() {
-        return offsetInvertedIndex;
+        return term + " " + getDocIds().toString() + " " + getFrequencies().toString() + " " + getIdf();
     }
 
-    public void setOffsetInvertedIndex(long offsetInvertedIndex) {
-        this.offsetInvertedIndex = offsetInvertedIndex;
-    }
 
     /**
      * Opens the posting list by reading associated skipping blocks from the lexicon.

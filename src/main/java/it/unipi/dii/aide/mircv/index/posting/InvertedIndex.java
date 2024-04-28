@@ -29,16 +29,6 @@ public class InvertedIndex {
         }
     }
 
-    public void addNew(String term, Posting posting){
-        if (isPresent(term)) {
-            PostingIndex test = Block.get(term);
-            //Collections.sort(postingList);
-            test.addPosting(posting);
-        }
-        else {
-            Block.put(term, new PostingIndex(posting));
-        }
-    }
 
     /**
      * Sorts the list of strings and returns the sorted list.

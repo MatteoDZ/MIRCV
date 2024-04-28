@@ -27,6 +27,7 @@ public class DocIdFile {
     public DocIdFile(int blockSize) {
         BLOCK_SIZE = blockSize;
         try {
+
             fc = FileChannel.open(Paths.get(Configuration.PATH_DOCID), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         } catch (IOException e) {
             throw new RuntimeException("An error occurred while writing to the " + Configuration.PATH_DOCID + " file.");

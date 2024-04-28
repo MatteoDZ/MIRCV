@@ -1,6 +1,7 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
+import it.unipi.dii.aide.mircv.index.compression.VariableByteCompressor;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
@@ -10,26 +11,36 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MergerTest {
-    /*String pathTest1 = Configuration.DIRECTORY_TEST + "/test1.bin";
+    String pathTest1 = Configuration.DIRECTORY_TEST + "/test1.bin";
     String pathTest2 = Configuration.DIRECTORY_TEST + "/test2.bin";
     String pathTest3 = Configuration.DIRECTORY_TEST + "/test3.bin";
 
     Statistics stats = new Statistics();
 
+    FileChannel fcSkippingBlock;
+    FileChannel fcDocIds;
+    FileChannel fcFreqs;
+
+    public MergerTest() throws IOException {
+    }
+
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws IOException {
         Configuration.setUpPathTest();
         FileUtils.deleteDirectory(Configuration.DIRECTORY_TEST);
         FileUtils.createDirectory(Configuration.DIRECTORY_TEST);
+
         try {
             FileChannel fc = FileChannel.open(Paths.get(Configuration.PATH_DOC_TERMS),
                     StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
@@ -67,11 +78,51 @@ public class MergerTest {
         merge.write(false);
 
 
-        assertEquals(List.of(1, 3, 6, 20), inv.getDocIds(lex.findTerm("a").getOffset_skip_pointer(), false));
-        assertEquals(List.of(2, 4), inv.getDocIds(lex.findTerm("b").getOffset_skip_pointer(), false));
-        assertEquals(List.of(4, 6), inv.getDocIds(lex.findTerm("c").getOffset_skip_pointer(), false));
-        assertEquals(List.of(1, 5), inv.getDocIds(lex.findTerm("z").getOffset_skip_pointer(), false));
-        assertEquals(2, inv.getFreq(lex.findTerm("a").getOffset_skip_pointer(), 3, false));
+        fcSkippingBlock = FileChannel.open(Paths.get(Configuration.SKIPPING_BLOCK_PATH), StandardOpenOption.READ);
+        fcDocIds = FileChannel.open(Paths.get(Configuration.PATH_DOCID), StandardOpenOption.READ);
+        fcFreqs = FileChannel.open(Paths.get(Configuration.PATH_FREQ), StandardOpenOption.READ);
+
+        long offsetSkippping = Lexicon.getInstance().get("a").getOffset_skip_pointer();
+        MappedByteBuffer mmbSkipping = fcSkippingBlock.map(FileChannel.MapMode.READ_ONLY, offsetSkippping, (8 + 4) * 2 + 4 + 4);
+        long offsetDocIds =mmbSkipping.getLong();
+        int docIdSize = mmbSkipping.getInt();
+        long offsetFreqs = mmbSkipping.getLong();
+        int freqSize = mmbSkipping.getInt();
+        MappedByteBuffer mmbDocIds = fcDocIds.map(FileChannel.MapMode.READ_ONLY, offsetDocIds, 4L *docIdSize);
+        List<Integer> docIds = new ArrayList<>();
+        for (int i = 0; i < docIdSize; i++) {
+            docIds.add(mmbDocIds.getInt());
+        }
+        List<Short> freqs = new ArrayList<>();
+        MappedByteBuffer mmbFreqs = fcFreqs.map(FileChannel.MapMode.READ_ONLY, offsetFreqs, 4L *freqSize);
+        for (int i = 0; i < docIdSize; i++) {
+            freqs.add(mmbFreqs.getShort());
+        }
+
+        assertEquals(List.of(1, 3, 6, 20), docIds);
+        assertEquals(List.of((short) 2,(short) 2, (short)1, (short)1), freqs);
+
+        docIds.clear();
+        freqs.clear();
+
+
+        offsetSkippping = Lexicon.getInstance().get("b").getOffset_skip_pointer();
+        mmbSkipping = fcSkippingBlock.map(FileChannel.MapMode.READ_ONLY, offsetSkippping, (8 + 4) * 2 + 4 + 4);
+        offsetDocIds =mmbSkipping.getLong();
+        docIdSize = mmbSkipping.getInt();
+        offsetFreqs = mmbSkipping.getLong();
+        freqSize = mmbSkipping.getInt();
+        mmbDocIds = fcDocIds.map(FileChannel.MapMode.READ_ONLY, offsetDocIds, 4L *docIdSize);
+        for (int i = 0; i < docIdSize; i++) {
+            docIds.add(mmbDocIds.getInt());
+        }
+        mmbFreqs = fcFreqs.map(FileChannel.MapMode.READ_ONLY, offsetFreqs, 4L *freqSize);
+        for (int i = 0; i < docIdSize; i++) {
+            freqs.add(mmbFreqs.getShort());
+        }
+
+        assertEquals(List.of(2, 4), docIds);
+        assertEquals(List.of((short) 1,(short) 1), freqs);
     }
 
     @Test
@@ -100,13 +151,43 @@ public class MergerTest {
         BinaryFile.writeBlock(inv3, pathTest3);
         Merge merge = new Merge(List.of(pathTest1, pathTest2, pathTest3),  2);
         merge.write( true);
-        InvertedIndexFile inv = new InvertedIndexFile( 2);
-        Lexicon lex = new Lexicon();
-        assertEquals(List.of(1, 3, 6, 20), inv.getDocIds(lex.findTerm("a").getOffsetInvertedIndex(), true));
-        assertEquals(List.of(2, 4), inv.getDocIds(lex.findTerm("b").getOffsetInvertedIndex(), true));
-        assertEquals(List.of(4, 6), inv.getDocIds(lex.findTerm("c").getOffsetInvertedIndex(), true));
-        assertEquals(List.of(3, 5), inv.getDocIds(lex.findTerm("z").getOffsetInvertedIndex(), true));
-        assertEquals(2, inv.getFreq(lex.findTerm("a").getOffsetInvertedIndex(), 3, true));
+
+        fcSkippingBlock = FileChannel.open(Paths.get(Configuration.SKIPPING_BLOCK_PATH), StandardOpenOption.READ);
+        fcDocIds = FileChannel.open(Paths.get(Configuration.PATH_DOCID), StandardOpenOption.READ, StandardOpenOption.WRITE);
+        fcFreqs = FileChannel.open(Paths.get(Configuration.PATH_FREQ), StandardOpenOption.READ, StandardOpenOption.WRITE);
+
+
+        long offsetSkippping = Lexicon.getInstance().get("b").getOffset_skip_pointer();
+        MappedByteBuffer mmbSkipping = fcSkippingBlock.map(FileChannel.MapMode.READ_ONLY, offsetSkippping, (8 + 4) * 2 + 4 + 4);
+        long offsetDocIds =mmbSkipping.getLong();
+        int docIdSize = mmbSkipping.getInt();
+
+        MappedByteBuffer mmbDocIds = fcDocIds.map(FileChannel.MapMode.READ_ONLY, offsetDocIds, fcDocIds.size());
+
+
+        byte[] doc_ids = new byte[docIdSize];
+
+        mmbDocIds.get(doc_ids, 0, docIdSize);
+
+        List<Integer> doc_ids_decompressed = VariableByteCompressor.decode(doc_ids);
+
+        assertEquals(List.of(2, 4), doc_ids_decompressed);
+
+         offsetSkippping = Lexicon.getInstance().get("a").getOffset_skip_pointer();
+         mmbSkipping = fcSkippingBlock.map(FileChannel.MapMode.READ_ONLY, offsetSkippping, (8 + 4) * 2 + 4 + 4);
+         offsetDocIds =mmbSkipping.getLong();
+         docIdSize = mmbSkipping.getInt();
+
+         mmbDocIds = fcDocIds.map(FileChannel.MapMode.READ_ONLY, offsetDocIds, fcDocIds.size());
+
+        byte[] doc_idsA = new byte[docIdSize];
+        mmbDocIds.get(doc_idsA, 0, docIdSize);
+
+        List<Integer> doc_ids_decompressedA = VariableByteCompressor.decode(doc_idsA);
+
+
+        assertEquals(List.of(1, 3, 6, 20), doc_ids_decompressedA);
+
     }
 
     @Test
@@ -139,7 +220,7 @@ public class MergerTest {
             readerLines.put(reader, new PostingIndex(line, docIds, freqs));
         }
         assertEquals("a", Merge.findMinTerm(readerLines));
-    }*/
+    }
     
 
 }
