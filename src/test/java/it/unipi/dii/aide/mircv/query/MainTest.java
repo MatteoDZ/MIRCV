@@ -15,6 +15,7 @@ public class MainTest {
         Configuration.setUpPathTest();
     }
 
+    // Query results using collection_subset_top100.tar.gz
     @Test
     public void mainTestNoCompression() throws IOException {
         setUp();
@@ -55,7 +56,7 @@ public class MainTest {
                 Processer.getRankedQuery(Processer.processQuery("war II", 4, false, "bm25", false, false)));
     }
 
-
+    // Query results using collection_subset_top100.tar.gz
     @Test
     public void mainTestYesCompression() throws IOException {
         setUp();
