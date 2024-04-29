@@ -3,6 +3,7 @@ package it.unipi.dii.aide.mircv.index.merge;
 import it.unipi.dii.aide.mircv.index.compression.UnaryCompressor;
 import it.unipi.dii.aide.mircv.index.compression.VariableByteCompressor;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
+import it.unipi.dii.aide.mircv.index.posting.Posting;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ public class DocIdFileTest {
 
 
     @Test
-     void writeDocIdsTestNoCompression() throws IOException {
+     void writeDocIdsTest() throws IOException {
         DocIdFile doc = new DocIdFile( 5);
         long offsets = doc.writeDocIds(docIds,  false);
         fcDocIds = FileChannel.open(Paths.get(Configuration.PATH_DOCID), StandardOpenOption.READ);
@@ -41,7 +42,6 @@ public class DocIdFileTest {
         }
         assertEquals(docIds, docIdsRead);
     }
-
 
 
 

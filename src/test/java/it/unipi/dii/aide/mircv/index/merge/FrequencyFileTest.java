@@ -1,6 +1,9 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
+import it.unipi.dii.aide.mircv.index.compression.UnaryCompressor;
+import it.unipi.dii.aide.mircv.index.compression.VariableByteCompressor;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
+import it.unipi.dii.aide.mircv.index.posting.Posting;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -30,7 +33,7 @@ public class FrequencyFileTest {
 
 
     @Test
-     void readFreqsNoCompressionTest() throws IOException {
+     void readFreqsTest() throws IOException {
         FrequencyFile freq = new FrequencyFile(5);
         long offsets = freq.writeFrequencies(freqsWrite,  false);
         fcFreqs = FileChannel.open(Paths.get(Configuration.PATH_FREQ), StandardOpenOption.READ);
@@ -41,6 +44,8 @@ public class FrequencyFileTest {
         }
         assertEquals(freqsRead, FreqsRead);
     }
+
+
 
 
 

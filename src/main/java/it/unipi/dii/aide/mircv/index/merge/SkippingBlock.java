@@ -145,7 +145,7 @@ public class SkippingBlock {
             List<Short> freqs_decompressed = UnaryCompressor.integerArrayDecompression(freqs, num_posting_of_block);
             List<Integer> doc_ids_decompressed = VariableByteCompressor.decode(doc_ids);
 
-            for (int i = 0; i < num_posting_of_block; i++) {
+            for (int i = 0; i < num_posting_of_block; i++) { // TODO: perchè il ciclo è num_posting_of_block e non doc_id_size????
                 Posting posting = new Posting(doc_ids_decompressed.get(i), freqs_decompressed.get(i));
                 postings.add(posting);
             }
