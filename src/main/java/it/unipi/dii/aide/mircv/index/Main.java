@@ -21,8 +21,6 @@ public class Main {
             FileUtils.createDirectory(Configuration.DIRECTORY_TEMP_FILES);
         }
 
-        System.out.println("Number of files in temporary directory: " + FileUtils.getNumberFiles(Configuration.DIRECTORY_TEMP_FILES));
-
 
         if (FileUtils.getNumberFiles(Configuration.DIRECTORY_TEMP_FILES) <= 0) {
             long startTime_spimi = System.currentTimeMillis();
@@ -31,8 +29,10 @@ public class Main {
             long endTime_spimi = System.currentTimeMillis();
             System.out.println(printTime("Spimi", startTime_spimi, endTime_spimi));
         }
+        System.out.println("Number of blocks created in spimi part: " + FileUtils.getNumberFiles(Configuration.DIRECTORY_TEMP_FILES));
 
-        if(!FileUtils.fileExists()){
+        if(FileUtils.filesExist(Configuration.SKIPPING_BLOCK_PATH, Configuration.PATH_DOCID, Configuration.PATH_FREQ, Configuration.PATH_LEXICON)){
+            FileUtils.deleteFiles(Configuration.SKIPPING_BLOCK_PATH, Configuration.PATH_DOCID, Configuration.PATH_FREQ, Configuration.PATH_LEXICON);
             long startTime_merge = System.currentTimeMillis();
             System.out.println("Merge is starting....");
             Merge merge = new Merge(Objects.requireNonNull(FileUtils.getFilesOfDirectory(Configuration.DIRECTORY_TEMP_FILES)), Configuration.BLOCK_SIZE);

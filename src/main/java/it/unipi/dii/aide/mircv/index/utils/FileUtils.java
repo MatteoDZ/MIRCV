@@ -114,14 +114,21 @@ public class FileUtils {
         return path.split("\\.")[0] + "_" + blockNumber + "." + path.split("\\.")[1];
     }
 
-    /**
-     * Check if multiple files exist.
-     *
-     * @return         true if all files exist, false otherwise
-     */
-    public static Boolean fileExists(){
-        return searchIfExists(Configuration.SKIPPING_BLOCK_PATH) && searchIfExists(Configuration.PATH_DOCID) &&
-                searchIfExists(Configuration.PATH_FREQ) && searchIfExists(Configuration.PATH_DOC_TERMS);
+
+    public static Boolean filesExist(String ...path){
+        for (String p : path) {
+            if (!searchIfExists(p)) {
+                throw new RuntimeException("File not found: " + p + ". Please run the indexing main.");
+            }
+        }
+        return true;
+    }
+
+    public static void deleteFiles(String ...path){
+        for (String p : path) {
+            if(searchIfExists(p))
+                    removeFile(p);
+        }
     }
 
 

@@ -111,6 +111,7 @@ public class Merge {
             skippingBlock.setDoc_id_size(docIdsNew.size());
             skippingBlock.setFreq_size(freqsNew.size());
             skippingBlock.setNum_posting_of_block(docIdsNew.size() % blockSize);
+                // TODO: non mi torna perchè se è il numero di posting per blocco dovrbbe essere docIdsNew.size()
             if(!skippingBlock.writeOnDisk(fcSkippingBlock)) {
                 System.out.println("Problems with writing the block of postings to disk.");
             }
@@ -159,13 +160,13 @@ public class Merge {
         return minTerm;
     }
 
-    protected void lexiconWrite(PostingIndex pi, long offset, List<Integer> docIds, List<Integer> freqs, Lexicon lexicon) throws IOException {
+    protected void lexiconWrite(PostingIndex pi, long offset, List<Integer> docIds, List<Integer> freqs, Lexicon lexicon) throws IOException { // TODO: docIds e freqs a cosa servono?
         float BM25Upper = 0F;
         float actualBM25;
         int  tf  = 0;
 
         int df = pi.getPostings().size();
-        float idf = (float) ((Math.log((double) stats.getNumDocs() / df))); // a cosa serve?
+        float idf = (float) ((Math.log((double) stats.getNumDocs() / df))); // TODO: a cosa serve?
 
         for (Posting posting : pi.getPostings()) {
             actualBM25 = calculateBM25(tf, posting.getDoc_id());
