@@ -67,7 +67,8 @@ public class FrequencyFile {
      * @param compress  The encoding type for the data.
      * @throws IOException If an I/O error occurs while writing to the file.
      */
-    private void writeBlock(List<Integer> block, boolean compress) throws IOException {
+    public long writeBlock(List<Integer> block, boolean compress) throws IOException {
+        long fc_size = fc.size();
         if (!compress) {
             BinaryFile.writeShortListToBuffer(fc, block);
         } else {
@@ -76,5 +77,6 @@ public class FrequencyFile {
                     .toArray());
             BinaryFile.writeArrayByteToBuffer(fc, compressed);
         }
+        return fc_size;
     }
 }

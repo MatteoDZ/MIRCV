@@ -86,8 +86,6 @@ public class Merge {
                 }
             }
 
-
-
             List<Integer> docIdsNew = minPosting.getDocIds();
             List<Integer> freqsNew = minPosting.getFrequencies();
             int docId;
@@ -102,19 +100,45 @@ public class Merge {
             }
             // System.out.println("Term: " + minPosting.getTerm() + " DocIds: " + docIdsNew.size() + " Freqs: " + freqsNew.size());
 
-            lexiconWrite(minPosting, fcSkippingBlock.size(), docIdsNew, freqsNew, lexicon);
+            int block_size;
+            int num_blocks;
 
-            SkippingBlock skippingBlock = new SkippingBlock();
-            skippingBlock.setDoc_id_offset(docIdWriter.writeDocIds(docIdsNew, compress));
-            skippingBlock.setFreq_offset(frequencyWriter.writeFrequencies(freqsNew, compress));
-            skippingBlock.setDoc_id_max(docIdsNew.get(docIdsNew.size() - 1));
-            skippingBlock.setDoc_id_size(docIdsNew.size());
-            skippingBlock.setFreq_size(freqsNew.size());
-            skippingBlock.setNum_posting_of_block(docIdsNew.size() % blockSize);
-            if(!skippingBlock.writeOnDisk(fcSkippingBlock)) {
-                System.out.println("Problems with writing the block of postings to disk.");
+            if (minPosting.getPostings().size() <= 512) {
+                block_size = minPosting.getPostings().size();
+                num_blocks = 1;
+            }
+            else {
+                block_size = (int) Math.ceil(Math.sqrt(minPosting.getPostings().size()));
+                num_blocks = (int) Math.ceil((double) minPosting.getPostings().size()/block_size);
             }
 
+            ArrayList<Integer> docIds;
+            ArrayList<Integer> freqs;
+
+            for (int currentBlock = 0; currentBlock < num_blocks; currentBlock++){
+                docIds = new ArrayList<>();
+                freqs = new ArrayList<>();
+
+                for(int i = 0; i < block_size; i++) {
+                    if(currentBlock * block_size + i < minPosting.getPostings().size()) {
+                        docIds.add(docIdsNew.get(currentBlock * block_size + i));
+                        freqs.add(freqsNew.get(currentBlock * block_size + i));
+                    }
+                }
+
+                lexiconWrite(minPosting, fcSkippingBlock.size(), docIds, freqs, lexicon); //TODO: FIXARE
+
+                SkippingBlock skippingBlock = new SkippingBlock();
+                skippingBlock.setDoc_id_offset(docIdWriter.writeBlock(docIds, compress));
+                skippingBlock.setFreq_offset(frequencyWriter.writeBlock(freqs, compress));
+                skippingBlock.setDoc_id_max(docIds.get(docIds.size() - 1));
+                skippingBlock.setDoc_id_size(docIds.size());
+                skippingBlock.setFreq_size(freqs.size());
+                skippingBlock.setNum_posting_of_block(docIds.size());
+                if(!skippingBlock.writeOnDisk(fcSkippingBlock)) {
+                    System.out.println("Problems with writing the block of postings to disk.");
+                }
+            }
 
         }
         fcSkippingBlock.close();

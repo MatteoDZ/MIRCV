@@ -68,12 +68,14 @@ public class DocIdFile {
      * @param compression The encoding to use for the block.
      * @throws IOException If an I/O error occurs.
      */
-    private void  writeBlock(List<Integer> block, boolean compression) throws IOException {
+    public long writeBlock(List<Integer> block, boolean compression) throws IOException {
+        long fc_size = fc.size();
         if (!compression) {
             BinaryFile.writeIntListToBuffer(fc, block);
         } else {
             BinaryFile.writeArrayByteToBuffer(fc, VariableByteCompressor.encode(block));
         }
+        return fc_size;
     }
 
 }
