@@ -56,6 +56,8 @@ public class DAAT {
             index.next(compression);
         }
 
+        System.out.println("DAAT: " + postings);
+
         // Initialize the priority queue for top-K results.
         TopKPriorityQueue<Pair<Float, Integer>> topK =
                 new TopKPriorityQueue<>(k, Comparator.comparing(Pair::getValue0));

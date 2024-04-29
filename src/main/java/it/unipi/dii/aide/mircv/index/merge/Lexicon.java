@@ -36,7 +36,7 @@ public class Lexicon {
     }
 
 
-    public void write(String term, Long offset, Integer df, Double docnum, Integer tf, Float bm25) throws IOException {
+    public void write(String term, Long offset, Integer df, Double docnum, Integer tf, Float bm25, Integer numBlocks) throws IOException {
         lexicon.setTerm(term);
         lexicon.setOffset_skip_pointer(offset);
         lexicon.setDf(df);
@@ -44,6 +44,7 @@ public class Lexicon {
         lexicon.setUpperTFIDF((float) ((1 + Math.log(tf)) * lexicon.getIdf()));
         lexicon.setUpperTF(1); // PERCHE 1???
         lexicon.setUpperBM25(bm25);
+        lexicon.setNumBlocks(numBlocks);
         lexicon.writeEntryToDisk(fc);
     }
 

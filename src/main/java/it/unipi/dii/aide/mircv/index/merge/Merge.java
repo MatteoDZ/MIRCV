@@ -86,6 +86,8 @@ public class Merge {
                 }
             }
 
+
+
             List<Integer> docIdsNew = minPosting.getDocIds();
             List<Integer> freqsNew = minPosting.getFrequencies();
             int docId;
@@ -103,7 +105,9 @@ public class Merge {
             int block_size;
             int num_blocks;
 
-            if (minPosting.getPostings().size() <= 512) {
+            System.out.println(minTerm + " " + docIdsNew.size());
+
+            if (minPosting.getPostings().size() <= Configuration.BLOCK_SIZE) {
                 block_size = minPosting.getPostings().size();
                 num_blocks = 1;
             }
@@ -111,6 +115,8 @@ public class Merge {
                 block_size = (int) Math.ceil(Math.sqrt(minPosting.getPostings().size()));
                 num_blocks = (int) Math.ceil((double) minPosting.getPostings().size()/block_size);
             }
+
+            System.out.println("block_size: " + block_size + " num_blocks: " + num_blocks);
 
             ArrayList<Integer> docIds;
             ArrayList<Integer> freqs;
@@ -126,7 +132,7 @@ public class Merge {
                     }
                 }
 
-                lexiconWrite(minPosting, fcSkippingBlock.size(), docIds, freqs, lexicon); //TODO: FIXARE
+                lexiconWrite(minPosting, fcSkippingBlock.size(), docIds, freqs, lexicon, num_blocks); //TODO: FIXARE
 
                 SkippingBlock skippingBlock = new SkippingBlock();
                 skippingBlock.setDoc_id_offset(docIdWriter.writeBlock(docIds, compress));
@@ -183,7 +189,7 @@ public class Merge {
         return minTerm;
     }
 
-    protected void lexiconWrite(PostingIndex pi, long offset, List<Integer> docIds, List<Integer> freqs, Lexicon lexicon) throws IOException { // TODO: docIds e freqs a cosa servono?
+    protected void lexiconWrite(PostingIndex pi, long offset, List<Integer> docIds, List<Integer> freqs, Lexicon lexicon, Integer numBlock) throws IOException { // TODO: docIds e freqs a cosa servono?
         float BM25Upper = 0F;
         float actualBM25;
         int  tf  = 0;
@@ -202,7 +208,7 @@ public class Merge {
                 tf = posting.getFrequency();
             }
         }
-        lexicon.write(pi.getTerm(), offset, df, (double) stats.getNumDocs(), tf, BM25Upper);
+        lexicon.write(pi.getTerm(), offset, df, (double) stats.getNumDocs(), tf, BM25Upper, numBlock);
     }
 
     protected float calculateBM25(float tf, long doc_id){

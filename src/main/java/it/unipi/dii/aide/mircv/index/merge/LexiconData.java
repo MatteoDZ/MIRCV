@@ -103,6 +103,14 @@ public class LexiconData {
         this.offset_skip_pointer = skipPointer;
     }
 
+    public int getNumBlocks() {
+        return numBlocks;
+    }
+
+    public void setNumBlocks(int numBlocks) {
+        this.numBlocks = numBlocks;
+    }
+
 
     /**
      * Reads the LexiconEntry from the specified offset in the given FileChannel.

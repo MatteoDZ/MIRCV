@@ -3,6 +3,7 @@ package it.unipi.dii.aide.mircv.index.merge;
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
 import it.unipi.dii.aide.mircv.index.compression.UnaryCompressor;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
+import org.javatuples.Pair;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;
@@ -58,6 +59,29 @@ public class FrequencyFile {
         }
 
         return offset;
+    }
+
+
+    public List<Pair<Long, Integer>> writeFrequenciesPair(List<Integer> freqs, boolean compress) throws IOException {
+        List<Pair<Long, Integer>> freqOffsetsNumElementsBlock = new ArrayList<>();
+        List<Integer> block = new ArrayList<>();
+
+        for (Integer freq : freqs) {
+            block.add(freq);
+            if (block.size() == BLOCK_SIZE) {
+                freqOffsetsNumElementsBlock.add(Pair.with(fc.size(), block.size()));
+                writeBlock(block, compress);
+                block.clear();
+            }
+        }
+
+        if (!block.isEmpty()) {
+            freqOffsetsNumElementsBlock.add(Pair.with(fc.size(), block.size()));
+            writeBlock(block, compress);
+            block.clear();
+        }
+
+        return freqOffsetsNumElementsBlock;
     }
 
     /**

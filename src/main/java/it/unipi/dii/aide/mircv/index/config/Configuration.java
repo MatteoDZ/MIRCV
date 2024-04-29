@@ -22,7 +22,6 @@ public class Configuration {
     public static  String PATH_DOC_TERMS = load(    "path_doc_terms");
     public static  String SKIPPING_BLOCK_PATH = load(    "skipping_block");
     public static final Integer LEXICON_CACHE_SIZE =  Integer.parseInt(Objects.requireNonNull(load("lexicon_cache_size")));
-    public static final Integer INVERTED_INDEX_CACHE_SIZE =  Integer.parseInt(Objects.requireNonNull(load("inverted_index_cache_size")));
     public static final Integer BLOCK_SIZE = Integer.parseInt(Objects.requireNonNull(load("block_size")));
     public static final Boolean COMPRESSION = Boolean.parseBoolean(load("compression"));
     public static final Boolean STEMMING_AND_STOPWORDS = Boolean.parseBoolean(load("stemmingAndStopwords"));

@@ -3,6 +3,8 @@ package it.unipi.dii.aide.mircv.index.merge;
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
 import it.unipi.dii.aide.mircv.index.compression.VariableByteCompressor;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
+import org.javatuples.Pair;
+import org.javatuples.Triplet;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;
@@ -59,6 +61,38 @@ public class DocIdFile {
 
         return offset;
     }
+
+
+    /**
+     * Writes document IDs to the file and returns the offsets of the written blocks.
+     *
+     * @param docIds      The list of document IDs to write.
+     * @param compression Indicates whether to use compression.
+     * @return The list of offsets.
+     * @throws IOException If an I/O error occurs.
+     */
+    public List<Triplet<Long, Integer, Integer>> writeDocIdsPair(List<Integer> docIds, boolean compression) throws IOException {
+        List<Triplet<Long, Integer, Integer>> offsetsNumElementsBlock = new ArrayList<>();
+
+        for (Integer docId : docIds) {
+            block.add(docId);
+            if (block.size() == BLOCK_SIZE) {
+                offsetsNumElementsBlock.add(Triplet.with(fc.size(), block.size(), block.get(block.size()-1)));
+                writeBlock(block, compression);
+                block.clear();
+            }
+        }
+
+        if (!block.isEmpty()) {
+            offsetsNumElementsBlock.add(Triplet.with(fc.size(), block.size(), block.get(block.size()-1)));
+            writeBlock(block, compression);
+            block.clear();
+        }
+
+        return offsetsNumElementsBlock;
+    }
+
+
 
     /**
      * Writes a block of integers to the file channel.
