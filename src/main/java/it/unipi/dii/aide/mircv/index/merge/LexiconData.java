@@ -135,6 +135,7 @@ public class LexiconData {
         } catch (IOException e) {
             throw new RuntimeException("An error occurred while reading a LexiconData from the lexicon file.");
         }
+
     }
 
     /**
@@ -171,6 +172,7 @@ public class LexiconData {
      * @return The list of SkippingBlocks.
      */
     public ArrayList<SkippingBlock> readBlocks() {
+
         try {
             ArrayList<SkippingBlock> blocks = new ArrayList<>();
             MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, offset_skip_pointer, (long) numBlocks * SkippingBlock.size_of_element);

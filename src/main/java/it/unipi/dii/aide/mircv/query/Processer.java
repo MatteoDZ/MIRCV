@@ -44,6 +44,7 @@ public class Processer {
             }
             postingOfQuery.add(postingIndex);
         }
+
         return postingOfQuery;
 
 

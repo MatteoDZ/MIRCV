@@ -23,8 +23,8 @@ public class LexiconTest {
     @Test
     public void writeTest() throws IOException {
         Lexicon lexicon = new Lexicon();
-        lexicon.write("a",0L, 0, 0d,0, 0f);
-        lexicon.write("b",0L, 0, 0d,0, 0f);
+        lexicon.write("a",0L, 0, 0d,0, 0f, 0);
+        lexicon.write("b",0L, 0, 0d,0, 0f, 0);
         LexiconData lexiconDataA = lexicon.get("a");
         assertEquals("a", lexiconDataA.getTerm());
         assertEquals(0L, lexiconDataA.getOffset_skip_pointer());
@@ -50,8 +50,8 @@ public class LexiconTest {
     @Test
     public void findTerm() throws IOException {
         Lexicon lexicon = new Lexicon();
-        lexicon.write("a",0L, 0, 0d,0, 0f);
-        lexicon.write("b",0L, 0, 0d,0, 0f);
+        lexicon.write("a",0L, 0, 0d,0, 0f, 0);
+        lexicon.write("b",0L, 0, 0d,0, 0f, 0);
         assertEquals("a", lexicon.findTerm("a").getTerm());
         assertNull(lexicon.findTerm("c"));
     }

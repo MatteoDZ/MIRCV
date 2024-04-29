@@ -8,6 +8,7 @@ import org.javatuples.Pair;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 public class DAAT {
 
@@ -50,13 +51,14 @@ public class DAAT {
     public static TopKPriorityQueue<Pair<Float, Integer>> scoreCollection(
             ArrayList<PostingIndex> postings, int k, String TFIDFOrBM25, boolean conjunctive, boolean compression) throws IOException {
 
+
+
         // Initialize the posting lists.
         for (PostingIndex index : postings) {
             index.openList();
             index.next(compression);
         }
 
-        System.out.println("DAAT: " + postings);
 
         // Initialize the priority queue for top-K results.
         TopKPriorityQueue<Pair<Float, Integer>> topK =
@@ -67,20 +69,27 @@ public class DAAT {
         int doc_id = conjunctive ? get_doc_id(postings, compression) : getMinDocId(postings);
 
         // If there are no documents matching the query, return null.
-        /*if (doc_id == 0) {
+        if (doc_id == 0) {
             return null;
-        }*/
+        }
 
         // Process each document and calculate the score.
         int doc_len = stats.getNumDocs();
 
 
+
         while (doc_id != doc_len) {
+
+
             float score = 0.0F;
+
+
 
             // Calculate the score for each posting in the list.
             for (PostingIndex postingIndex : postings) {
                 Posting posting = postingIndex.getPostingActual();
+
+
                 if (posting != null) {
                     if (posting.getDoc_id() == doc_id) {
                         score += Scorer.score(
@@ -92,6 +101,7 @@ public class DAAT {
                 } else if (conjunctive) {
                     return topK;
                 }
+
             }
 
 

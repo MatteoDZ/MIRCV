@@ -116,10 +116,12 @@ public class Merge {
                 num_blocks = (int) Math.ceil((double) minPosting.getPostings().size()/block_size);
             }
 
-            System.out.println("block_size: " + block_size + " num_blocks: " + num_blocks);
+            // System.out.println("block_size: " + block_size + " num_blocks: " + num_blocks );
 
             ArrayList<Integer> docIds;
             ArrayList<Integer> freqs;
+
+            lexiconWrite(minPosting, fcSkippingBlock.size(), docIdsNew, freqsNew, lexicon, num_blocks); //TODO: FIXARE
 
             for (int currentBlock = 0; currentBlock < num_blocks; currentBlock++){
                 docIds = new ArrayList<>();
@@ -132,11 +134,20 @@ public class Merge {
                     }
                 }
 
-                lexiconWrite(minPosting, fcSkippingBlock.size(), docIds, freqs, lexicon, num_blocks); //TODO: FIXARE
+                System.out.println(currentBlock + " " + docIds + " " + freqs);
+
+                System.out.println("Term: " + minTerm + " fcSkippingBlock: " + fcSkippingBlock.size());
+
+
+
+                long docIds_offset = docIdWriter.writeBlock(docIds, compress);
+                long freqs_offset = frequencyWriter.writeBlock(docIds, compress);
+
+                System.out.println("DocId offset: " + docIds_offset +" " + "DocIds size: " + docIds.size() + " " + "Freqs offset: " + freqs_offset + " " + "Freqs size: " + freqs.size() + " " + "DocId max: " + docIds.get(docIds.size() - 1));
 
                 SkippingBlock skippingBlock = new SkippingBlock();
-                skippingBlock.setDoc_id_offset(docIdWriter.writeBlock(docIds, compress));
-                skippingBlock.setFreq_offset(frequencyWriter.writeBlock(freqs, compress));
+                skippingBlock.setDoc_id_offset(docIds_offset);
+                skippingBlock.setFreq_offset(freqs_offset);
                 skippingBlock.setDoc_id_max(docIds.get(docIds.size() - 1));
                 skippingBlock.setDoc_id_size(docIds.size());
                 skippingBlock.setFreq_size(freqs.size());
@@ -144,6 +155,9 @@ public class Merge {
                 if(!skippingBlock.writeOnDisk(fcSkippingBlock)) {
                     System.out.println("Problems with writing the block of postings to disk.");
                 }
+
+
+                System.out.println("Skipping dopo " + fcSkippingBlock.size());
             }
 
         }

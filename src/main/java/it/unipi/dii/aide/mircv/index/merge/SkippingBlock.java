@@ -155,6 +155,7 @@ public class SkippingBlock {
                 postings.add(posting);
             }
         }
+
         return postings;
     }
 
