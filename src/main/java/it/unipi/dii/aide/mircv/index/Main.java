@@ -31,7 +31,7 @@ public class Main {
         }
         System.out.println("Number of blocks created in spimi part: " + FileUtils.getNumberFiles(Configuration.DIRECTORY_TEMP_FILES));
 
-        if(FileUtils.filesExist(Configuration.SKIPPING_BLOCK_PATH, Configuration.PATH_DOCID, Configuration.PATH_FREQ, Configuration.PATH_LEXICON)){
+        if(!FileUtils.filesExist(Configuration.SKIPPING_BLOCK_PATH, Configuration.PATH_DOCID, Configuration.PATH_FREQ, Configuration.PATH_LEXICON)){
             FileUtils.deleteFiles(Configuration.SKIPPING_BLOCK_PATH, Configuration.PATH_DOCID, Configuration.PATH_FREQ, Configuration.PATH_LEXICON);
             long startTime_merge = System.currentTimeMillis();
             System.out.println("Merge is starting....");

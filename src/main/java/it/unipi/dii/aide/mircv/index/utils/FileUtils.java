@@ -118,7 +118,7 @@ public class FileUtils {
     public static Boolean filesExist(String ...path){
         for (String p : path) {
             if (!searchIfExists(p)) {
-                throw new RuntimeException("File not found: " + p + ". Please run the indexing main.");
+                return false;
             }
         }
         return true;

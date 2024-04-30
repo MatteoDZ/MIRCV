@@ -19,8 +19,8 @@ public class Configuration {
     public static  String PATH_FREQ = load("path_freqs");
     public static  String PATH_LEXICON = load("path_lexicon");
     public static  String PATH_STATISTICS = load("path_statistics");
-    public static  String PATH_DOC_TERMS = load(    "path_doc_terms");
-    public static  String SKIPPING_BLOCK_PATH = load(    "skipping_block");
+    public static  String PATH_DOC_TERMS = load("path_doc_terms");
+    public static  String SKIPPING_BLOCK_PATH = load("path_skipping");
     public static final Integer LEXICON_CACHE_SIZE =  Integer.parseInt(Objects.requireNonNull(load("lexicon_cache_size")));
     public static final Integer BLOCK_SIZE = Integer.parseInt(Objects.requireNonNull(load("block_size")));
     public static final Boolean COMPRESSION = Boolean.parseBoolean(load("compression"));
