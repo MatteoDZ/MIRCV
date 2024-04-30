@@ -21,7 +21,7 @@ public class LexiconData {
     private float upperBM25 = 0;
     private Long offset_skip_pointer = 0L;
     private int numBlocks = 1;
-    private static final long BYTES_ATTRIBUTES = 4 * 6 + 8 * 3; //4bytes * (n_int + n_float) + 8bytes * (n_long)
+    private static final long BYTES_ATTRIBUTES = 4 * 6 + 8; //4bytes * (n_int + n_float) + 8bytes * (n_long)
     protected static final long ENTRY_SIZE = BYTES_ATTRIBUTES + Lexicon.MAX_LEN_OF_TERM;
 
     private static FileChannel fileChannel = null;
@@ -34,7 +34,6 @@ public class LexiconData {
                 fileChannel = FileChannel.open(Paths.get(Configuration.SKIPPING_BLOCK_PATH), StandardOpenOption.READ);
             }
         }catch (IOException e){
-            e.printStackTrace();
             System.out.println("problems with opening file with lexicon entry with block file");
         }
     }
@@ -121,7 +120,6 @@ public class LexiconData {
     public void readEntryFromDisk(long offset, FileChannel fileChannel) {
         try {
             MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, offset, ENTRY_SIZE);
-
             byte[] termBytes = new byte[Lexicon.MAX_LEN_OF_TERM];
             mappedByteBuffer.get(termBytes);
             term = Lexicon.removePadding(new String(termBytes, StandardCharsets.UTF_8));
@@ -144,12 +142,8 @@ public class LexiconData {
      * @param fileChannel The FileChannel to which to write.
      */
     public void writeEntryToDisk(FileChannel fileChannel) {
-
-
-        // long startLexiconDataWrite = System.currentTimeMillis();
         try {
             MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, fileChannel.size(), ENTRY_SIZE);
-
             mappedByteBuffer.put(Lexicon.padStringToLength(term).getBytes(StandardCharsets.UTF_8));
             mappedByteBuffer.putInt(df);
             mappedByteBuffer.putFloat(idf);
@@ -158,9 +152,6 @@ public class LexiconData {
             mappedByteBuffer.putFloat(upperBM25);
             mappedByteBuffer.putLong(offset_skip_pointer);
             mappedByteBuffer.putInt(numBlocks);
-            // long endLexiconDataWrite = System.currentTimeMillis();
-            // System.out.println("LexiconData write time: " + (endLexiconDataWrite - startLexiconDataWrite));
-            // System.out.println("-------------------------------------");
         } catch (IOException e) {
             throw new RuntimeException("An error occurred while writing a LexiconData in to the lexicon file");
         }
@@ -193,7 +184,6 @@ public class LexiconData {
             return blocks;
         } catch (IOException e) {
             System.out.println("Problems with reading blocks in the lexicon entry");
-            e.printStackTrace();
             return null;
         }
     }

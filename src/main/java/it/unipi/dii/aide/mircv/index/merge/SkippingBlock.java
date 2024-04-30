@@ -4,8 +4,8 @@ import it.unipi.dii.aide.mircv.index.compression.UnaryCompressor;
 import it.unipi.dii.aide.mircv.index.compression.VariableByteCompressor;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.posting.Posting;
+import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -22,19 +22,17 @@ public class SkippingBlock {
     private int doc_id_max;
     private int num_posting_of_block;
     private static long file_offset = 0;
-    public static final int size_of_element = (8 + 4) * 2 + 4 + 4;
+    public static final int size_of_element = 8 * 2 + 4 * 4; //4bytes * (n_int) + 8bytes * (n_long)
     private static MappedByteBuffer bufferDocId = null;
     private static MappedByteBuffer bufferFreq = null;
 
     static {
         try {
-            File file= new File(Configuration.PATH_DOCID);
-            File file1=new File(Configuration.PATH_FREQ);
-            if(file.exists()&&file1.exists()){
-                FileChannel fileChannel = FileChannel.open(Paths.get(Configuration.PATH_DOCID), StandardOpenOption.READ);
-                FileChannel fileChannel1 = FileChannel.open(Paths.get(Configuration.PATH_FREQ), StandardOpenOption.READ);
-                bufferDocId = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
-                bufferFreq = fileChannel1.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel1.size());
+            if(FileUtils.filesExist(Configuration.PATH_DOCID, Configuration.PATH_FREQ)){
+                FileChannel fcDocId = FileChannel.open(Paths.get(Configuration.PATH_DOCID), StandardOpenOption.READ);
+                FileChannel fcFreq = FileChannel.open(Paths.get(Configuration.PATH_FREQ), StandardOpenOption.READ);
+                bufferDocId = fcDocId.map(FileChannel.MapMode.READ_ONLY, 0, fcDocId.size());
+                bufferFreq = fcFreq.map(FileChannel.MapMode.READ_ONLY, 0, fcFreq.size());
             }
 
         } catch (IOException e) {
@@ -145,7 +143,7 @@ public class SkippingBlock {
             List<Short> freqs_decompressed = UnaryCompressor.integerArrayDecompression(freqs, num_posting_of_block);
             List<Integer> doc_ids_decompressed = VariableByteCompressor.decode(doc_ids);
 
-            for (int i = 0; i < num_posting_of_block; i++) { // TODO: perchè il ciclo è num_posting_of_block e non doc_id_size????
+            for (int i = 0; i < num_posting_of_block; i++) {
                 Posting posting = new Posting(doc_ids_decompressed.get(i), freqs_decompressed.get(i));
                 postings.add(posting);
             }

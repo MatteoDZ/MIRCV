@@ -21,7 +21,6 @@ public class Spimi {
     public static void spimi(String pathCollection) throws IOException {
         final FileChannel fc;
         try {
-            // Open file channel for reading and writing
             fc = FileChannel.open(Paths.get(Configuration.PATH_DOC_TERMS),
                     StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         } catch (IOException e) {
@@ -34,19 +33,19 @@ public class Spimi {
                 String line;
                 int blockNumber = 0, numDocs = 0, total_length = 0;
                 InvertedIndex inv = new InvertedIndex();
-                while ((line = br.readLine()) != null) { //loop giusto. sotto c'è quello provvisorio per vedere se va il tutto
+                while ((line = br.readLine()) != null) {
                     String[] parts = line.split("\t");
                     List<String> term = Preprocess.processText(parts[1], Configuration.STEMMING_AND_STOPWORDS);
                     term.removeAll(List.of("", " "));
                     total_length += term.size();
-                    if (!parts[1].isEmpty() || !term.isEmpty()) { //è sufficiente che una delle due non sia empty per fare inserire il tutto
+                    if (!parts[1].isEmpty() || !term.isEmpty()) {
                         inv.add(term, Integer.parseInt(parts[0]));
                         BinaryFile.writeIntToBuffer(fc, term.size());
                         if (numDocs % 1000000 == 0) {
                             System.out.println("Now at document: " + numDocs + " and block: " + blockNumber);
                         }
                         numDocs++;
-                        if (Runtime.getRuntime().freeMemory() < (Runtime.getRuntime().totalMemory() * 20 / 100)) { //if giusto che tiene conto della memoria occupata
+                        if (Runtime.getRuntime().freeMemory() < (Runtime.getRuntime().totalMemory() * 20 / 100)) {
                             String pathBlockN = FileUtils.createPathFileBlockN(Objects.requireNonNull(Configuration.PATH_BLOCKS),blockNumber);
                             BinaryFile.writeBlock(inv, pathBlockN);
                             blockNumber++;

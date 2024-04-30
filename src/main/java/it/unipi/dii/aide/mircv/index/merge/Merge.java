@@ -107,7 +107,7 @@ public class Merge {
 
             //System.out.println(minTerm + " " + docIdsNew.size());
 
-            if (minPosting.getPostings().size() <= Configuration.BLOCK_SIZE) {
+            if (minPosting.getPostings().size() <= this.blockSize) {
                 block_size = minPosting.getPostings().size();
                 num_blocks = 1;
             }
@@ -121,7 +121,7 @@ public class Merge {
             ArrayList<Integer> docIds;
             ArrayList<Integer> freqs;
 
-            lexiconWrite(minPosting, fcSkippingBlock.size(), docIdsNew, freqsNew, lexicon, num_blocks); //TODO: FIXARE
+            lexiconWrite(minPosting, fcSkippingBlock.size(), docIdsNew, freqsNew, lexicon, num_blocks);
 
             for (int currentBlock = 0; currentBlock < num_blocks; currentBlock++){
                 docIds = new ArrayList<>();

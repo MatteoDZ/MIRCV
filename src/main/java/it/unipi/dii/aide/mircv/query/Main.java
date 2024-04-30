@@ -1,6 +1,7 @@
 package it.unipi.dii.aide.mircv.query;
 
 import it.unipi.dii.aide.mircv.index.config.Configuration;
+import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import org.javatuples.Pair;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,6 +15,11 @@ public class Main {
      * @throws IOException If an I/O error occurs while reading or writing files.
      */
     public static void main(String[] args) throws IOException {
+        if(!FileUtils.filesExist(Configuration.SKIPPING_BLOCK_PATH, Configuration.PATH_DOCID, Configuration.PATH_FREQ, Configuration.PATH_LEXICON)){
+            throw new RuntimeException("Execute Index Main first");
+        }
+
+
         Scanner scanner = new Scanner(System.in);
         long timerStart, timerEnd;
         TopKPriorityQueue<Pair<Float,Integer>> topKPriorityQueue;

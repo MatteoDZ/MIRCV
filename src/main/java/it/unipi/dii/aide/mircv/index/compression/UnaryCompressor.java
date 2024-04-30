@@ -1,8 +1,6 @@
 package it.unipi.dii.aide.mircv.index.compression;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
 import java.util.List;
 
 /**
@@ -73,7 +71,7 @@ public class UnaryCompressor {
 
     /**
      * Method to decompress an array of bytes int an array of totNums integers using Unary compression algorithm
-     * @return an array containing the decompressed integers
+     * @return a list containing the decompressed integers
      */
     public static List<Short> integerArrayDecompression(byte[] toBeDecompressed, int len) {
         List<Short> decompressedArray=new ArrayList<>();
