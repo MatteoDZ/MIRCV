@@ -1,6 +1,7 @@
 package it.unipi.dii.aide.mircv.query;
 
 import it.unipi.dii.aide.mircv.index.config.Configuration;
+import org.javatuples.Pair;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeAll;
 
@@ -20,10 +21,13 @@ public class MainTest {
     public void mainTestNoCompression() throws IOException {
         setUp();
 
+        System.out.println("TEST 1");
         assertEquals(List.of(1, 5, 3, 6, 8, 2),
                 Processer.getRankedQuery(Processer.processQuery("atomic bomb", 6, true, "tfidf", false, false)));
+        System.out.println("TEST 2");
         assertEquals(List.of(2, 3, 5, 6, 8, 1),
                 Processer.getRankedQuery(Processer.processQuery("atomic bomb", 6, true, "bm25", false, false)));
+        System.out.println("TEST 3");
         assertEquals(List.of(5, 1, 2, 3, 8, 6),
                 Processer.getRankedQuery(Processer.processQuery("atomic bomb", 6, false, "tfidf", false, false)));
         assertEquals(List.of(1, 2, 3, 5, 6, 0),

@@ -30,12 +30,16 @@ public class DAAT {
      * @return Minimum document ID.
      */
     private static int getMinDocId(ArrayList<PostingIndex> postings) {
+        System.out.println("getMin");
         int min_doc = stats.getNumDocs();
+        System.out.println("min_doc: " + min_doc);
         for (PostingIndex postingIndex : postings) {
             if (postingIndex.getPostingActual() != null) {
+                System.out.println(postingIndex.getPostingActual().getDoc_id());
                 min_doc = Math.min(min_doc, postingIndex.getPostingActual().getDoc_id());
             }
         }
+        System.out.println("min_doc end: " + min_doc);
         return min_doc;
     }
 
@@ -51,7 +55,7 @@ public class DAAT {
     public static TopKPriorityQueue<Pair<Float, Integer>> scoreCollection(
             ArrayList<PostingIndex> postings, int k, String TFIDFOrBM25, boolean conjunctive, boolean compression) throws IOException {
 
-
+        System.out.println("Started scoreCollection");
 
         // Initialize the posting lists.
         for (PostingIndex index : postings) {
@@ -59,24 +63,28 @@ public class DAAT {
             index.next(compression);
         }
 
+        System.out.println("Created postingIndex");
 
         // Initialize the priority queue for top-K results.
         TopKPriorityQueue<Pair<Float, Integer>> topK =
                 new TopKPriorityQueue<>(k, Comparator.comparing(Pair::getValue0));
 
+        System.out.println("Created topk PQ: " + topK);
 
         // Determine the starting document ID based on the query type.
         int doc_id = conjunctive ? get_doc_id(postings, compression) : getMinDocId(postings);
 
+        System.out.println("doc_id: " + doc_id);
+
         // If there are no documents matching the query, return null.
-        if (doc_id == 0) {
+        if (doc_id == stats.getNumDocs()) {
             return null;
         }
 
         // Process each document and calculate the score.
         int doc_len = stats.getNumDocs();
 
-
+        System.out.println("doc_len: " + doc_len);
 
         while (doc_id != doc_len) {
 
@@ -97,6 +105,7 @@ public class DAAT {
                                 postingIndex.getIdf(),
                                 TFIDFOrBM25);
                         postingIndex.next(compression);
+                        //System.out.println(doc_id + " " + score);
                     }
                 } else if (conjunctive) {
                     return topK;
@@ -104,9 +113,10 @@ public class DAAT {
 
             }
 
-
             // Add the document ID and its score to the priority queue.
             topK.offer(new Pair<>(score, doc_id));
+
+            System.out.println(topK);
 
             // Move to the next document based on the query type.
             doc_id = conjunctive ? get_doc_id(postings, compression) : getMinDocId(postings);
@@ -168,6 +178,7 @@ public class DAAT {
      * @return Document ID.
      */
     private static int get_doc_id(ArrayList<PostingIndex> postingIndices, Boolean compression) {
+        System.out.println("getDoc");
         int doc_id = get_max_doc_id(postingIndices);
         if (doc_id == 0) {
             return 0;

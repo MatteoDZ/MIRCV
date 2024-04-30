@@ -105,7 +105,7 @@ public class Merge {
             int block_size;
             int num_blocks;
 
-            System.out.println(minTerm + " " + docIdsNew.size());
+            //System.out.println(minTerm + " " + docIdsNew.size());
 
             if (minPosting.getPostings().size() <= Configuration.BLOCK_SIZE) {
                 block_size = minPosting.getPostings().size();
@@ -134,16 +134,16 @@ public class Merge {
                     }
                 }
 
-                System.out.println(currentBlock + " " + docIds + " " + freqs);
+                //System.out.println(currentBlock + " " + docIds + " " + freqs);
 
-                System.out.println("Term: " + minTerm + " fcSkippingBlock: " + fcSkippingBlock.size());
+                //System.out.println("Term: " + minTerm + " fcSkippingBlock: " + fcSkippingBlock.size());
 
 
 
                 long docIds_offset = docIdWriter.writeBlock(docIds, compress);
-                long freqs_offset = frequencyWriter.writeBlock(docIds, compress);
+                long freqs_offset = frequencyWriter.writeBlock(freqs, compress);
 
-                System.out.println("DocId offset: " + docIds_offset +" " + "DocIds size: " + docIds.size() + " " + "Freqs offset: " + freqs_offset + " " + "Freqs size: " + freqs.size() + " " + "DocId max: " + docIds.get(docIds.size() - 1));
+                //System.out.println("DocId offset: " + docIds_offset +" " + "DocIds size: " + docIds.size() + " " + "Freqs offset: " + freqs_offset + " " + "Freqs size: " + freqs.size() + " " + "DocId max: " + docIds.get(docIds.size() - 1));
 
                 SkippingBlock skippingBlock = new SkippingBlock();
                 skippingBlock.setDoc_id_offset(docIds_offset);
@@ -157,7 +157,7 @@ public class Merge {
                 }
 
 
-                System.out.println("Skipping dopo " + fcSkippingBlock.size());
+                //System.out.println("Skipping dopo " + fcSkippingBlock.size());
             }
 
         }
