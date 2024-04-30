@@ -10,6 +10,7 @@ import org.javatuples.Pair;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -30,6 +31,28 @@ public class PerformanceEvaluationQueries {
         List<String> lineofDoc;
         String qno;
         String directoryPath = "./PerformanceEvaluatedFile";
+        File fileDAATTFIDF = new File(directoryPath, "/DAATTFIDF.txt");
+        File fileDAATBM25 = new File(directoryPath, "/DAATBM25.txt");
+        File fileDYNAMICPRUNINGTFIDF = new File(directoryPath, "/DYNAMICPRUNINGTFIDF.txt");
+        File fileDYNAMICPRUNINGBM25 = new File(directoryPath, "/DYNAMICPRUNINGBM25.txt");
+
+        Path path = Paths.get(directoryPath);
+        if(!Files.exists(path)){
+            Files.createDirectory(path);
+        }
+
+        if (!fileDAATTFIDF.exists()) {
+            fileDAATTFIDF.createNewFile();
+        }
+        if (!fileDAATBM25.exists()) {
+            fileDAATBM25.createNewFile();
+        }
+        if (!fileDYNAMICPRUNINGTFIDF.exists()) {
+            fileDYNAMICPRUNINGTFIDF.createNewFile();
+        }
+        if (!fileDYNAMICPRUNINGBM25.exists()) {
+            fileDYNAMICPRUNINGBM25.createNewFile();
+        }
 
         try {
             assert Configuration.PATH_QUERIES != null;
@@ -37,10 +60,10 @@ public class PerformanceEvaluationQueries {
             InputStream gzip = new GZIPInputStream(file);
             BufferedReader reader = new BufferedReader(new InputStreamReader(gzip, StandardCharsets.UTF_8));
             String line;
-            BufferedWriter bufferedWriterDAATTFIDF = new BufferedWriter(new FileWriter(directoryPath + "/DAATTFIDF.txt"));
-            BufferedWriter bufferedWriterDAATBM25 = new BufferedWriter(new FileWriter(directoryPath + "/DAATBM25.txt"));
-            BufferedWriter bufferedWriterDYNAMICPRUNINGTFIDF = new BufferedWriter(new FileWriter(directoryPath + "/DYNAMICPRUNINGTFIDF.txt"));
-            BufferedWriter bufferedWriterDYNAMICPRUNINGBM25 = new BufferedWriter(new FileWriter(directoryPath + "/DYNAMICPRUNINGBM25.txt"));
+            BufferedWriter bufferedWriterDAATTFIDF = new BufferedWriter(new FileWriter(fileDAATTFIDF));
+            BufferedWriter bufferedWriterDAATBM25 = new BufferedWriter(new FileWriter(fileDAATBM25));
+            BufferedWriter bufferedWriterDYNAMICPRUNINGTFIDF = new BufferedWriter(new FileWriter(fileDYNAMICPRUNINGTFIDF));
+            BufferedWriter bufferedWriterDYNAMICPRUNINGBM25 = new BufferedWriter(new FileWriter(fileDYNAMICPRUNINGBM25));
             long start, end;
             ArrayList<Long> withCacheTFIDFDAAT = new ArrayList<>();
             ArrayList<Long> withCacheTFIDFDP = new ArrayList<>();
