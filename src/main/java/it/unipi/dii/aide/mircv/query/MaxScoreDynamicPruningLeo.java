@@ -11,6 +11,17 @@ import java.util.Comparator;
 
 public class MaxScoreDynamicPruningLeo {
 
+    private static final Statistics stats;
+
+    static {
+        stats = new Statistics();
+        try {
+            stats.readFromDisk();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * Sorts the posting indices by their upper bounds.
      *
@@ -55,7 +66,7 @@ public class MaxScoreDynamicPruningLeo {
             skip = false;
             current = conjunctive ? get_doc_id(postings, pivot, postings.size(), compression) : getMinDocId(postings, pivot, postings.size());
 
-            if (current == 0) {
+            if (stats.getNumDocs() == 0) {
                 break;
             }
 
@@ -138,9 +149,7 @@ public class MaxScoreDynamicPruningLeo {
      * @return The minimum document ID.
      */
     private static int getMinDocId(ArrayList<PostingIndex> postings, int start, int end) throws IOException {
-        Statistics statistics = new Statistics();
-        statistics.readFromDisk();
-        int minDoc = statistics.getNumDocs();
+        int minDoc = stats.getNumDocs();
 
         for (int i = start; i < end; i++) {
             if (postings.get(i).getPostingActual() != null) {

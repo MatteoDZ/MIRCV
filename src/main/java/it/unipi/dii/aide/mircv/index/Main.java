@@ -27,7 +27,7 @@ public class Main {
             System.out.println("Spimi is starting....");
             Spimi.spimi(Configuration.PATH_DOCUMENTS);
             long endTime_spimi = System.currentTimeMillis();
-            System.out.println(printTime("Spimi", startTime_spimi, endTime_spimi));
+            System.out.println(printCompletionTime("Spimi", startTime_spimi, endTime_spimi));
         }
         System.out.println("Number of blocks created in spimi part: " + FileUtils.getNumberFiles(Configuration.DIRECTORY_TEMP_FILES));
 
@@ -38,7 +38,7 @@ public class Main {
             Merge merge = new Merge(Objects.requireNonNull(FileUtils.getFilesOfDirectory(Configuration.DIRECTORY_TEMP_FILES)), Configuration.BLOCK_SIZE);
             merge.write(Configuration.COMPRESSION);
             long endTime_merge = System.currentTimeMillis();
-            System.out.println(printTime("Merge", startTime_merge, endTime_merge));
+            System.out.println(printCompletionTime("Merge", startTime_merge, endTime_merge));
         }
 
         /*InvertedIndexFile invRead = new InvertedIndexFile(Configuration.BLOCK_SIZE);
@@ -155,7 +155,7 @@ public class Main {
         scanner.close();*/
     }
 
-    public static String printTime(String phase, long startTime, long endTime){
+    public static String printCompletionTime(String phase, Long startTime, Long endTime){
         long executionTimeInSeconds = (endTime - startTime) / 1000;
         long minutes = executionTimeInSeconds / 60;
         long remainingSeconds = executionTimeInSeconds % 60;

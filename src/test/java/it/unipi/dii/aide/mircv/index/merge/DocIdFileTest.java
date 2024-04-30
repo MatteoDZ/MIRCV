@@ -1,9 +1,7 @@
 package it.unipi.dii.aide.mircv.index.merge;
 
-import it.unipi.dii.aide.mircv.index.compression.UnaryCompressor;
-import it.unipi.dii.aide.mircv.index.compression.VariableByteCompressor;
+
 import it.unipi.dii.aide.mircv.index.config.Configuration;
-import it.unipi.dii.aide.mircv.index.posting.Posting;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,8 +30,8 @@ public class DocIdFileTest {
 
     @Test
      void writeDocIdsTest() throws IOException {
-        DocIdFile doc = new DocIdFile( 5);
-        long offsets = doc.writeDocIds(docIds,  false);
+        DocIdFile doc = new DocIdFile();
+        long offsets = doc.writeBlock(docIds,  false);
         fcDocIds = FileChannel.open(Paths.get(Configuration.PATH_DOCID), StandardOpenOption.READ);
         MappedByteBuffer mmbDocIds = fcDocIds.map(FileChannel.MapMode.READ_ONLY, offsets, 4L *docIds.size());
         List<Integer> docIdsRead = new ArrayList<>();

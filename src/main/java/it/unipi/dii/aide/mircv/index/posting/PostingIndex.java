@@ -179,9 +179,11 @@ public class PostingIndex {
             skippingBlockActual = skippingBlockIterator.next();
             postings.clear();
             postings.addAll(skippingBlockActual.getSkippingBlockPostings(compression));
+
             postingIterator = postings.iterator();
         }
         postingActual = postingIterator.next();
+
         return postingActual;
     }
 

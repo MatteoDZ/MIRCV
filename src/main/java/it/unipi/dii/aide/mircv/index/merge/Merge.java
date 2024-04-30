@@ -38,8 +38,8 @@ public class Merge {
         FileChannel fcSkippingBlock = FileChannel.open(Paths.get(Configuration.SKIPPING_BLOCK_PATH),
                 StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
 
-        FrequencyFile frequencyWriter = new FrequencyFile(blockSize);
-        DocIdFile docIdWriter = new DocIdFile(blockSize);
+        FrequencyFile frequencyWriter = new FrequencyFile();
+        DocIdFile docIdWriter = new DocIdFile();
 
         while (!readerLines.isEmpty()) {
             long time_read_term = System.currentTimeMillis();
