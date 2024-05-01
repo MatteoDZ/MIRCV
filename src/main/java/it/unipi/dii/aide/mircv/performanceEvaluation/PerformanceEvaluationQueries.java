@@ -68,66 +68,71 @@ public class PerformanceEvaluationQueries {
                 }
 
                 String[] parts = line.split("\t");
-                List<String> term = Preprocess.processText(parts[1], Configuration.STEMMING_AND_STOPWORDS);
 
-                if (parts[1].isEmpty() || term.isEmpty()) {
-                    continue;
-                }
-
-                lineofDoc = String.join(" ", term);
-
-                System.out.println(parts[0] + " " + lineofDoc);
+                System.out.println(parts[0] + " " + parts[1]);
 
                 qno = parts[0];
                 Lexicon.getInstance().clear();
                 start = System.currentTimeMillis();
-                TopKPriorityQueue<Pair<Float, Integer>> answerOfSearchEngine = Processer.processQuery(lineofDoc, 10, false, "tfidf", Configuration.COMPRESSION, false);
+                TopKPriorityQueue<Pair<Float, Integer>> answerOfSearchEngine = Processer.processQuery(parts[1], 10, false, "tfidf", Configuration.COMPRESSION, false);
                 end = System.currentTimeMillis();
                 withoutCacheTFIDFDAAT.add(end - start);
                 write2File(bufferedWriterDAATTFIDF, answerOfSearchEngine, qno);
+                System.out.println("Without Cache TFIDF DAAT: " + (end-start));
 
                 start = System.currentTimeMillis();
-                Processer.processQuery(lineofDoc, 10, false, "tfidf", Configuration.COMPRESSION, false);
+                Processer.processQuery(parts[1], 10, false, "tfidf", Configuration.COMPRESSION, false);
                 end = System.currentTimeMillis();
                 withCacheTFIDFDAAT.add(end - start);
+                System.out.println("With Cache TFIDF DAAT: " + (end-start));
 
                 Lexicon.getInstance().clear();
                 start = System.currentTimeMillis();
-                answerOfSearchEngine = Processer.processQuery(lineofDoc, 10, false, "bm25", Configuration.COMPRESSION, false);
+                answerOfSearchEngine = Processer.processQuery(parts[1], 10, false, "bm25", Configuration.COMPRESSION, false);
                 end = System.currentTimeMillis();
                 withoutCacheBM25DAAT.add(end - start);
                 write2File(bufferedWriterDAATBM25, answerOfSearchEngine, qno);
+                System.out.println("Without Cache BM25 DAAT: " + (end-start));
 
                 start = System.currentTimeMillis();
-                Processer.processQuery(lineofDoc, 10, false, "bm25", Configuration.COMPRESSION, false);
+                Processer.processQuery(parts[1], 10, false, "bm25", Configuration.COMPRESSION, false);
                 end = System.currentTimeMillis();
                 withCacheBM25DAAT.add(end - start);
                 Lexicon.getInstance().clear();
+                System.out.println("With Cache BM25 DAAT: " + (end-start));
 
                 start = System.currentTimeMillis();
-                answerOfSearchEngine = Processer.processQuery(lineofDoc, 10, false, "tfidf", Configuration.COMPRESSION, true);
+                answerOfSearchEngine = Processer.processQuery(parts[1], 10, false, "tfidf", Configuration.COMPRESSION, true);
                 end = System.currentTimeMillis();
                 withoutCacheTFIDFDP.add(end - start);
                 write2File(bufferedWriterDYNAMICPRUNINGTFIDF, answerOfSearchEngine, qno);
+                System.out.println("Without Cache FTIDF DP: " + (end-start));
 
                 start = System.currentTimeMillis();
-                Processer.processQuery(lineofDoc, 10, false, "tfidf", Configuration.COMPRESSION, true);
+                Processer.processQuery(parts[1], 10, false, "tfidf", Configuration.COMPRESSION, true);
                 end = System.currentTimeMillis();
                 withCacheTFIDFDP.add(end - start);
+                System.out.println("With Cache FTIDF DP: " + (end-start));
+
 
                 Lexicon.getInstance().clear();
 
                 start = System.currentTimeMillis();
-                answerOfSearchEngine = Processer.processQuery(lineofDoc, 10, false, "bm25", Configuration.COMPRESSION, true);
+                answerOfSearchEngine = Processer.processQuery(parts[1], 10, false, "bm25", Configuration.COMPRESSION, true);
                 end = System.currentTimeMillis();
                 withoutCacheBM25DP.add(end - start);
                 write2File(bufferedWriterDYNAMICPRUNINGBM25, answerOfSearchEngine, qno);
 
+                System.out.println("Without Cache BM25 DP: " + (end-start));
+
 
                 start = System.currentTimeMillis();
-                Processer.processQuery(lineofDoc, 10, false, "bm25", Configuration.COMPRESSION, true);
+                Processer.processQuery(parts[1], 10, false, "bm25", Configuration.COMPRESSION, true);
                 end = System.currentTimeMillis();
                 withCacheBM25DP.add(end - start);
+
+                System.out.println("With Cache BM25 DP: " + (end-start));
+                System.out.println("----------");
 
             }
             printStats("withoutCacheTFIDFDAAT", withoutCacheTFIDFDAAT);
