@@ -11,7 +11,6 @@ import org.javatuples.Pair;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -202,7 +201,7 @@ public class PerformanceEvaluationQueries {
                 Collections.reverse(pair);
                 for (int i = 0; i < pair.size(); i++) {
                     // bufferedWriter.write(qno + " Q0 " + Integer.parseInt(DocIndex.getInstance().getDoc_NO(pair.get(i).getValue())) + " " + (i + 1) + " " + pair.get(i).getKey() + " CHANG0" + "\n");
-                    bufferedWriter.write(qno + " Q0 " + i + " " + (i + 1) + " " + pair.get(i).getValue0() + " CHANG0" + "\n");
+                    bufferedWriter.write(qno + " Q0 " + pair.get(i).getValue1() + " " + (i + 1) + " " + pair.get(i).getValue0() + " CHANG0" + "\n");
                 }
             }
         } catch (IOException e) {
