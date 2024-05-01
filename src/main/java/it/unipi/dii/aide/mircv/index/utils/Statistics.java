@@ -23,8 +23,7 @@ public class Statistics {
         try {
             fc = FileChannel.open(Paths.get(Configuration.PATH_STATISTICS),
                     StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
-        } catch (
-                IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException("An error occurred while writing to the " + Configuration.PATH_STATISTICS + " file.");
         }
     }

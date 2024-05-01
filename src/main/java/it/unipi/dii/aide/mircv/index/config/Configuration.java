@@ -14,7 +14,7 @@ public class Configuration {
     public static String PATH_BLOCKS = load("path_blocks");
     public static String DIRECTORY_TEMP_FILES = load("directory_temporary_files");
     public static final String DIRECTORY_TEST = load("directory_test");
-    public static Boolean DYNAMIC_PRUNING = Boolean.parseBoolean(load("dynamic_pruning"));
+    public static final String DIRECTORY_PERFORMANCE_EVALUATION = load("directory_performance_evaluation");;
     public static  String PATH_DOCID = load("path_docids");
     public static  String PATH_FREQ = load("path_freqs");
     public static  String PATH_LEXICON = load("path_lexicon");

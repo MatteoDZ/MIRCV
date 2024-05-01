@@ -16,6 +16,19 @@ import java.nio.file.StandardOpenOption;
  */
 public class Scorer {
 
+    private static final FileChannel fc;
+    static Statistics stats = new Statistics();
+
+
+    static {
+        try {
+            fc = FileChannel.open(Path.of(Configuration.PATH_DOC_TERMS), StandardOpenOption.READ, StandardOpenOption.WRITE);
+            stats.readFromDisk();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * Calculates the score based on the specified scoring function (TFIDF or BM25).
      *
@@ -53,10 +66,7 @@ public class Scorer {
      * @return The calculated BM25 score.
      */
     public static float calculateBM25(Posting posting, float idf) throws IOException {
-        Statistics stats = new Statistics();
-        FileChannel fc = FileChannel.open(Path.of(Configuration.PATH_DOC_TERMS), StandardOpenOption.READ, StandardOpenOption.WRITE);
         int doc_len = BinaryFile.readIntFromBuffer(fc, posting.getDoc_id()*4L);
-        fc.close();
         float tf = (float) (1 + Math.log(posting.getFrequency()));
         return (float) ((tf * idf) / (tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (doc_len / stats.getAvgDocLen()))));
     }

@@ -3,6 +3,7 @@ package it.unipi.dii.aide.mircv.performanceEvaluation;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.merge.Lexicon;
 import it.unipi.dii.aide.mircv.index.preprocess.Preprocess;
+import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import it.unipi.dii.aide.mircv.index.utils.Statistics;
 import it.unipi.dii.aide.mircv.query.Processer;
 import it.unipi.dii.aide.mircv.query.TopKPriorityQueue;
@@ -28,31 +29,19 @@ public class PerformanceEvaluationQueries {
         Statistics statistics = new Statistics();
         statistics.readFromDisk();
 
-        List<String> lineofDoc;
+        String lineofDoc;
         String qno;
-        String directoryPath = "./PerformanceEvaluatedFile";
-        File fileDAATTFIDF = new File(directoryPath, "/DAATTFIDF.txt");
-        File fileDAATBM25 = new File(directoryPath, "/DAATBM25.txt");
-        File fileDYNAMICPRUNINGTFIDF = new File(directoryPath, "/DYNAMICPRUNINGTFIDF.txt");
-        File fileDYNAMICPRUNINGBM25 = new File(directoryPath, "/DYNAMICPRUNINGBM25.txt");
+        File fileDAATTFIDF = new File(Configuration.DIRECTORY_PERFORMANCE_EVALUATION, "/DAATTFIDF.txt");
+        File fileDAATBM25 = new File(Configuration.DIRECTORY_PERFORMANCE_EVALUATION, "/DAATBM25.txt");
+        File fileDYNAMICPRUNINGTFIDF = new File(Configuration.DIRECTORY_PERFORMANCE_EVALUATION, "/DYNAMICPRUNINGTFIDF.txt");
+        File fileDYNAMICPRUNINGBM25 = new File(Configuration.DIRECTORY_PERFORMANCE_EVALUATION, "/DYNAMICPRUNINGBM25.txt");
 
-        Path path = Paths.get(directoryPath);
-        if(!Files.exists(path)){
-            Files.createDirectory(path);
-        }
-
-        if (!fileDAATTFIDF.exists()) {
-            fileDAATTFIDF.createNewFile();
-        }
-        if (!fileDAATBM25.exists()) {
-            fileDAATBM25.createNewFile();
-        }
-        if (!fileDYNAMICPRUNINGTFIDF.exists()) {
-            fileDYNAMICPRUNINGTFIDF.createNewFile();
-        }
-        if (!fileDYNAMICPRUNINGBM25.exists()) {
-            fileDYNAMICPRUNINGBM25.createNewFile();
-        }
+        FileUtils.deleteDirectory(Configuration.DIRECTORY_PERFORMANCE_EVALUATION);
+        FileUtils.createDirectory(Configuration.DIRECTORY_PERFORMANCE_EVALUATION);
+        fileDAATTFIDF.createNewFile();
+        fileDAATBM25.createNewFile();
+        fileDYNAMICPRUNINGTFIDF.createNewFile();
+        fileDYNAMICPRUNINGBM25.createNewFile();
 
         try {
             assert Configuration.PATH_QUERIES != null;
@@ -78,60 +67,66 @@ public class PerformanceEvaluationQueries {
                 if (line.trim().isEmpty()) {
                     continue;
                 }
-                lineofDoc = Preprocess.processText(line, Configuration.STEMMING_AND_STOPWORDS);
-                if (lineofDoc.get(1).trim().isEmpty()) {
+
+                String[] parts = line.split("\t");
+                List<String> term = Preprocess.processText(parts[1], Configuration.STEMMING_AND_STOPWORDS);
+
+                if (parts[1].isEmpty() || term.isEmpty()) {
                     continue;
                 }
 
-                qno = lineofDoc.get(0);
+                lineofDoc = String.join(" ", term);
+
+                System.out.println(parts[0] + " " + lineofDoc);
+
+                qno = parts[0];
                 Lexicon.getInstance().clear();
                 start = System.currentTimeMillis();
-                TopKPriorityQueue<Pair<Float, Integer>> answerOfSearchEngine = Processer.processQuery(lineofDoc.get(1), 10, false, "tfidf", Configuration.COMPRESSION, Configuration.DYNAMIC_PRUNING);
+                TopKPriorityQueue<Pair<Float, Integer>> answerOfSearchEngine = Processer.processQuery(lineofDoc, 10, false, "tfidf", Configuration.COMPRESSION, false);
                 end = System.currentTimeMillis();
                 withoutCacheTFIDFDAAT.add(end - start);
                 write2File(bufferedWriterDAATTFIDF, answerOfSearchEngine, qno);
 
                 start = System.currentTimeMillis();
-                Processer.processQuery(lineofDoc.get(1), 10, false, "tfidf", Configuration.COMPRESSION, Configuration.DYNAMIC_PRUNING);
+                Processer.processQuery(lineofDoc, 10, false, "tfidf", Configuration.COMPRESSION, false);
                 end = System.currentTimeMillis();
                 withCacheTFIDFDAAT.add(end - start);
 
                 Lexicon.getInstance().clear();
                 start = System.currentTimeMillis();
-                answerOfSearchEngine = Processer.processQuery(lineofDoc.get(1), 10, false, "bm25", Configuration.COMPRESSION, Configuration.DYNAMIC_PRUNING);
+                answerOfSearchEngine = Processer.processQuery(lineofDoc, 10, false, "bm25", Configuration.COMPRESSION, false);
                 end = System.currentTimeMillis();
                 withoutCacheBM25DAAT.add(end - start);
                 write2File(bufferedWriterDAATBM25, answerOfSearchEngine, qno);
 
                 start = System.currentTimeMillis();
-                Processer.processQuery(lineofDoc.get(1), 10, false, "bm25", Configuration.COMPRESSION, Configuration.DYNAMIC_PRUNING);
+                Processer.processQuery(lineofDoc, 10, false, "bm25", Configuration.COMPRESSION, false);
                 end = System.currentTimeMillis();
                 withCacheBM25DAAT.add(end - start);
                 Lexicon.getInstance().clear();
 
-                Configuration.DYNAMIC_PRUNING = true;
                 start = System.currentTimeMillis();
-                answerOfSearchEngine = Processer.processQuery(lineofDoc.get(1), 10, false, "tfidf", Configuration.COMPRESSION, Configuration.DYNAMIC_PRUNING);
+                answerOfSearchEngine = Processer.processQuery(lineofDoc, 10, false, "tfidf", Configuration.COMPRESSION, true);
                 end = System.currentTimeMillis();
                 withoutCacheTFIDFDP.add(end - start);
                 write2File(bufferedWriterDYNAMICPRUNINGTFIDF, answerOfSearchEngine, qno);
 
                 start = System.currentTimeMillis();
-                Processer.processQuery(lineofDoc.get(1), 10, false, "tfidf", Configuration.COMPRESSION, Configuration.DYNAMIC_PRUNING);
+                Processer.processQuery(lineofDoc, 10, false, "tfidf", Configuration.COMPRESSION, true);
                 end = System.currentTimeMillis();
                 withCacheTFIDFDP.add(end - start);
 
                 Lexicon.getInstance().clear();
 
                 start = System.currentTimeMillis();
-                answerOfSearchEngine = Processer.processQuery(lineofDoc.get(1), 10, false, "bm25", Configuration.COMPRESSION, Configuration.DYNAMIC_PRUNING);
+                answerOfSearchEngine = Processer.processQuery(lineofDoc, 10, false, "bm25", Configuration.COMPRESSION, true);
                 end = System.currentTimeMillis();
                 withoutCacheBM25DP.add(end - start);
                 write2File(bufferedWriterDYNAMICPRUNINGBM25, answerOfSearchEngine, qno);
 
 
                 start = System.currentTimeMillis();
-                Processer.processQuery(lineofDoc.get(1), 10, false, "bm25", Configuration.COMPRESSION, Configuration.DYNAMIC_PRUNING);
+                Processer.processQuery(lineofDoc, 10, false, "bm25", Configuration.COMPRESSION, true);
                 end = System.currentTimeMillis();
                 withCacheBM25DP.add(end - start);
 

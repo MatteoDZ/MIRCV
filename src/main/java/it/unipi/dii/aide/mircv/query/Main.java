@@ -58,9 +58,9 @@ public class Main {
                 continue;
             }
 
-            Configuration.DYNAMIC_PRUNING = chose != 1;
+            boolean dynamicPruning = chose != 1;
             timerStart = System.currentTimeMillis();
-            topKPriorityQueue = (Processer.processQuery(query, 10, chose1 == 1, scoreFun, Configuration.COMPRESSION, Configuration.DYNAMIC_PRUNING));
+            topKPriorityQueue = (Processer.processQuery(query, 10, chose1 == 1, scoreFun, Configuration.COMPRESSION, dynamicPruning));
             timerEnd = System.currentTimeMillis();
             queryResult=Processer.getRankedQuery(topKPriorityQueue);
 
