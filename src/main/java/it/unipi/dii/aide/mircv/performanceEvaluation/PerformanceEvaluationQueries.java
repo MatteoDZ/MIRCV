@@ -16,7 +16,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 public class PerformanceEvaluationQueries {
@@ -27,8 +26,7 @@ public class PerformanceEvaluationQueries {
     public static void execute() throws IOException {
         Statistics statistics = new Statistics();
         statistics.readFromDisk();
-
-        String lineofDoc;
+        
         String qno;
         File fileDAATTFIDF = new File(Configuration.DIRECTORY_PERFORMANCE_EVALUATION, "/DAATTFIDF.txt");
         File fileDAATBM25 = new File(Configuration.DIRECTORY_PERFORMANCE_EVALUATION, "/DAATBM25.txt");

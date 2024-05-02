@@ -3,6 +3,7 @@ package it.unipi.dii.aide.mircv.query;
 
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
+import it.unipi.dii.aide.mircv.index.merge.LFUCache;
 import it.unipi.dii.aide.mircv.index.posting.Posting;
 import it.unipi.dii.aide.mircv.index.utils.Statistics;
 
@@ -18,6 +19,8 @@ public class Scorer {
 
     private static final FileChannel fc;
     static Statistics stats = new Statistics();
+    static long time=0;
+    private static final LFUCache<Integer, Integer> lfuCache = new LFUCache<>(100000);
 
 
     static {
@@ -66,8 +69,24 @@ public class Scorer {
      * @return The calculated BM25 score.
      */
     public static float calculateBM25(Posting posting, float idf) throws IOException {
-        int doc_len = BinaryFile.readIntFromBuffer(fc, posting.getDoc_id()*4L);
+        // long start = System.currentTimeMillis();
+        // int doc_len = BinaryFile.readIntFromBuffer(fc, posting.getDoc_id()*4L);
+        int doc_len = getDoc_len(posting.getDoc_id());
+        // long end = System.currentTimeMillis();
+        // time += end - start;
+        // System.out.println(time);
         float tf = (float) (1 + Math.log(posting.getFrequency()));
         return (float) ((tf * idf) / (tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (doc_len / stats.getAvgDocLen()))));
     }
+
+    public static Integer getDoc_len(int doc_id) throws IOException {
+        if (lfuCache.containsKey(doc_id)) {
+            return lfuCache.get(doc_id);
+        }
+        int doc_len = BinaryFile.readIntFromBuffer(fc, doc_id*4L);
+        lfuCache.put(doc_id, doc_len);
+        return doc_len;
+    }
+
+
 }

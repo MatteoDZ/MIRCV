@@ -50,6 +50,7 @@ public class DAAT {
     public static TopKPriorityQueue<Pair<Float, Integer>> scoreCollection(
             ArrayList<PostingIndex> postings, int k, String TFIDFOrBM25, boolean conjunctive, boolean compression) throws IOException {
 
+
         // Initialize the posting lists.
         for (PostingIndex index : postings) {
             index.openList();

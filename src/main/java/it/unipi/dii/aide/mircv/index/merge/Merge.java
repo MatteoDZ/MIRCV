@@ -209,7 +209,6 @@ public class Merge {
         int  tf  = 0;
 
         int df = pi.getPostings().size();
-        float idf = (float) ((Math.log((double) stats.getNumDocs() / df))); // TODO: a cosa serve?
 
         for (Posting posting : pi.getPostings()) {
             actualBM25 = calculateBM25(tf, posting.getDoc_id());

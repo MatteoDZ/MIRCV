@@ -28,33 +28,33 @@ public class Main {
 
 
         do {
-            System.out.print("Query-> ");
+            System.out.print("Enter the query: ");
             query = scanner.nextLine();
             if (query.trim().isEmpty()) {
-                System.out.println("empty query");
+                System.out.println("The query is empty. Please enter a valid query.");
                 continue;
             }
 
-            System.out.print("Daat(1) or Dynamic Pruning(2) or exit(3)?");
+            System.out.print("Select Daat(1) or Dynamic Pruning(2) or exit(3): ");
             int chose = Integer.parseInt(scanner.nextLine());
             if (chose != 1 && chose != 2 && chose != 3) {
-                System.out.println("no good choice, please repeat");
+                System.out.println("Invalid choice. Please try again.");
                 continue;
             } else if (chose == 3) {
                 break;
             }
 
-            System.out.print("Conjunctive(1) or Disjunctive(2)?");
+            System.out.print("Select Conjunctive(1) or Disjunctive(2): ");
             int chose1 = Integer.parseInt(scanner.nextLine());
             if (chose1 != 1 && chose1 != 2) {
-                System.out.println("no conjunctive nor disjunctive selected, please restart");
+                System.out.println("No valid option selected. Please restart.");
                 continue;
             }
 
-            System.out.print("Score function bm25 or tfidf->");
+            System.out.print("Select the scoring function bm25 or tfidf: ");
             scoreFun = scanner.nextLine();
             if (!scoreFun.equals("bm25") && !scoreFun.equals("tfidf")) {
-                System.out.println("no tfidf or bm25");
+                System.out.println("Invalid choice. Choose between 'bm25' and 'tfidf'.");
                 continue;
             }
 
@@ -65,13 +65,13 @@ public class Main {
             queryResult=Processer.getRankedQuery(topKPriorityQueue);
 
             if (queryResult == null) {
-                System.out.println("no docs for the query");
+                System.out.println("No documents found for the query.");
             } else {
-                System.out.print("Results of DocNos-> ");
+                System.out.print("Results of document numbers: ");
                 for (int i : queryResult) {
                     System.out.print(i + " ");
                 }
-                System.out.println("with time->" + (timerEnd - timerStart) + "ms");
+                System.out.println("with execution time: " + (timerEnd - timerStart) + "ms");
             }
 
         } while (true);
