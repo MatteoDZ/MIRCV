@@ -2,7 +2,6 @@ package it.unipi.dii.aide.mircv.performanceEvaluation;
 
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.merge.Lexicon;
-import it.unipi.dii.aide.mircv.index.preprocess.Preprocess;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import it.unipi.dii.aide.mircv.index.utils.Statistics;
 import it.unipi.dii.aide.mircv.query.Processer;
@@ -35,10 +34,7 @@ public class PerformanceEvaluationQueries {
 
         FileUtils.deleteDirectory(Configuration.DIRECTORY_PERFORMANCE_EVALUATION);
         FileUtils.createDirectory(Configuration.DIRECTORY_PERFORMANCE_EVALUATION);
-        fileDAATTFIDF.createNewFile();
-        fileDAATBM25.createNewFile();
-        fileDYNAMICPRUNINGTFIDF.createNewFile();
-        fileDYNAMICPRUNINGBM25.createNewFile();
+        FileUtils.createFiles(fileDAATTFIDF, fileDAATBM25, fileDYNAMICPRUNINGTFIDF, fileDYNAMICPRUNINGBM25);
 
         try {
             assert Configuration.PATH_QUERIES != null;
@@ -114,13 +110,11 @@ public class PerformanceEvaluationQueries {
 
 
                 Lexicon.getInstance().clear();
-
                 start = System.currentTimeMillis();
                 answerOfSearchEngine = Processer.processQuery(parts[1], 10, false, "bm25", Configuration.COMPRESSION, true);
                 end = System.currentTimeMillis();
                 withoutCacheBM25DP.add(end - start);
                 write2File(bufferedWriterDYNAMICPRUNINGBM25, answerOfSearchEngine, qno);
-
                 System.out.println("Without Cache BM25 DP: " + (end-start));
 
 
@@ -128,7 +122,6 @@ public class PerformanceEvaluationQueries {
                 Processer.processQuery(parts[1], 10, false, "bm25", Configuration.COMPRESSION, true);
                 end = System.currentTimeMillis();
                 withCacheBM25DP.add(end - start);
-
                 System.out.println("With Cache BM25 DP: " + (end-start));
                 System.out.println("----------");
 
@@ -177,11 +170,20 @@ public class PerformanceEvaluationQueries {
     }
 
     private static double averageOfTime(ArrayList<Long> list) {
+
+        double new_mean = list.stream().mapToDouble(Long::doubleValue).average().orElse(Double.NaN);
+
         long sum = 0;
         for (long l : list) {
             sum += l;
         }
-        return (double) sum / list.size();
+        double old_mean = sum / list.size();
+
+        if (new_mean != old_mean) {
+            System.out.println("Problems with average of time. Old mean: " + old_mean + ", new mean: " + new_mean);
+        }
+
+        return old_mean;
     }
 
     private static double standardDeviationOfTime(ArrayList<Long> list, double mean) {
@@ -191,6 +193,17 @@ public class PerformanceEvaluationQueries {
             sumSquaredDiff += diff * diff;
         }
         double variance = sumSquaredDiff / list.size();
+
+        double new_variance = list.stream()
+                .mapToDouble(value -> Math.pow(value - mean, 2))
+                .average()
+                .orElse(0);
+
+        if(new_variance != variance) {
+            System.out.println("Problems with variance. Old variance: " + variance + ", new variance: " + new_variance);
+        }
+
+
         return Math.sqrt(variance);
     }
 

@@ -131,6 +131,13 @@ public class FileUtils {
         }
     }
 
+    public static void createFiles(File ...files) throws IOException {
+        for (File f : files) {
+            if(!f.createNewFile())
+                throw new RuntimeException("Failed to create file: " + f);
+        }
+    }
+
 
 
 

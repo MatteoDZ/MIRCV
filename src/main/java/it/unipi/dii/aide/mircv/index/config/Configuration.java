@@ -22,11 +22,14 @@ public class Configuration {
     public static  String PATH_DOC_TERMS = load("path_doc_terms");
     public static  String SKIPPING_BLOCK_PATH = load("path_skipping");
     public static final Integer LEXICON_CACHE_SIZE =  Integer.parseInt(Objects.requireNonNull(load("lexicon_cache_size")));
+    public static final Integer DOC_TERMS_CACHE_SIZE =  Integer.parseInt(Objects.requireNonNull(load("doc_terms_cache_size")));
     public static final Integer BLOCK_SIZE = Integer.parseInt(Objects.requireNonNull(load("block_size")));
     public static final Boolean COMPRESSION = Boolean.parseBoolean(load("compression"));
     public static final Boolean STEMMING_AND_STOPWORDS = Boolean.parseBoolean(load("stemmingAndStopwords"));
     public static final Float BM25_K1 = Float.parseFloat(Objects.requireNonNull(load("BM25_K1")));
     public static final Float BM25_B = Float.parseFloat(Objects.requireNonNull(load("BM25_B")));
+
+
 
 
 

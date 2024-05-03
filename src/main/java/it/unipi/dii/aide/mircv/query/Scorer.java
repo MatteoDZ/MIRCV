@@ -20,7 +20,7 @@ public class Scorer {
     private static final FileChannel fc;
     static Statistics stats = new Statistics();
     static long time=0;
-    private static final LFUCache<Integer, Integer> lfuCache = new LFUCache<>(100000);
+    private static final LFUCache<Integer, Integer> lfuCache = new LFUCache<>(Configuration.DOC_TERMS_CACHE_SIZE);
 
 
     static {
