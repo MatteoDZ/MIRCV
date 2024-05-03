@@ -35,10 +35,7 @@ public class PerformanceEvaluationQueries {
 
         FileUtils.deleteDirectory(Configuration.DIRECTORY_PERFORMANCE_EVALUATION);
         FileUtils.createDirectory(Configuration.DIRECTORY_PERFORMANCE_EVALUATION);
-        fileDAATTFIDF.createNewFile();
-        fileDAATBM25.createNewFile();
-        fileDYNAMICPRUNINGTFIDF.createNewFile();
-        fileDYNAMICPRUNINGBM25.createNewFile();
+        FileUtils.createFiles(fileDAATTFIDF, fileDAATBM25, fileDYNAMICPRUNINGTFIDF, fileDYNAMICPRUNINGBM25);
 
         try {
             assert Configuration.PATH_QUERIES != null;
@@ -51,6 +48,7 @@ public class PerformanceEvaluationQueries {
             BufferedWriter bufferedWriterDYNAMICPRUNINGTFIDF = new BufferedWriter(new FileWriter(fileDYNAMICPRUNINGTFIDF));
             BufferedWriter bufferedWriterDYNAMICPRUNINGBM25 = new BufferedWriter(new FileWriter(fileDYNAMICPRUNINGBM25));
             long start, end;
+            TopKPriorityQueue<Pair<Float, Integer>> answerOfSearchEngine;
             ArrayList<Long> withCacheTFIDFDAAT = new ArrayList<>();
             ArrayList<Long> withCacheTFIDFDP = new ArrayList<>();
             ArrayList<Long> withoutCacheTFIDFDAAT = new ArrayList<>();
@@ -72,7 +70,7 @@ public class PerformanceEvaluationQueries {
                 qno = parts[0];
                 Lexicon.getInstance().clear();
                 start = System.currentTimeMillis();
-                TopKPriorityQueue<Pair<Float, Integer>> answerOfSearchEngine = Processer.processQuery(parts[1], 10, false, "tfidf", Configuration.COMPRESSION, false);
+                answerOfSearchEngine = Processer.processQuery(parts[1], 10, false, "tfidf", Configuration.COMPRESSION, false);
                 end = System.currentTimeMillis();
                 withoutCacheTFIDFDAAT.add(end - start);
                 write2File(bufferedWriterDAATTFIDF, answerOfSearchEngine, qno);
@@ -120,7 +118,6 @@ public class PerformanceEvaluationQueries {
                 end = System.currentTimeMillis();
                 withoutCacheBM25DP.add(end - start);
                 write2File(bufferedWriterDYNAMICPRUNINGBM25, answerOfSearchEngine, qno);
-
                 System.out.println("Without Cache BM25 DP: " + (end-start));
 
 
@@ -128,7 +125,6 @@ public class PerformanceEvaluationQueries {
                 Processer.processQuery(parts[1], 10, false, "bm25", Configuration.COMPRESSION, true);
                 end = System.currentTimeMillis();
                 withCacheBM25DP.add(end - start);
-
                 System.out.println("With Cache BM25 DP: " + (end-start));
                 System.out.println("----------");
 
@@ -181,7 +177,17 @@ public class PerformanceEvaluationQueries {
         for (long l : list) {
             sum += l;
         }
-        return (double) sum / list.size();
+        double avg = (double) sum / list.size();
+
+        double new_avg = list.stream()
+                .mapToDouble(Long::doubleValue)
+                .average()
+                .orElse(Double.NaN);
+
+        if(avg != new_avg)
+            System.out.println("PROBLEM - Average: " + avg + " New Average: " + new_avg);
+
+        return avg;
     }
 
     private static double standardDeviationOfTime(ArrayList<Long> list, double mean) {
@@ -191,6 +197,16 @@ public class PerformanceEvaluationQueries {
             sumSquaredDiff += diff * diff;
         }
         double variance = sumSquaredDiff / list.size();
+
+        double new_variance = list.stream()
+                .mapToDouble(value -> Math.pow(value - mean, 2))
+                .average()
+                .orElse(0);
+
+
+        if(variance != new_variance)
+            System.out.println("PROBLEM - Variance: " + variance + " New Variance: " + new_variance);
+
         return Math.sqrt(variance);
     }
 
@@ -202,6 +218,9 @@ public class PerformanceEvaluationQueries {
                     pair.add(answerOfSearchEngine.poll());
                 }
                 Collections.reverse(pair);
+
+                // pair.forEach(p -> bufferedWriter.write(qno + " Q0 " + p.getValue1() + " " + (pair.indexOf(p) + 1) + " " + p.getValue0() + "\n"));
+
                 for (int i = 0; i < pair.size(); i++) {
                     // bufferedWriter.write(qno + " Q0 " + Integer.parseInt(DocIndex.getInstance().getDoc_NO(pair.get(i).getValue())) + " " + (i + 1) + " " + pair.get(i).getKey() + " CHANG0" + "\n");
                     bufferedWriter.write(qno + " Q0 " + pair.get(i).getValue1() + " " + (i + 1) + " " + pair.get(i).getValue0() + " CHANG0" + "\n");
@@ -210,6 +229,24 @@ public class PerformanceEvaluationQueries {
         } catch (IOException e) {
             System.out.println("Problems with opening the query file to perform a performance evaluation in the write method");
         }
+    }
+
+
+    private void execQuery(BufferedWriter buffer, String qno, String query, String scoringFunction, Boolean pruning, ArrayList<Long> listTimeExecution) throws IOException {
+        Lexicon.getInstance().clear();
+        long start = System.currentTimeMillis();
+        TopKPriorityQueue<Pair<Float, Integer>> answerOfSearchEngine = Processer.processQuery(query, 10, false, scoringFunction, Configuration.COMPRESSION, pruning);
+        long end = System.currentTimeMillis();
+        listTimeExecution.add(end - start);
+        write2File(buffer, answerOfSearchEngine, qno);
+    }
+
+    private void execQueryWithCache(String query, String scoringFunction, Boolean pruning, ArrayList<Long> listTimeExecution) throws IOException {
+        Lexicon.getInstance().clear();
+        long start = System.currentTimeMillis();
+        Processer.processQuery(query, 10, false, scoringFunction, Configuration.COMPRESSION, pruning);
+        long end = System.currentTimeMillis();
+        listTimeExecution.add(end - start);
     }
 
     public static void main(String[] args) throws IOException {
