@@ -1,11 +1,10 @@
 package it.unipi.dii.aide.mircv.index.utils;
 
-import it.unipi.dii.aide.mircv.index.config.Configuration;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
@@ -97,7 +96,7 @@ public class FileUtils {
             try(Stream<Path> files = Files.list(Paths.get(path))) {
                 return files.map(Path::toString).toList();
             } catch(IOException e) {
-                throw new RuntimeException("Failed to get number of files in directory: " + path);
+                throw new RuntimeException("Failed to get files in directory: " + path);
             }
         }
         return null;
@@ -114,7 +113,12 @@ public class FileUtils {
         return path.split("\\.")[0] + "_" + blockNumber + "." + path.split("\\.")[1];
     }
 
-
+    /**
+     * Checks if the specified files exist.
+     *
+     * @param  path  the paths of the files to check
+     * @return       true if all the files exist, false otherwise
+     */
     public static Boolean filesExist(String ...path){
         for (String p : path) {
             if (!searchIfExists(p)) {
@@ -124,21 +128,27 @@ public class FileUtils {
         return true;
     }
 
+    /**
+     * Deletes files at the specified paths.
+     *
+     * @param  path	variable number of file paths to be deleted
+     */
     public static void deleteFiles(String ...path){
-        for (String p : path) {
-            if(searchIfExists(p))
-                    removeFile(p);
-        }
+        Arrays.stream(path).forEach(FileUtils::removeFile);
     }
 
+    /**
+     * Creates files with the specified file paths.
+     *
+     * @param  files  array of File objects representing the files to be created
+     * @throws IOException if an I/O error occurs while creating the files
+     */
     public static void createFiles(File ...files) throws IOException {
         for (File f : files) {
             if(!f.createNewFile())
                 throw new RuntimeException("Failed to create file: " + f);
         }
     }
-
-
 
 
 }
