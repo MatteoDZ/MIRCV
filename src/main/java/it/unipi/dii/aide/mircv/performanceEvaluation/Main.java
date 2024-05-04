@@ -8,7 +8,10 @@ import it.unipi.dii.aide.mircv.query.Processer;
 import it.unipi.dii.aide.mircv.query.TopKPriorityQueue;
 import static it.unipi.dii.aide.mircv.performanceEvaluation.Statistics.printStats;
 
+import me.tongfei.progressbar.ProgressBar;
 import org.javatuples.Pair;
+
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.io.*;
@@ -51,6 +54,8 @@ public class Main {
                     withCacheBM25DP = new ArrayList<>(), withCacheBM25DAAT = new ArrayList<>(),
                     withoutCacheBM25DAAT = new ArrayList<>(), withoutCacheBM25DP = new ArrayList<>();
 
+            ProgressBar pb = new ProgressBar("Performance Evaluation", 200); // 200 number of queries
+
             while ((line = reader.readLine()) != null) {
                 if (line.trim().isEmpty())
                     continue;
@@ -73,6 +78,8 @@ public class Main {
 
                 execQuery(bufferedWriterDYNAMICPRUNINGBM25,qn0, query, "bm25", true, withoutCacheBM25DP);
                 execQueryWithCache(query, "bm25", true, withCacheBM25DP);
+
+                pb.step();
 
             }
             printStats("withoutCacheTFIDFDAAT", withoutCacheTFIDFDAAT);

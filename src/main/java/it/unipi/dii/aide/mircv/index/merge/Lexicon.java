@@ -93,7 +93,7 @@ public class Lexicon {
             entry.readEntryFromDisk(mid * LexiconData.ENTRY_SIZE, fc);
 
             if (entry.getTerm().isEmpty()) {
-                System.out.println("Term "+termToFind+" not found in lexicon");
+                // System.out.println("Term "+termToFind+" not found in lexicon");
                 return null;
             }
 
@@ -109,7 +109,7 @@ public class Lexicon {
                 top = mid - 1;
             }
         }
-        System.out.println("Term "+termToFind+" not found in lexicon");
+        // System.out.println("Term "+termToFind+" not found in lexicon");
         return null;
 
     }
