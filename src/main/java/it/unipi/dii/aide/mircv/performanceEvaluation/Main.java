@@ -41,7 +41,7 @@ public class Main {
             assert Configuration.PATH_QUERIES != null;
             InputStream gzip = new GZIPInputStream(Files.newInputStream(Paths.get(Configuration.PATH_QUERIES)));
             BufferedReader reader = new BufferedReader(new InputStreamReader(gzip, StandardCharsets.UTF_8));
-            String line;
+            String line, qn0, query;
             BufferedWriter bufferedWriterDAATTFIDF = new BufferedWriter(new FileWriter(fileDAATTFIDF));
             BufferedWriter bufferedWriterDAATBM25 = new BufferedWriter(new FileWriter(fileDAATBM25));
             BufferedWriter bufferedWriterDYNAMICPRUNINGTFIDF = new BufferedWriter(new FileWriter(fileDYNAMICPRUNINGTFIDF));
@@ -52,23 +52,27 @@ public class Main {
                     withoutCacheBM25DAAT = new ArrayList<>(), withoutCacheBM25DP = new ArrayList<>();
 
             while ((line = reader.readLine()) != null) {
-                if (line.trim().isEmpty()) {
+                if (line.trim().isEmpty())
                     continue;
-                }
 
                 String[] parts = line.split("\t");
+                qn0 = parts[0];
+                query = parts[1];
 
-                execQuery(bufferedWriterDAATTFIDF, parts[0], parts[1], "tfidf", false, withoutCacheTFIDFDAAT);
-                execQueryWithCache(parts[1], "tfidf", false, withCacheTFIDFDAAT);
+                if(query.trim().isEmpty())
+                    continue;
 
-                execQuery(bufferedWriterDAATBM25, parts[0], parts[1], "bm25", false, withoutCacheBM25DAAT);
-                execQueryWithCache(parts[1], "bm25", false, withCacheBM25DAAT);
+                execQuery(bufferedWriterDAATTFIDF, qn0, query, "tfidf", false, withoutCacheTFIDFDAAT);
+                execQueryWithCache(query, "tfidf", false, withCacheTFIDFDAAT);
 
-                execQuery(bufferedWriterDYNAMICPRUNINGTFIDF, parts[0], parts[1], "tfidf", true, withoutCacheTFIDFDP);
-                execQueryWithCache(parts[1], "tfidf", true, withCacheTFIDFDP);
+                execQuery(bufferedWriterDAATBM25, qn0, query, "bm25", false, withoutCacheBM25DAAT);
+                execQueryWithCache(query, "bm25", false, withCacheBM25DAAT);
 
-                execQuery(bufferedWriterDYNAMICPRUNINGBM25, parts[0], parts[1], "bm25", true, withoutCacheBM25DP);
-                execQueryWithCache(parts[1], "bm25", true, withCacheBM25DP);
+                execQuery(bufferedWriterDYNAMICPRUNINGTFIDF, qn0, query, "tfidf", true, withoutCacheTFIDFDP);
+                execQueryWithCache(query, "tfidf", true, withCacheTFIDFDP);
+
+                execQuery(bufferedWriterDYNAMICPRUNINGBM25,qn0, query, "bm25", true, withoutCacheBM25DP);
+                execQueryWithCache(query, "bm25", true, withCacheBM25DP);
 
             }
             printStats("withoutCacheTFIDFDAAT", withoutCacheTFIDFDAAT);
@@ -109,7 +113,7 @@ public class Main {
                     try {
                         bufferedWriter.write(qno + " Q0 " + p.getValue1() + " " + (pair.indexOf(p) + 1) + " " + p.getValue0() + "\n");
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        throw new RuntimeException("Error to write the results to the file "+ bufferedWriter + ": " + e);
                     }
                 });
             }
@@ -146,7 +150,6 @@ public class Main {
      * @throws IOException     if an I/O error occurs
      */
     private static void execQueryWithCache(String query, String scoringFunction, Boolean pruning, ArrayList<Long> listTimeExecution) throws IOException {
-        Lexicon.getInstance().clear();
         long start = System.currentTimeMillis();
         Processer.processQuery(query, 10, false, scoringFunction, Configuration.COMPRESSION, pruning);
         long end = System.currentTimeMillis();
