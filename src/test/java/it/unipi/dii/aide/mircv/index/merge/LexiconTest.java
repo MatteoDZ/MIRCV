@@ -4,9 +4,7 @@ import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
-
 import java.io.IOException;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -23,13 +21,13 @@ public class LexiconTest {
     @Test
     public void writeTest() throws IOException {
         Lexicon lexicon = new Lexicon();
-        lexicon.write("a",0L, 0, 0d,0, 0f, 0);
+        lexicon.write("a",0L, 0, 0d,0, 0f, 1);
         lexicon.write("b",0L, 0, 0d,0, 0f, 0);
         LexiconData lexiconDataA = lexicon.get("a");
         assertEquals("a", lexiconDataA.getTerm());
         assertEquals(0L, lexiconDataA.getOffset_skip_pointer());
-        assertEquals(0, lexiconDataA.getDf());
-        assertEquals(0d, lexiconDataA.getTf(), 0.0001);
+        assertEquals(1, lexiconDataA.getNumBlocks());
+       assertEquals(0d, lexiconDataA.getOffset_skip_pointer(), 0.0001);
 
     }
 

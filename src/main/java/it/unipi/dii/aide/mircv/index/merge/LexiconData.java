@@ -13,15 +13,15 @@ import java.util.ArrayList;
 
 public class LexiconData {
     private String term;
-    private int upperTF = 0;
-    private int tf = 0; //not written in the file
+    /*private int upperTF = 0; // SERVE?
+    private int tf = 0; //not written in the file // SERVE?
+    private int df = 0; // SERVE?*/
     private float idf = 0;
     private float upperTFIDF = 0;
-    private int df = 0;
     private float upperBM25 = 0;
-    private Long offset_skip_pointer = 0L;
     private int numBlocks = 1;
-    private static final long BYTES_ATTRIBUTES = 4 * 6 + 8; //4bytes * (n_int + n_float) + 8bytes * (n_long)
+    private Long offset_skip_pointer = 0L;
+    private static final long BYTES_ATTRIBUTES = 4 * 4 + 8; //4bytes * (n_int + n_float) + 8bytes * (n_long)
     protected static final long ENTRY_SIZE = BYTES_ATTRIBUTES + Lexicon.MAX_LEN_OF_TERM;
 
     private static FileChannel fileChannel = null;
@@ -46,26 +46,8 @@ public class LexiconData {
         return term;
     }
 
-    public int getUpperTF() {
+    /*public int getUpperTF() {
         return upperTF;
-    }
-
-    public int getTf() {
-        return tf;
-    }
-
-    public int getDf() {return df;}
-
-    public float getIdf() {
-        return idf;
-    }
-
-    public float getUpperTFIDF() {
-        return upperTFIDF;
-    }
-
-    public void setTerm(String term) {
-        this.term = term;
     }
 
     public void setUpperTF(int upperTF) {
@@ -78,12 +60,32 @@ public class LexiconData {
 
     public void setDf(int df) {this.df = df;}
 
-    public void setIdf(float idf) {
-        this.idf = idf;
+
+    public int getTf() {
+        return tf;
+    }
+
+    public int getDf() {return df;}*/
+
+    public float getIdf() {
+        return idf;
     }
 
     public void setUpperTFIDF(float upperTFIDF) {
         this.upperTFIDF = upperTFIDF;
+    }
+
+    public float getUpperTFIDF() {
+        return upperTFIDF;
+    }
+
+    public void setTerm(String term) {
+        this.term = term;
+    }
+
+
+    public void setIdf(float idf) {
+        this.idf = idf;
     }
 
     public float getUpperBM25() {
@@ -123,9 +125,9 @@ public class LexiconData {
             byte[] termBytes = new byte[Lexicon.MAX_LEN_OF_TERM];
             mappedByteBuffer.get(termBytes);
             term = Lexicon.removePadding(new String(termBytes, StandardCharsets.UTF_8));
-            df = (mappedByteBuffer.getInt());
+            // df = (mappedByteBuffer.getInt());
             idf = (mappedByteBuffer.getFloat());
-            upperTF = (mappedByteBuffer.getInt());
+            // upperTF = (mappedByteBuffer.getInt());
             upperTFIDF = (mappedByteBuffer.getFloat());
             upperBM25 = (mappedByteBuffer.getFloat());
             offset_skip_pointer = (mappedByteBuffer.getLong());
@@ -145,9 +147,9 @@ public class LexiconData {
         try {
             MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, fileChannel.size(), ENTRY_SIZE);
             mappedByteBuffer.put(Lexicon.padStringToLength(term).getBytes(StandardCharsets.UTF_8));
-            mappedByteBuffer.putInt(df);
+            // mappedByteBuffer.putInt(df);
             mappedByteBuffer.putFloat(idf);
-            mappedByteBuffer.putInt(upperTF);
+            // mappedByteBuffer.putInt(upperTF);
             mappedByteBuffer.putFloat(upperTFIDF);
             mappedByteBuffer.putFloat(upperBM25);
             mappedByteBuffer.putLong(offset_skip_pointer);
@@ -170,7 +172,6 @@ public class LexiconData {
             if (mappedByteBuffer == null) {
                 return null;
             }
-
             for (int i = 0; i < numBlocks; i++) {
                 SkippingBlock skippingBlock = new SkippingBlock();
                 skippingBlock.setDoc_id_offset(mappedByteBuffer.getLong());
@@ -198,8 +199,8 @@ public class LexiconData {
     @Override
     public String toString() {
         return "Term: " + term + " " +
-                "Upper TF: " + upperTF + " " +
-                "DF: " + df + " " +
+                // "Upper TF: " + upperTF + " " +
+                // "DF: " + df + " " +
                 "IDF: " + idf + " " +
                 "Upper TF-IDF: " + upperTFIDF + " " +
                 "Upper BM25: " + upperBM25 + " " +

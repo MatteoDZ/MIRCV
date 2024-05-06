@@ -38,7 +38,7 @@ public class Spimi {
                     List<String> term = Preprocess.processText(parts[1], Configuration.STEMMING_AND_STOPWORDS);
                     term.removeAll(List.of("", " "));
                     total_length += term.size();
-                    if (!parts[1].isEmpty() || !term.isEmpty()) {
+                    if (!parts[1].trim().isEmpty() || !term.isEmpty()) {
                         inv.add(term, Integer.parseInt(parts[0]));
                         BinaryFile.writeIntToBuffer(fc, term.size());
                         if (numDocs % 1000000 == 0) {
