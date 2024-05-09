@@ -19,7 +19,6 @@ public class Scorer {
 
     private static final FileChannel fc;
     static Statistics stats = new Statistics();
-    static long time=0;
     private static final LFUCache<Integer, Integer> lfuCache = new LFUCache<>(Configuration.DOC_TERMS_CACHE_SIZE);
 
 
@@ -69,23 +68,32 @@ public class Scorer {
      * @return The calculated BM25 score.
      */
     public static float calculateBM25(Posting posting, float idf) throws IOException {
-        // long start = System.currentTimeMillis();
-        // int doc_len = BinaryFile.readIntFromBuffer(fc, posting.getDoc_id()*4L);
         int doc_len = getDoc_len(posting.getDoc_id());
-        // long end = System.currentTimeMillis();
-        // time += end - start;
-        // System.out.println(time);
         float tf = (float) (1 + Math.log(posting.getFrequency()));
         return (float) ((tf * idf) / (tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (doc_len / stats.getAvgDocLen()))));
     }
 
-    public static Integer getDoc_len(int doc_id) throws IOException {
-        if (lfuCache.containsKey(doc_id)) {
-            return lfuCache.get(doc_id);
+    /**
+     * Gets the Integer for a given docId, either from the cache or by retrieving it.
+     *
+     * @param docId The doc_id to get.
+     * @return The LexiconEntry for the term, or null if not found.
+     */
+    public static Integer getDoc_len(int docId) throws IOException {
+        if (lfuCache.containsKey(docId)) {
+            return lfuCache.get(docId);
         }
-        int doc_len = BinaryFile.readIntFromBuffer(fc, doc_id*4L);
-        lfuCache.put(doc_id, doc_len);
+        int doc_len = BinaryFile.readIntFromBuffer(fc, docId*4L);
+        lfuCache.put(docId, doc_len);
         return doc_len;
+    }
+
+    /**
+     * Clears the cache.
+     *
+     */
+    public static void clearCache() {
+        lfuCache.clear();
     }
 
 

@@ -39,10 +39,8 @@ public class Lexicon {
     public void write(String term, Long offset, Integer df, Double docnum, Integer tf, Float bm25, Integer numBlocks) throws IOException {
         lexicon.setTerm(term);
         lexicon.setOffset_skip_pointer(offset);
-        // lexicon.setDf(df); // PERCHE
         lexicon.setIdf((float) Math.log10((double) docnum /df));
         lexicon.setUpperTFIDF((float) ((1 + Math.log(tf)) * lexicon.getIdf()));
-        // lexicon.setUpperTF(1); // PERCHE 1???
         lexicon.setUpperBM25(bm25);
         lexicon.setNumBlocks(numBlocks);
         lexicon.writeEntryToDisk(fc);
@@ -84,23 +82,15 @@ public class Lexicon {
         long bot = 0;
         long mid;
         long top = fc.size()/LexiconData.ENTRY_SIZE;
-
-
         LexiconData entry = new LexiconData();
-
         while (bot <= top) {
             mid = (bot + top) / 2;
             entry.readEntryFromDisk(mid * LexiconData.ENTRY_SIZE, fc);
-
             if (entry.getTerm().isEmpty()) {
-                // System.out.println("Term "+termToFind+" not found in lexicon");
                 return null;
             }
-
             String termFound = entry.getTerm();
-
             int comparisonResult = termToFind.compareTo(termFound);
-
             if (comparisonResult == 0) {
                 return entry;
             } else if (comparisonResult > 0) {
@@ -109,9 +99,7 @@ public class Lexicon {
                 top = mid - 1;
             }
         }
-        // System.out.println("Term "+termToFind+" not found in lexicon");
         return null;
-
     }
 
 

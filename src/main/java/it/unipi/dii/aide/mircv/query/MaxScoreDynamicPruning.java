@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 
-public class MaxScoreDynamicPruningLeo {
+public class MaxScoreDynamicPruning {
 
     private static final Statistics stats;
 

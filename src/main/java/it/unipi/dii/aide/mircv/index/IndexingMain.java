@@ -8,7 +8,7 @@ import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import java.io.*;
 import java.util.Objects;
 
-public class Main {
+public class IndexingMain {
 
     /**
      * Reads lines from a TAR.GZ file, processes each line, and writes the results to a new file.

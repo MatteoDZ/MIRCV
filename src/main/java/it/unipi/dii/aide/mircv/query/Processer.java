@@ -88,7 +88,7 @@ public class Processer {
 
         // Choose between dynamic pruning and DAAT scoring based on the flag.
         if (pruning) {
-            priorityQueue = MaxScoreDynamicPruningLeo.maxScore(queryPostings,k,scoringFun,conjunctive, compression);
+            priorityQueue = MaxScoreDynamicPruning.maxScore(queryPostings,k,scoringFun,conjunctive, compression);
         } else {
             priorityQueue = DAAT.scoreCollection(queryPostings, k, scoringFun, conjunctive, compression);
         }

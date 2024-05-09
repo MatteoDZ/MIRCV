@@ -59,26 +59,19 @@ public class Merge {
                 Map.Entry<BlockReader, PostingIndex> entry = iterator.next();
                 PostingIndex postingList = entry.getValue();
 
-                // System.out.println("Term PostingList: " + postingList.getTerm());
 
 
                 if (postingList.getTerm().equals(minTerm)) {
                     //we are inside a reader with the min term
                     minPosting.appendList(postingList);
-                    // postingList.getFrequencies().get(0);
-
-                    // System.out.println("Term IF " + postingList.getTerm());
 
                     BlockReader reader = entry.getKey();
                     String line = reader.readTerm();
-                    // System.out.println("Line: " + line);
 
 
                     if (line != null) {
                         List<Integer> docIds = reader.readNumbers();
-                        // System.out.println("DocIds: " + docIds);
                         List<Integer> freqs = reader.readNumbers();
-                        // System.out.println("Freqs: " + freqs);
                         readerLines.put(reader, new PostingIndex(line, docIds, freqs));
                     } else {
                         iterator.remove(); // Remove the current reader from the list
@@ -86,26 +79,19 @@ public class Merge {
                 }
             }
 
-
-
             List<Integer> docIdsNew = minPosting.getDocIds();
             List<Integer> freqsNew = minPosting.getFrequencies();
             int docId;
 
             while ((docId = findDuplicate(docIdsNew)) != -1) {
-                // System.out.println("Prima DocIds: " + docIdsNew + " Freqs: " + freqsNew + " DocId: " + docId);
                 docIdsNew.remove(docId);
                 int freq = freqsNew.get(docId);
                 freqsNew.remove( docId);
                 freqsNew.add(docId, freq + freqsNew.get(docId + 1));
-                // System.out.println("Dopo DocIds: " + docIdsNew + " Freqs: " + freqsNew + " DocId: " + docId);
             }
-            // System.out.println("Term: " + minPosting.getTerm() + " DocIds: " + docIdsNew.size() + " Freqs: " + freqsNew.size());
 
             int block_size;
             int num_blocks;
-
-            //System.out.println(minTerm + " " + docIdsNew.size());
 
             if (minPosting.getPostings().size() <= this.blockSize) {
                 block_size = minPosting.getPostings().size();
@@ -116,12 +102,10 @@ public class Merge {
                 num_blocks = (int) Math.ceil((double) minPosting.getPostings().size()/block_size);
             }
 
-            // System.out.println("block_size: " + block_size + " num_blocks: " + num_blocks );
-
             ArrayList<Integer> docIds;
             ArrayList<Integer> freqs;
 
-            lexiconWrite(minPosting, fcSkippingBlock.size(), docIdsNew, freqsNew, lexicon, num_blocks);
+            lexiconWrite(minPosting, fcSkippingBlock.size(), lexicon, num_blocks);
 
             for (int currentBlock = 0; currentBlock < num_blocks; currentBlock++){
                 docIds = new ArrayList<>();
@@ -134,16 +118,8 @@ public class Merge {
                     }
                 }
 
-                //System.out.println(currentBlock + " " + docIds + " " + freqs);
-
-                //System.out.println("Term: " + minTerm + " fcSkippingBlock: " + fcSkippingBlock.size());
-
-
-
                 long docIds_offset = docIdWriter.writeBlock(docIds, compress);
                 long freqs_offset = frequencyWriter.writeBlock(freqs, compress);
-
-                //System.out.println("DocId offset: " + docIds_offset +" " + "DocIds size: " + docIds.size() + " " + "Freqs offset: " + freqs_offset + " " + "Freqs size: " + freqs.size() + " " + "DocId max: " + docIds.get(docIds.size() - 1));
 
                 SkippingBlock skippingBlock = new SkippingBlock();
                 skippingBlock.setDoc_id_offset(docIds_offset);
@@ -155,11 +131,7 @@ public class Merge {
                 if(!skippingBlock.writeOnDisk(fcSkippingBlock)) {
                     System.out.println("Problems with writing the block of postings to disk.");
                 }
-
-
-                //System.out.println("Skipping dopo " + fcSkippingBlock.size());
             }
-
         }
         fcSkippingBlock.close();
 
@@ -203,7 +175,16 @@ public class Merge {
         return minTerm;
     }
 
-    protected void lexiconWrite(PostingIndex pi, long offset, List<Integer> docIds, List<Integer> freqs, Lexicon lexicon, Integer numBlock) throws IOException { // TODO: docIds e freqs a cosa servono?
+    /**
+     * Writes the lexicon entry for a given term.
+     *
+     * @param pi The PostingIndex containing the postings for the term.
+     * @param offset The offset at which to write the lexicon entry.
+     * @param lexicon The Lexicon object for writing the entry.
+     * @param numBlock The number of blocks.
+     * @throws IOException If an I/O error occurs.
+     */
+    protected void lexiconWrite(PostingIndex pi, Long offset, Lexicon lexicon, Integer numBlock) throws IOException {
         float BM25Upper = 0F;
         float actualBM25;
         int  tf  = 0;
@@ -224,7 +205,16 @@ public class Merge {
         lexicon.write(pi.getTerm(), offset, df, (double) stats.getNumDocs(), tf, BM25Upper, numBlock);
     }
 
-    protected float calculateBM25(float tf, long doc_id){
+    /**
+     * Calculates the BM25 score for a specific term in a document given the term frequency (tf) and the document ID.
+     * Utilizes the BM25 configuration parameters defined in the Configuration class.
+     *
+     * @param tf The term frequency (tf) in the document.
+     * @param doc_id The ID of the document.
+     * @return The calculated BM25 score for the term in the specified document.
+     * @throws RuntimeException If an error occurs while reading from the document terms file.
+     */
+    protected float calculateBM25(Integer tf, Integer doc_id){
         try {
             FileChannel fc = FileChannel.open(Path.of(Configuration.PATH_DOC_TERMS), StandardOpenOption.READ, StandardOpenOption.WRITE);
             int doc_len = BinaryFile.readIntFromBuffer(fc, doc_id*4L);

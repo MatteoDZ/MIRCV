@@ -14,7 +14,7 @@ import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 
-public class MainTest {
+public class IndexingMainTest {
     @BeforeAll
     static void setUp() {
         Configuration.setUpPathTest();
@@ -30,14 +30,14 @@ public class MainTest {
         System.out.println("Spimi is starting....");
         Spimi.spimi(Configuration.PATH_DOCUMENTS_TEST);
         long endTime_spimi = System.currentTimeMillis();
-        System.out.println(Main.printCompletionTime("Spimi", startTime_spimi, endTime_spimi));
+        System.out.println(IndexingMain.printCompletionTime("Spimi", startTime_spimi, endTime_spimi));
 
         long startTime_merge = System.currentTimeMillis();
         System.out.println("Merge is starting....");
         Merge merge = new Merge(Objects.requireNonNull(FileUtils.getFilesOfDirectory(Configuration.DIRECTORY_TEMP_FILES)), Configuration.BLOCK_SIZE);
         merge.write( false);
         long endTime_merge = System.currentTimeMillis();
-        System.out.println(Main.printCompletionTime("Merge", startTime_merge, endTime_merge));
+        System.out.println(IndexingMain.printCompletionTime("Merge", startTime_merge, endTime_merge));
 
 
     }
@@ -52,7 +52,7 @@ public class MainTest {
         System.out.println("Spimi is starting....");
         Spimi.spimi(Configuration.PATH_DOCUMENTS_TEST);
         long endTime_spimi = System.currentTimeMillis();
-        System.out.println(Main.printCompletionTime("Spimi", startTime_spimi, endTime_spimi));
+        System.out.println(IndexingMain.printCompletionTime("Spimi", startTime_spimi, endTime_spimi));
 
         long startTime_merge = System.currentTimeMillis();
         System.out.println("Merge is starting....");
@@ -60,7 +60,7 @@ public class MainTest {
                 Objects.requireNonNull(FileUtils.getFilesOfDirectory(Configuration.DIRECTORY_TEMP_FILES)), Configuration.BLOCK_SIZE);
         merge.write(true);
         long endTime_merge = System.currentTimeMillis();
-        System.out.println(Main.printCompletionTime("Merge", startTime_merge, endTime_merge));
+        System.out.println(IndexingMain.printCompletionTime("Merge", startTime_merge, endTime_merge));
 
     }
 }

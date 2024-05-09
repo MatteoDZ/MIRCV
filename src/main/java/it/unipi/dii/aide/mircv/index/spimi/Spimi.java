@@ -36,6 +36,7 @@ public class Spimi {
                 while ((line = br.readLine()) != null) {
                     String[] parts = line.split("\t");
                     List<String> term = Preprocess.processText(parts[1], Configuration.STEMMING_AND_STOPWORDS);
+
                     term.removeAll(List.of("", " "));
                     total_length += term.size();
                     if (!parts[1].trim().isEmpty() || !term.isEmpty()) {

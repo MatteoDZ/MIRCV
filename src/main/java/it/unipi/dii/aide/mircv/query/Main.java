@@ -18,7 +18,7 @@ public class Main {
         if(!FileUtils.filesExist(Configuration.SKIPPING_BLOCK_PATH, Configuration.PATH_DOCID, Configuration.PATH_FREQ, Configuration.PATH_LEXICON)){
             System.out.println("The index data files does not exist, we need to create it and start the indexing process...");
             try {
-                it.unipi.dii.aide.mircv.index.Main.main(new String[0]);
+                it.unipi.dii.aide.mircv.index.IndexingMain.main(args);
             } catch (Exception e) {
                throw new RuntimeException(e);
             }

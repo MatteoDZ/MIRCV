@@ -5,12 +5,12 @@ import it.unipi.dii.aide.mircv.index.merge.Lexicon;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import it.unipi.dii.aide.mircv.index.utils.Statistics;
 import it.unipi.dii.aide.mircv.query.Processer;
+import it.unipi.dii.aide.mircv.query.Scorer;
 import it.unipi.dii.aide.mircv.query.TopKPriorityQueue;
 import static it.unipi.dii.aide.mircv.performanceEvaluation.Statistics.printStats;
 
 import me.tongfei.progressbar.ProgressBar;
 import org.javatuples.Pair;
-
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -44,7 +44,7 @@ public class Main {
             assert Configuration.PATH_QUERIES != null;
             InputStream gzip = new GZIPInputStream(Files.newInputStream(Paths.get(Configuration.PATH_QUERIES)));
             BufferedReader reader = new BufferedReader(new InputStreamReader(gzip, StandardCharsets.UTF_8));
-            String line, qn0, query;
+            String line, qno, query;
             BufferedWriter bufferedWriterDAATTFIDF = new BufferedWriter(new FileWriter(fileDAATTFIDF));
             BufferedWriter bufferedWriterDAATBM25 = new BufferedWriter(new FileWriter(fileDAATBM25));
             BufferedWriter bufferedWriterDYNAMICPRUNINGTFIDF = new BufferedWriter(new FileWriter(fileDYNAMICPRUNINGTFIDF));
@@ -61,28 +61,30 @@ public class Main {
                     continue;
 
                 String[] parts = line.split("\t");
-                qn0 = parts[0];
+                qno = parts[0];
                 query = parts[1];
 
-                if(query.trim().isEmpty())
+                if(query.trim().isEmpty()){
+                    pb.step();
                     continue;
+                }
 
-                execQuery(bufferedWriterDAATTFIDF, qn0, query, "tfidf", false, withoutCacheTFIDFDAAT);
+                execQueryWithoutCache(bufferedWriterDAATTFIDF, qno, query, "tfidf", false, withoutCacheTFIDFDAAT);
                 execQueryWithCache(query, "tfidf", false, withCacheTFIDFDAAT);
 
-                execQuery(bufferedWriterDAATBM25, qn0, query, "bm25", false, withoutCacheBM25DAAT);
+                execQueryWithoutCache(bufferedWriterDAATBM25, qno, query, "bm25", false, withoutCacheBM25DAAT);
                 execQueryWithCache(query, "bm25", false, withCacheBM25DAAT);
 
-                execQuery(bufferedWriterDYNAMICPRUNINGTFIDF, qn0, query, "tfidf", true, withoutCacheTFIDFDP);
+                execQueryWithoutCache(bufferedWriterDYNAMICPRUNINGTFIDF, qno, query, "tfidf", true, withoutCacheTFIDFDP);
                 execQueryWithCache(query, "tfidf", true, withCacheTFIDFDP);
 
-                execQuery(bufferedWriterDYNAMICPRUNINGBM25,qn0, query, "bm25", true, withoutCacheBM25DP);
+                execQueryWithoutCache(bufferedWriterDYNAMICPRUNINGBM25,qno, query, "bm25", true, withoutCacheBM25DP);
                 execQueryWithCache(query, "bm25", true, withCacheBM25DP);
 
                 pb.step();
 
             }
-            printStats("withoutCacheTFIDFDAAT", withoutCacheTFIDFDAAT);
+            printStats("\nwithoutCacheTFIDFDAAT", withoutCacheTFIDFDAAT);
             printStats("withCacheTFIDFDAAT", withCacheTFIDFDAAT);
             printStats("withoutCacheBM25DAAT", withoutCacheBM25DAAT);
             printStats("withCacheBM25DAAT", withCacheBM25DAAT);
@@ -118,7 +120,7 @@ public class Main {
                 Collections.reverse(pair);
                 pair.forEach(p -> {
                     try {
-                        bufferedWriter.write(qno + " Q0 " + p.getValue1() + " " + (pair.indexOf(p) + 1) + " " + p.getValue0() + "\n");
+                        bufferedWriter.write(qno + " Q0 " + p.getValue1() + " " + (pair.indexOf(p) + 1) + " " + p.getValue0() + " CHANG0" + "\n");
                     } catch (IOException e) {
                         throw new RuntimeException("Error to write the results to the file "+ bufferedWriter + ": " + e);
                     }
@@ -137,8 +139,10 @@ public class Main {
      * @param  pruning          a boolean indicating whether pruning should be applied
      * @param  listTimeExecution an ArrayList to store the time taken for execution
      */
-    private static void execQuery(BufferedWriter buffer, String qno, String query, String scoringFunction, Boolean pruning, ArrayList<Long> listTimeExecution) throws IOException {
+    private static void execQueryWithoutCache(BufferedWriter buffer, String qno, String query, String scoringFunction, Boolean pruning, ArrayList<Long> listTimeExecution) throws IOException {
         Lexicon.getInstance().clear();
+        Scorer.clearCache();
+        System.gc();
         long start = System.currentTimeMillis();
         TopKPriorityQueue<Pair<Float, Integer>> answerOfSearchEngine = Processer.processQuery(query, 10, false, scoringFunction, Configuration.COMPRESSION, pruning);
         long end = System.currentTimeMillis();

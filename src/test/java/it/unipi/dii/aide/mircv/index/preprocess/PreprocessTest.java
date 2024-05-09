@@ -11,13 +11,13 @@ class PreprocessTest {
 
     @Test
     void processText() {
-        assertLinesMatch(List.of("text", "url", "content"),
+        assertLinesMatch(List.of("url", "content"),
                 Preprocess.processText("This is a 'text' -   with - a URL https://www.example.com and some content.", true));
-        assertLinesMatch(List.of("text", "case", "punctuat", "remain"),
+        assertLinesMatch(List.of("punctuat", "remain"),
                 Preprocess.processText("This text, with Case AnD Punctuation, remains.", true));
         assertLinesMatch(List.of("cat", "tabl"),
                 Preprocess.processText("The cat is on the table.", true));
-        assertLinesMatch(List.of("twinkl", "twinkl", "littl", "bat", "wonder", "world", "fly", "like", "tea", "trai", "sky"),
+        assertLinesMatch(List.of("twinkl", "twinkl", "bat", "fly", "tea", "trai", "sky"),
                 Preprocess.processText("""
                         Twinkle, twinkle, little bat.
                          How I wonder what you’re at!
@@ -27,7 +27,7 @@ class PreprocessTest {
                 Preprocess.processText("The      cat is on the table. Attention! â", true));
         assertLinesMatch(List.of("url", "univers", "pisa"),
                 Preprocess.processText("this is the url of university of Pisa \n https://www.unipi.it", true));
-        assertLinesMatch(List.of("1000", "2020"),
+        assertLinesMatch(List.of("tutt"),
                 Preprocess.processText("1000 2020 00001 tuttte", true));
     }
 
@@ -67,7 +67,7 @@ class PreprocessTest {
     }
 
     @Test void removeStopwords() {
-        assertEquals("This test remove common English stopwords.",
+        assertEquals("This remove common English stopwords.",
                 Preprocess.removeStopwords("This is a test to remove some common English stopwords."));
         assertEquals("", Preprocess.removeStopwords("a an the and or but"));
         assertEquals("This text, Case Punctuation, remains.",
@@ -76,9 +76,9 @@ class PreprocessTest {
                 Preprocess.removeStopwords("The cat is on the table."));
         assertEquals("",
                 Preprocess.removeStopwords("to be or not to be"));
-        assertEquals("sentence contains stopwords",
+        assertEquals("sentence stopwords",
                 Preprocess.removeStopwords("this sentence contains some stopwords"));
-        assertEquals("test return true",
+        assertEquals("return true",
                 Preprocess.removeStopwords("this test should return true"));
     }
 
@@ -111,13 +111,13 @@ class PreprocessTest {
 
     @Test
     void removeDigitsTest(){
-        assertEquals("In 1800 was born my grandfather  ", Preprocess.removeDigits("In 1800 was born my grandfather 09098873 00001"));
+        assertEquals("In  was born my grandfather  ", Preprocess.removeDigits("In 1800 was born my grandfather 09098873 00001"));
     }
 
     @Test
     void removeWordsThreeEqualLetterTest(){
-        assertEquals("In 2000 was born my brother", Preprocess.removeWordsThreeEqualLetter("In 2000 was born my brother"));
-        assertEquals("In 2000  born my brother", Preprocess.removeWordsThreeEqualLetter("In 2000 wassss born my brother"));
+        assertEquals("In 200 was born my brother", Preprocess.removeWordsThreeEqualLetter("In 2000 was born my brother"));
+        assertEquals("In 200 wass born my brother", Preprocess.removeWordsThreeEqualLetter("In 2000 wasss born my brother"));
     }
 
 }

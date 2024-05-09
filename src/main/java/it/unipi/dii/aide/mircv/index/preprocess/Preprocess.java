@@ -51,7 +51,7 @@ public class Preprocess {
      * @return The text with URLs removed.
      */
     protected static String removeUrls(String text) {
-        return text.replaceAll("(https?|ftp)://[^\\s/$.?#].[^\\s]*", " ");
+        return text.replaceAll("[(http(s)?):\\/\\/(www\\.)?a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)", " ");
     }
 
     /**
@@ -76,23 +76,23 @@ public class Preprocess {
     }
 
     /**
-     * Removes all digits that have 5 or more consecutive digits.
+     * Removes all digits.
      *
      * @param  text  the input text to remove digits from
      * @return       the modified text with digits removed
      */
     public static String removeDigits(String text) {
-        return text.replaceAll("\\b\\d{5,}\\b", "");
+        return text.replaceAll("[^a-zA-Z ]", "");
     }
 
     /**
-     * Removes all words that have 3 or more consecutive equal letters.
+     * Removes consecutive occurrences of three or more equal letters in a given text.
      *
-     * @param  text  the input text to remove words from
-     * @return       the modified text with words removed
+     * @param text The input text from which to remove consecutive occurrences.
+     * @return The text with consecutive occurrences of three or more equal letters replaced with two occurrences.
      */
     public static String removeWordsThreeEqualLetter(String text) {
-        return text.replaceAll("\\b\\w*?(\\p{L})\\1{2,}\\w*\\b", "");
+        return text.replaceAll("(.)\\1{2,}", "$1$1");
     }
 
     /**
