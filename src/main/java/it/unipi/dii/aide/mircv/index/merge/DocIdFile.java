@@ -47,8 +47,4 @@ public class DocIdFile {
         return Pair.with(fc_size, Math.toIntExact((int) fc.size() - fc_size));
     }
 
-
-
-
-
 }

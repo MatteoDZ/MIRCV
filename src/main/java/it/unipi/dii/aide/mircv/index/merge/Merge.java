@@ -136,7 +136,7 @@ public class Merge {
                 skippingBlock.setDoc_id_size(compress ? pair_docIds.getValue1() : docIds.size());
                 skippingBlock.setFreq_size(compress ? pair_freqs.getValue1() : freqs.size());
                 skippingBlock.setNum_posting_of_block(docIds.size());
-                if(!skippingBlock.writeOnDisk(fcSkippingBlock)) {
+                if(!skippingBlock.writeToDisk(fcSkippingBlock)) {
                     System.out.println("Problems with writing the block of postings to disk.");
                 }
 

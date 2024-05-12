@@ -18,9 +18,9 @@ import java.nio.file.StandardOpenOption;
 public class Scorer {
 
     private static final FileChannel fc;
+    private static int doc = -1;
+    private static int docCount = 0;
     static Statistics stats = new Statistics();
-    private static final LFUCache<Integer, Integer> lfuCache = new LFUCache<>(Configuration.DOC_TERMS_CACHE_SIZE);
-
 
     static {
         try {
@@ -30,9 +30,10 @@ public class Scorer {
             throw new RuntimeException(e);
         }
     }
+    private static final LFUCache<Integer, Integer> lfuCache = new LFUCache<>(Configuration.DOC_TERMS_CACHE_SIZE);
 
     /**
-     * Calculates the score based on the specified scoring function (TFIDF or BM25).
+     * Calculates the score based on the scoring function (TFIDF or BM25).
      *
      * @param posting      The Posting object for a term in a document.
      * @param idf          The inverse document frequency of the term.
@@ -54,7 +55,7 @@ public class Scorer {
      *
      * @param tf  The term frequency in the document.
      * @param idf The inverse document frequency of the term.
-     * @return The calculated TFIDF score.
+     * @return The TFIDF score.
      */
     public static float calculateTFIDF(int tf, float idf) {
         return (float) ((1 + Math.log(tf)) * idf);
@@ -65,19 +66,26 @@ public class Scorer {
      *
      * @param posting The Posting object for a term in a document.
      * @param idf     The inverse document frequency of the term.
-     * @return The calculated BM25 score.
+     * @return The BM25 score.
      */
     public static float calculateBM25(Posting posting, float idf) throws IOException {
+        if(posting.getDoc_id() == doc) {
+            docCount++;
+        }
+        doc = posting.getDoc_id();
+        if(docCount%1000000 == 0 && docCount != 0){
+            System.out.println("Conto documenti ripetuti: " + docCount);
+        }
         int doc_len = getDoc_len(posting.getDoc_id());
         float tf = (float) (1 + Math.log(posting.getFrequency()));
         return (float) ((tf * idf) / (tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (doc_len / stats.getAvgDocLen()))));
     }
 
     /**
-     * Gets the Integer for a given docId, either from the cache or by retrieving it.
+     * Return the lenght of a document.
      *
      * @param docId The doc_id to get.
-     * @return The LexiconEntry for the term, or null if not found.
+     * @return The length of the document corresponding to the docId
      */
     public static Integer getDoc_len(int docId) throws IOException {
         if (lfuCache.containsKey(docId)) {

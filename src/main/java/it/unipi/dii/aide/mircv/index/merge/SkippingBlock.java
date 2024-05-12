@@ -15,14 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SkippingBlock {
-    private long doc_id_offset;
-    private int doc_id_size;
-    private long freq_offset;
-    private int freq_size;
-    private int doc_id_max;
-    private int num_posting_of_block;
-    private static long file_offset = 0;
-    public static final int size_of_element = 8 * 2 + 4 * 4; //4bytes * (n_int) + 8bytes * (n_long)
+
     private static MappedByteBuffer bufferDocId = null;
     private static MappedByteBuffer bufferFreq = null;
 
@@ -36,10 +29,17 @@ public class SkippingBlock {
             }
 
         } catch (IOException e) {
-            System.out.println("Problems with opening the file channel");
+            System.out.println("Error while opening the file channel");
         }
     }
-
+    private long doc_id_offset;
+    private int doc_id_size;
+    private long freq_offset;
+    private int freq_size;
+    private int doc_id_max;
+    private int num_posting_of_block;
+    private static long file_offset = 0;
+    public static final int size_of_element = 8 * 2 + 4 * 4; //4bytes * (n_int) + 8bytes * (n_long)
 
     /**
      * Writes the skipping block information to disk.
@@ -47,10 +47,14 @@ public class SkippingBlock {
      * @param file_to_write The file channel to write the skipping block information.
      * @return True if writing is successful, false otherwise.
      */
-    public boolean writeOnDisk(FileChannel file_to_write) {
+    public boolean writeToDisk(FileChannel file_to_write) {
+        /*
         if (file_to_write == null) {
             return false;
         }
+
+         */
+        assert file_to_write!=null : "FileChannel is null";
         try {
             MappedByteBuffer mappedByteBuffer = file_to_write.map(FileChannel.MapMode.READ_WRITE, file_offset, size_of_element);
             if (mappedByteBuffer == null) {
@@ -65,22 +69,16 @@ public class SkippingBlock {
             file_offset += size_of_element;
             return true;
         } catch (IOException e) {
-            System.out.println("Problems with writing the block of postings to disk.");
+            System.out.println("Error while writing the postings to disk.");
             return false;
         }
     }
-
 
     // Getters and setters...
 
     public void setDoc_id_offset(long doc_id_offset) {
         this.doc_id_offset = doc_id_offset;
     }
-
-    public Long getDoc_id_offset(){
-        return doc_id_offset;
-    }
-
 
     public void setDoc_id_size(int doc_id_size) {
         this.doc_id_size = doc_id_size;
@@ -109,14 +107,6 @@ public class SkippingBlock {
         this.num_posting_of_block = num_posting_of_block;
     }
 
-    public static long getFile_offset() {
-        return file_offset;
-    }
-
-    public static void setFile_offset(long file_offset) {
-        SkippingBlock.file_offset = file_offset;
-    }
-
     /**
      * Reads the postings from the disk based on the skipping block information.
      *
@@ -124,10 +114,8 @@ public class SkippingBlock {
      */
     public ArrayList<Posting> getSkippingBlockPostings(Boolean compression) {
 
-        if (bufferDocId == null || bufferFreq == null) {
-            System.out.println("problems with file channels");
-            return null;
-        }
+        assert bufferDocId != null : "Error with the DocID MappedByteBuffer";
+        assert bufferFreq != null : "Error with the Frequency MappedByteBuffer";
 
         bufferDocId.position((int) doc_id_offset);
         bufferFreq.position((int) freq_offset);
