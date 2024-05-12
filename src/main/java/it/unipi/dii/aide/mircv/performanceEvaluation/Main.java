@@ -147,6 +147,7 @@ public class Main {
         TopKPriorityQueue<Pair<Float, Integer>> answerOfSearchEngine = Processer.processQuery(query, 10, false, scoringFunction, Configuration.COMPRESSION, pruning);
         long end = System.currentTimeMillis();
         listTimeExecution.add(end - start);
+        System.out.println(query + " " + (end-start));
         write2File(buffer, answerOfSearchEngine, qno);
     }
 
@@ -165,6 +166,7 @@ public class Main {
         Processer.processQuery(query, 10, false, scoringFunction, Configuration.COMPRESSION, pruning);
         long end = System.currentTimeMillis();
         listTimeExecution.add(end - start);
+        System.out.println(query + " " +(end-start));
     }
 
 }

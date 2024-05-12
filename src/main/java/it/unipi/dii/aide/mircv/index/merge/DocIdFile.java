@@ -3,6 +3,7 @@ package it.unipi.dii.aide.mircv.index.merge;
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
 import it.unipi.dii.aide.mircv.index.compression.VariableByteCompressor;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
+import org.javatuples.Pair;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;
@@ -36,14 +37,18 @@ public class DocIdFile {
      * @return           the size of the file before writing the block
      * @throws IOException if an I/O error occurs
      */
-    public long writeBlock(List<Integer> block, boolean compression) throws IOException {
+    public Pair<Long, Integer> writeBlock(List<Integer> block, boolean compression) throws IOException {
         long fc_size = fc.size();
         if (!compression) {
             BinaryFile.writeIntListToBuffer(fc, block);
         } else {
             BinaryFile.writeArrayByteToBuffer(fc, VariableByteCompressor.encode(block));
         }
-        return fc_size;
+        return Pair.with(fc_size, Math.toIntExact((int) fc.size() - fc_size));
     }
+
+
+
+
 
 }

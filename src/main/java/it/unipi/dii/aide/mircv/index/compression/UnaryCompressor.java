@@ -2,6 +2,7 @@ package it.unipi.dii.aide.mircv.index.compression;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * class used to implement the unary compressor used to compress the frequencies in the inverted index
@@ -73,7 +74,7 @@ public class UnaryCompressor {
      * Method to decompress an array of bytes int an array of totNums integers using Unary compression algorithm
      * @return a list containing the decompressed integers
      */
-    public static List<Short> integerArrayDecompression(byte[] toBeDecompressed, int len) {
+    public static List<Short> integerArrayDecompression(byte[] toBeDecompressed, Integer len) {
         List<Short> decompressedArray=new ArrayList<>();
         short onesCounter = 1;
         int lenCounter = 0;
@@ -102,6 +103,6 @@ public class UnaryCompressor {
             }
         }
 
-        return decompressedArray;
+        return decompressedArray.stream().limit(len).collect(Collectors.toList());
     }
 }

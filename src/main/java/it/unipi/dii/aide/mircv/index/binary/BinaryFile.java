@@ -40,10 +40,10 @@ public class BinaryFile {
     }
 
     /**
-     * A description of the entire Java function.
+     * Write a int value to the provided FileChannel at the current position.
      *
-     * @param  fc       description of parameter
-     * @param  value    description of parameter
+     * @param  fc       the file channel to read from
+     * @param  value    into to write in the file channel
      * @throws IOException description of exception
      */
     public static void writeIntToBuffer(FileChannel fc, int value) throws IOException {

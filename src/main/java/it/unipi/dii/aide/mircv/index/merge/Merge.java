@@ -5,6 +5,7 @@ import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.posting.Posting;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
 import it.unipi.dii.aide.mircv.index.utils.Statistics;
+import org.javatuples.Pair;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;
@@ -41,8 +42,11 @@ public class Merge {
         FrequencyFile frequencyWriter = new FrequencyFile();
         DocIdFile docIdWriter = new DocIdFile();
 
+        long docIds_offset;
+        long freqs_offset;
+        long docIds_offset_old=0L;
+
         while (!readerLines.isEmpty()) {
-            long time_read_term = System.currentTimeMillis();
 
             if (lexSize % 100000 == 0)
                 System.out.println("Term number " + lexSize);
@@ -83,6 +87,8 @@ public class Merge {
             List<Integer> freqsNew = minPosting.getFrequencies();
             int docId;
 
+
+
             while ((docId = findDuplicate(docIdsNew)) != -1) {
                 docIdsNew.remove(docId);
                 int freq = freqsNew.get(docId);
@@ -105,6 +111,8 @@ public class Merge {
             ArrayList<Integer> docIds;
             ArrayList<Integer> freqs;
 
+            // System.out.println("Size of minPosting: " + minPosting.getPostings().size() + " block_size: " + block_size + " num_blocks: " + num_blocks);
+
             lexiconWrite(minPosting, fcSkippingBlock.size(), lexicon, num_blocks);
 
             for (int currentBlock = 0; currentBlock < num_blocks; currentBlock++){
@@ -118,19 +126,20 @@ public class Merge {
                     }
                 }
 
-                long docIds_offset = docIdWriter.writeBlock(docIds, compress);
-                long freqs_offset = frequencyWriter.writeBlock(freqs, compress);
+                Pair<Long, Integer> pair_docIds = docIdWriter.writeBlock(docIds, compress);
+                Pair<Long, Integer> pair_freqs = frequencyWriter.writeBlockP(freqs, compress);
 
                 SkippingBlock skippingBlock = new SkippingBlock();
-                skippingBlock.setDoc_id_offset(docIds_offset);
-                skippingBlock.setFreq_offset(freqs_offset);
+                skippingBlock.setDoc_id_offset(pair_docIds.getValue0());
+                skippingBlock.setFreq_offset(pair_freqs.getValue0());
                 skippingBlock.setDoc_id_max(docIds.get(docIds.size() - 1));
-                skippingBlock.setDoc_id_size(docIds.size());
-                skippingBlock.setFreq_size(freqs.size());
+                skippingBlock.setDoc_id_size(compress ? pair_docIds.getValue1() : docIds.size());
+                skippingBlock.setFreq_size(compress ? pair_freqs.getValue1() : freqs.size());
                 skippingBlock.setNum_posting_of_block(docIds.size());
                 if(!skippingBlock.writeOnDisk(fcSkippingBlock)) {
                     System.out.println("Problems with writing the block of postings to disk.");
                 }
+
             }
         }
         fcSkippingBlock.close();

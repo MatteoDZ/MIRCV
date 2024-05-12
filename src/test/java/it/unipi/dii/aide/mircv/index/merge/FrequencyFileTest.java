@@ -2,6 +2,7 @@ package it.unipi.dii.aide.mircv.index.merge;
 
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
+import org.javatuples.Pair;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import java.io.IOException;
@@ -32,9 +33,9 @@ public class FrequencyFileTest {
     @Test
      void readFreqsTest() throws IOException {
         FrequencyFile freq = new FrequencyFile();
-        long offsets = freq.writeBlock(freqsWrite,  false);
+        Pair<Long,Integer> offsets = freq.writeBlockP(freqsWrite,  false);
         fcFreqs = FileChannel.open(Paths.get(Configuration.PATH_FREQ), StandardOpenOption.READ);
-        MappedByteBuffer mmbFreq = fcFreqs.map(FileChannel.MapMode.READ_ONLY, offsets, 2L *freqsWrite.size());
+        MappedByteBuffer mmbFreq = fcFreqs.map(FileChannel.MapMode.READ_ONLY, offsets.getValue0(), 2L *freqsWrite.size());
         List<Short> FreqsRead = new ArrayList<>();
         for (int i = 0; i < freqsWrite.size(); i++) {
             FreqsRead.add(mmbFreq.getShort());

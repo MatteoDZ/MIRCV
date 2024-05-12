@@ -148,7 +148,7 @@ public class MaxScoreDynamicPruning {
      * @param end      The end index.
      * @return The minimum document ID.
      */
-    private static int getMinDocId(ArrayList<PostingIndex> postings, int start, int end) throws IOException {
+    private static int getMinDocId(ArrayList<PostingIndex> postings, int start, int end)  {
         int minDoc = stats.getNumDocs();
 
         for (int i = start; i < end; i++) {
@@ -168,7 +168,7 @@ public class MaxScoreDynamicPruning {
      * @param end      The end index.
      * @return The document ID.
      */
-    private static int get_doc_id(ArrayList<PostingIndex> postings, int start, int end, Boolean compression) {
+    private static int get_doc_id(ArrayList<PostingIndex> postings, int start, int end, Boolean compression)  {
         int doc_id = get_max_doc_id(postings, start, end);
 
         if (doc_id == 0) {

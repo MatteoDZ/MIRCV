@@ -3,6 +3,7 @@ package it.unipi.dii.aide.mircv.index.merge;
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
 import it.unipi.dii.aide.mircv.index.compression.UnaryCompressor;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
+import org.javatuples.Pair;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;
@@ -36,7 +37,7 @@ public class FrequencyFile {
      * @return           the size of the file before writing the block
      * @throws IOException if an I/O error occurs
      */
-    public long writeBlock(List<Integer> block, boolean compress) throws IOException {
+    public Pair<Long, Integer> writeBlockP(List<Integer> block, boolean compress) throws IOException {
         long fc_size = fc.size();
         if (!compress) {
             BinaryFile.writeShortListToBuffer(fc, block);
@@ -46,6 +47,7 @@ public class FrequencyFile {
                     .toArray());
             BinaryFile.writeArrayByteToBuffer(fc, compressed);
         }
-        return fc_size;
+        return Pair.with(fc_size, Math.toIntExact((int) fc.size() - fc_size));
     }
+
 }
