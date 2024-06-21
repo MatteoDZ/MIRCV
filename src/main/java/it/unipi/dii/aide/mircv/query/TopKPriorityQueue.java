@@ -4,11 +4,11 @@ import java.util.Comparator;
 import java.util.PriorityQueue;
 
 /**
- * Priority queue implementation for maintaining the top-K elements.
+ * Priority queue implementation for keeping the topK results obtained in a queru.
  *
- * @param <E> Type of elements in the priority queue.
+ * @param <T> Type of elements in the priority queue.
  */
-public class TopKPriorityQueue<E> extends PriorityQueue<E> {
+public class TopKPriorityQueue<T> extends PriorityQueue<T> {
     private final int maxSize;
 
     /**
@@ -17,32 +17,32 @@ public class TopKPriorityQueue<E> extends PriorityQueue<E> {
      * @param maxSize    The maximum size of the priority queue.
      * @param comparator The comparator used to order the elements.
      */
-    public TopKPriorityQueue(int maxSize, Comparator<? super E> comparator) {
+    public TopKPriorityQueue(int maxSize, Comparator<? super T> comparator) {
         super(maxSize, comparator);
         this.maxSize = maxSize;
     }
 
     /**
-     * Adds the specified element to the priority queue if it is greater than the smallest element.
+     * Adds the element e to the TopKPriorityQueue if it is better than the worst element.
      *
      * @param e The element to be added.
      * @return True if the element is added, false otherwise.
      */
     @Override
-    public boolean offer(E e) {
-        // If the size exceeds the maximum size, compare with the smallest element.
-        if (size() >= maxSize) {
-            E top = peek();
-            // If the new element is greater than the smallest element, replace the smallest element.
+    public boolean offer(T e) {
+        // If the priority queue size is smaller than maxSize directly add the element
+        if (size() < maxSize) {
+            return super.offer(e);
+        }
+        // Else check if the element e is better than the worst element present in the priority queue
+        else {
+            T top = peek();
+            // If the new element is better than the worst element, replace the worst element with the new one.
             if (comparator().compare(e, top) > 0) {
-                poll(); // Remove the smallest element.
-                super.offer(e); // Add the new element.
-                return true; // Element added successfully.
+                poll();
+                return super.offer(e); // Element added
             }
             return false; // Element not added.
-        } else {
-            // If the size is less than the maximum size, simply add the element.
-            return super.offer(e);
         }
     }
 }

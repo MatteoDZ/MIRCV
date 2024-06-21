@@ -12,13 +12,12 @@ import java.util.*;
 public class PostingIndex {
     private String term;  // Term associated with the postings
     private final ArrayList<Posting> postings = new ArrayList<>();  // List of postings for the term
-    private Posting postingActual;  // Currently active posting
+    private Posting currentPosting;  // Currently active posting
     private Iterator<Posting> postingIterator;  // Iterator for postings
     private float upperBound;
     private float idf;
     private SkippingBlock skippingBlockActual;  // Currently active skipping block
     private Iterator<SkippingBlock> skippingBlockIterator;  // Iterator for skipping blocks
-    private ArrayList<SkippingBlock> blocks;  // List of skipping blocks for efficient iteration
 
     public float getUpperBound() {
         return upperBound;
@@ -80,8 +79,8 @@ public class PostingIndex {
      *
      * @return The currently active posting.
      */
-    public Posting getPostingActual() {
-        return postingActual;
+    public Posting getCurrentPosting() {
+        return currentPosting;
     }
 
     /**
@@ -156,7 +155,8 @@ public class PostingIndex {
      * Opens the posting list by reading associated skipping blocks from the lexicon.
      */
     public void openList() throws IOException {
-        blocks = Lexicon.getInstance().get(term).readBlocks();
+        // List of skipping blocks for efficient iteration
+        ArrayList<SkippingBlock> blocks = Lexicon.getInstance().get(term).readBlocks();
 
         if (blocks == null) {
             return;
@@ -173,7 +173,7 @@ public class PostingIndex {
     public Posting next(Boolean compression) {
         if (!postingIterator.hasNext()) {
             if (!skippingBlockIterator.hasNext()) {
-                postingActual = null;
+                currentPosting = null;
                 return null;
             }
             skippingBlockActual = skippingBlockIterator.next();
@@ -182,9 +182,9 @@ public class PostingIndex {
 
             postingIterator = postings.iterator();
         }
-        postingActual = postingIterator.next();
+        currentPosting = postingIterator.next();
 
-        return postingActual;
+        return currentPosting;
     }
 
     /**
@@ -197,7 +197,7 @@ public class PostingIndex {
         boolean nextBlock = false;
         while (skippingBlockActual == null || skippingBlockActual.getDoc_id_max() < doc_id) {
             if (!skippingBlockIterator.hasNext()) {
-                postingActual = null;
+                currentPosting = null;
                 return null;
             }
             skippingBlockActual = skippingBlockIterator.next();
@@ -209,12 +209,12 @@ public class PostingIndex {
             postingIterator = postings.iterator();
         }
         while (postingIterator.hasNext()) {
-            postingActual = postingIterator.next();
-            if (postingActual.getDoc_id() >= doc_id) {
-                return postingActual;
+            currentPosting = postingIterator.next();
+            if (currentPosting.getDoc_id() >= doc_id) {
+                return currentPosting;
             }
         }
-        postingActual = null;
+        currentPosting = null;
         return null;
     }
 }

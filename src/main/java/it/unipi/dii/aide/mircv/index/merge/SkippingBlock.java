@@ -110,6 +110,7 @@ public class SkippingBlock {
     /**
      * Reads the postings from the disk based on the skipping block information.
      *
+     * @param compression indicates if the data is compressed or not
      * @return ArrayList of Posting objects representing the postings in the skipping block.
      */
     public ArrayList<Posting> getSkippingBlockPostings(Boolean compression) {

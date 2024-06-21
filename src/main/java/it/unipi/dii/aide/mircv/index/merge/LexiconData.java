@@ -13,9 +13,6 @@ import java.util.ArrayList;
 
 public class LexiconData {
     private String term;
-    /*private int upperTF = 0; // SERVE?
-    private int tf = 0; //not written in the file // SERVE?
-    private int df = 0; // SERVE?*/
     private float idf = 0;
     private float upperTFIDF = 0;
     private float upperBM25 = 0;

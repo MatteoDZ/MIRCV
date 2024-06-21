@@ -71,10 +71,10 @@ public class MaxScoreDynamicPruning {
             }
 
             for (int i = pivot; i < postings.size(); i++) {
-                if (postings.get(i).getPostingActual() != null && postings.get(i).getPostingActual().getDoc_id() == current) {
-                    score += Scorer.score(postings.get(i).getPostingActual(), postings.get(i).getIdf(), TFIDFOrBM25);
+                if (postings.get(i).getCurrentPosting() != null && postings.get(i).getCurrentPosting().getDoc_id() == current) {
+                    score += Scorer.score(postings.get(i).getCurrentPosting(), postings.get(i).getIdf(), TFIDFOrBM25);
                     postings.get(i).next(compression);
-                } else if (conjunctive && postings.get(i).getPostingActual() == null) {
+                } else if (conjunctive && postings.get(i).getCurrentPosting() == null) {
                     return topKPriorityQueue;
                 }
             }
@@ -85,8 +85,8 @@ public class MaxScoreDynamicPruning {
                     break;
                 }
 
-                if (postings.get(i).getPostingActual() != null) {
-                    if (postings.get(i).getPostingActual().getDoc_id() < current) {
+                if (postings.get(i).getCurrentPosting() != null) {
+                    if (postings.get(i).getCurrentPosting().getDoc_id() < current) {
                         Posting geq = postings.get(i).nextGEQ(current, compression);
 
                         if (geq == null && conjunctive || (conjunctive && geq.getDoc_id() != current)) {
@@ -97,13 +97,13 @@ public class MaxScoreDynamicPruning {
                         if (geq != null && geq.getDoc_id() == current) {
                             score += Scorer.score(geq, postings.get(i).getIdf(), TFIDFOrBM25);
                         }
-                    } else if (postings.get(i).getPostingActual().getDoc_id() > current && conjunctive) {
+                    } else if (postings.get(i).getCurrentPosting().getDoc_id() > current && conjunctive) {
                         skip = true;
                         break;
-                    } else if (postings.get(i).getPostingActual().getDoc_id() == current) {
-                        score += Scorer.score(postings.get(i).getPostingActual(), postings.get(i).getIdf(), TFIDFOrBM25);
+                    } else if (postings.get(i).getCurrentPosting().getDoc_id() == current) {
+                        score += Scorer.score(postings.get(i).getCurrentPosting(), postings.get(i).getIdf(), TFIDFOrBM25);
                     }
-                } else if (postings.get(i).getPostingActual() == null && conjunctive) {
+                } else if (postings.get(i).getCurrentPosting() == null && conjunctive) {
                     return topKPriorityQueue;
                 }
             }
@@ -133,7 +133,7 @@ public class MaxScoreDynamicPruning {
      */
     private static boolean isFinished(ArrayList<PostingIndex> postingIndices, int start, int end) {
         for (int i = start; i < end; i++) {
-            if (postingIndices.get(i).getPostingActual() != null) {
+            if (postingIndices.get(i).getCurrentPosting() != null) {
                 return false;
             }
         }
@@ -152,8 +152,8 @@ public class MaxScoreDynamicPruning {
         int minDoc = stats.getNumDocs();
 
         for (int i = start; i < end; i++) {
-            if (postings.get(i).getPostingActual() != null) {
-                minDoc = Math.min(minDoc, postings.get(i).getPostingActual().getDoc_id());
+            if (postings.get(i).getCurrentPosting() != null) {
+                minDoc = Math.min(minDoc, postings.get(i).getCurrentPosting().getDoc_id());
             }
         }
 
@@ -180,17 +180,17 @@ public class MaxScoreDynamicPruning {
                 return doc_id;
             }
 
-            if (postings.get(i).getPostingActual() == null) {
+            if (postings.get(i).getCurrentPosting() == null) {
                 return 0;
             }
 
-            if (postings.get(i).getPostingActual().getDoc_id() > doc_id) {
-                doc_id = postings.get(i).getPostingActual().getDoc_id();
+            if (postings.get(i).getCurrentPosting().getDoc_id() > doc_id) {
+                doc_id = postings.get(i).getCurrentPosting().getDoc_id();
                 i = start - 1; // Reset i to restart the loop.
                 continue;
             }
 
-            if (postings.get(i).getPostingActual().getDoc_id() < doc_id) {
+            if (postings.get(i).getCurrentPosting().getDoc_id() < doc_id) {
                 Posting geq = postings.get(i).nextGEQ(doc_id, compression);
 
                 if (geq == null) {
@@ -227,15 +227,15 @@ public class MaxScoreDynamicPruning {
             return true;
         }
 
-        if (postings.get(0).getPostingActual() == null) {
+        if (postings.get(0).getCurrentPosting() == null) {
             return false;
         }
 
-        int doc_id = postings.get(0).getPostingActual().getDoc_id();
+        int doc_id = postings.get(0).getCurrentPosting().getDoc_id();
 
         for (int i = start + 1; i < end; i++) {
-            if (postings.get(i).getPostingActual() != null) {
-                if (postings.get(i).getPostingActual().getDoc_id() != doc_id) {
+            if (postings.get(i).getCurrentPosting() != null) {
+                if (postings.get(i).getCurrentPosting().getDoc_id() != doc_id) {
                     return false;
                 }
             } else {
@@ -258,9 +258,9 @@ public class MaxScoreDynamicPruning {
         int doc_id = 0;
 
         for (int i = start; i < end; i++) {
-            if (postings.get(i).getPostingActual() != null) {
-                if (postings.get(i).getPostingActual().getDoc_id() > doc_id) {
-                    doc_id = postings.get(i).getPostingActual().getDoc_id();
+            if (postings.get(i).getCurrentPosting() != null) {
+                if (postings.get(i).getCurrentPosting().getDoc_id() > doc_id) {
+                    doc_id = postings.get(i).getCurrentPosting().getDoc_id();
                 }
             } else {
                 return 0;

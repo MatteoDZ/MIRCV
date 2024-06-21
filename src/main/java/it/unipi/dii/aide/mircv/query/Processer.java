@@ -63,7 +63,7 @@ public class Processer {
     public static TopKPriorityQueue<Pair<Float,Integer>> processQuery(String query, Integer k, Boolean conjunctive, String scoringFun, Boolean compression, Boolean pruning) throws IOException {
         // Clean and preprocess the query.
         List<String> cleaned = Preprocess.processText(query, Configuration.STEMMING_AND_STOPWORDS);
-
+        System.out.println(cleaned);
 
         // Check if the query is empty after preprocessing.
         if (cleaned.isEmpty()) {

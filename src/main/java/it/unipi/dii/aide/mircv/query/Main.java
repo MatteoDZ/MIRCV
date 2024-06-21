@@ -24,7 +24,7 @@ public class Main {
         long timerStart, timerEnd;
         TopKPriorityQueue<Pair<Float,Integer>> topKPriorityQueue;
         ArrayList<Integer> queryResult;
-        String query, scoreFun;
+        String query, scoringFunction, dynamicPruning, typeOfQuery;
 
 
         do {
@@ -34,38 +34,38 @@ public class Main {
                 System.out.println("The query is empty. Please enter a valid query.");
                 continue;
             }
-
-            System.out.print("Select Daat(1) or Dynamic Pruning(2) or exit(3): ");
-            int chose = Integer.parseInt(scanner.nextLine());
-            if (chose != 1 && chose != 2 && chose != 3) {
-                System.out.println("Invalid choice. Please try again.");
-                continue;
-            } else if (chose == 3) {
+            else if(query.trim().equals("exit")) {
                 break;
             }
 
-            System.out.print("Select Conjunctive(1) or Disjunctive(2): ");
-            int chose1 = Integer.parseInt(scanner.nextLine());
-            if (chose1 != 1 && chose1 != 2) {
-                System.out.println("No valid option selected. Please restart.");
+            System.out.print("Select between DAAT and DynamicPruning (DP): ");
+            dynamicPruning = scanner.nextLine();
+            if (!dynamicPruning.equals("DAAT") && !dynamicPruning.equals("DP")) {
+                System.out.println("Something went wrong, please repeat last input");
+                continue;
+            }
+
+            System.out.print("Select Conjunctive (C) or Disjunctive(D): ");
+            typeOfQuery = scanner.nextLine();
+            if (!typeOfQuery.equals("C") && !typeOfQuery.equals("D")) {
+                System.out.println("Something went wrong, please repeat last input");
                 continue;
             }
 
             System.out.print("Select the scoring function bm25 or tfidf: ");
-            scoreFun = scanner.nextLine();
-            if (!scoreFun.equals("bm25") && !scoreFun.equals("tfidf")) {
-                System.out.println("Invalid choice. Choose between 'bm25' and 'tfidf'.");
+            scoringFunction = scanner.nextLine();
+            if (!scoringFunction.equals("bm25") && !scoringFunction.equals("tfidf")) {
+                System.out.println("Something went wrong, please repeat last input");
                 continue;
             }
 
-            boolean dynamicPruning = chose != 1;
             timerStart = System.currentTimeMillis();
-            topKPriorityQueue = (Processer.processQuery(query, 10, chose1 == 1, scoreFun, Configuration.COMPRESSION, dynamicPruning));
+            topKPriorityQueue = (Processer.processQuery(query, 10, typeOfQuery.equals("C"), scoringFunction, Configuration.COMPRESSION, dynamicPruning.equals("DP")));
             timerEnd = System.currentTimeMillis();
             queryResult=Processer.getRankedQuery(topKPriorityQueue);
 
             if (queryResult == null) {
-                System.out.println("No documents found for the query.");
+                System.out.println("No documents were found for this query.");
             } else {
                 System.out.print("Results of document numbers: ");
                 for (int i : queryResult) {

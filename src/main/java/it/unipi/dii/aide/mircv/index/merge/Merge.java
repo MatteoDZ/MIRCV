@@ -88,14 +88,6 @@ public class Merge {
             int docId;
 
 
-
-            while ((docId = findDuplicate(docIdsNew)) != -1) {
-                docIdsNew.remove(docId);
-                int freq = freqsNew.get(docId);
-                freqsNew.remove( docId);
-                freqsNew.add(docId, freq + freqsNew.get(docId + 1));
-            }
-
             int block_size;
             int num_blocks;
 

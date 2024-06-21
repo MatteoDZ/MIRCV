@@ -37,16 +37,16 @@ public class Scorer {
      *
      * @param posting      The Posting object for a term in a document.
      * @param idf          The inverse document frequency of the term.
-     * @param TFIDForBM25  The scoring function to be used (TFIDF or BM25).
+     * @param scoringFunction  The scoring function to be used (TFIDF or BM25).
      * @return The calculated score.
      */
-    public static float score(Posting posting, float idf, String TFIDForBM25) throws IOException {
-        if (TFIDForBM25.equals("tfidf")) {
+    public static float score(Posting posting, float idf, String scoringFunction) throws IOException {
+        if (scoringFunction.equals("tfidf")) {
             return calculateTFIDF(posting.getFrequency(), idf);
-        } else if (TFIDForBM25.equals("bm25")) {
+        } else if (scoringFunction.equals("bm25")) {
             return calculateBM25(posting, idf);
         }
-        System.out.println("Non-valid scoring function chosen");
+        System.out.println("Chosen scoring function not available");
         return -1F;
     }
 
@@ -69,13 +69,8 @@ public class Scorer {
      * @return The BM25 score.
      */
     public static float calculateBM25(Posting posting, float idf) throws IOException {
-        if(posting.getDoc_id() == doc) {
-            docCount++;
-        }
-        doc = posting.getDoc_id();
-        if(docCount%1000000 == 0 && docCount != 0){
-            System.out.println("Conto documenti ripetuti: " + docCount);
-        }
+        docCount++;
+        System.out.println(docCount);
         int doc_len = getDoc_len(posting.getDoc_id());
         float tf = (float) (1 + Math.log(posting.getFrequency()));
         return (float) ((tf * idf) / (tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (doc_len / stats.getAvgDocLen()))));
