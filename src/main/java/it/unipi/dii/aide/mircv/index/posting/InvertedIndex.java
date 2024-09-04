@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 public class InvertedIndex {
     private final HashMap<String, PostingIndex> Block;
 
-    public HashMap<String, PostingIndex> getInvertedIndexBlock() {
+    public HashMap<String, PostingIndex> getInvertedIndex() {
         return Block;
     }
     public InvertedIndex(){

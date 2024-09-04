@@ -9,9 +9,9 @@ import java.nio.file.StandardOpenOption;
 import java.util.Objects;
 
 public class Lexicon {
-    private final FileChannel fc;
-    private final LFUCache<String, LexiconData> lfuCache = new LFUCache<>(Configuration.LEXICON_CACHE_SIZE);
-    protected static final int MAX_LEN_OF_TERM = 32;
+    private final FileChannel fc; //filechannel for read and write operations
+    private final LFUCache<String, LexiconData> lfuCache = new LFUCache<>(Configuration.LEXICON_CACHE_SIZE); //least frequently used cache
+    protected static final int MAX_LEN_OF_TERM = 32; //maximum length of a term
     private final LexiconData lexicon;
     private static final Lexicon instance = new Lexicon();
 
@@ -63,11 +63,11 @@ public class Lexicon {
     /**
      * Removes padding from a padded string.
      *
-     * @param paddedString The padded string.
+     * @param originalString The padded string.
      * @return The string without padding.
      */
-    public static String removePadding(String paddedString) {
-        String trimmed = paddedString.trim();
+    public static String removePadding(String originalString) {
+        String trimmed = originalString.trim();
         int nullIndex = trimmed.indexOf(' ');
         return nullIndex >= 0 ? trimmed.substring(0, nullIndex) : trimmed;
     }

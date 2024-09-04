@@ -70,11 +70,17 @@ public class Posting implements Comparable<Posting>{
 
     @Override
     public int compareTo(Posting o) {
+
+        return Integer.compare(this.doc_id, o.doc_id);
+
+        /*
         if (this.doc_id > o.doc_id){
             return 1;
         }
-        else {
-            return 0;
+        else if (this.doc_id < o.doc_id){
+            return -1;
         }
+        else return 0;
+         */
     }
 }

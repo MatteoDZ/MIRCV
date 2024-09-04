@@ -23,75 +23,6 @@ public class DAAT {
     }
 
     /**
-     * Retrieves the minimum document ID from a list of PostingIndex by comparing the current min_doc with.
-     *
-     * @param postings List of PostingIndex objects.
-     * @return Minimum document ID.
-     */
-    protected static int getMinDocId(ArrayList<PostingIndex> postings) {
-
-        // Set the minDoc value to the maximum doc_id
-        int minDoc = stats.getNumDocs();
-
-        // Check each element in the postings list and update the minDoc value
-        for (PostingIndex postingIndex : postings) {
-            if (postingIndex.getCurrentPosting() != null) {
-                minDoc = Math.min(minDoc, postingIndex.getCurrentPosting().getDoc_id());
-            }
-            else {
-                return stats.getNumDocs(); //Check
-            }
-        }
-        return minDoc;
-    }
-
-    /**
-     * Retrieves the maximum document ID from a list of PostingIndex objects.
-     *
-     * @param postingIndices List of PostingIndex objects.
-     * @return Maximum document ID.
-     */
-    private static int getMaxDocId(ArrayList<PostingIndex> postingIndices) {
-
-        // Set the maxDoc value to -1
-        int maxDoc = -1;
-
-        // Check each element in the postings list and update the maxDoc value
-        for (PostingIndex postingIndex : postingIndices) {
-            if (postingIndex.getCurrentPosting() != null) {
-                maxDoc = Math.max(maxDoc, postingIndex.getCurrentPosting().getDoc_id());
-            } else {
-                return 0;
-            }
-        }
-        return maxDoc;
-    }
-
-    /**
-     * Checks if the document IDs in a list of PostingIndex objects are equal.
-     *
-     * @param postingIndices List of PostingIndex objects.
-     * @return True if document IDs are equal, false otherwise.
-     */
-    private static boolean areEquals(ArrayList<PostingIndex> postingIndices) {
-
-        // postingIndices list is null
-        if (postingIndices.get(0).getCurrentPosting() == null) {
-            return false;
-        }
-
-        // Return the doc_id of the first element of the postingIndicesList
-        int doc_id = postingIndices.get(0).getCurrentPosting().getDoc_id();
-
-        for (int i = 1; i < postingIndices.size(); i++) {
-            if (postingIndices.get(i).getCurrentPosting() == null || doc_id != postingIndices.get(i).getCurrentPosting().getDoc_id()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
      * Scores the collection based on a specified ranking model (TFIDF or BM25).
      *
      * @param postings     List of PostingIndex objects.
@@ -101,9 +32,12 @@ public class DAAT {
      * @param compression  Boolean parameter to indicate if compression is used or not
      * @return Top-K results with their scores.
      */
+    /*
     public static TopKPriorityQueue<Pair<Float, Integer>> scoreCollection(
             ArrayList<PostingIndex> postings, int k, String scoringFunction, boolean conjunctive, boolean compression) throws IOException {
 
+        int doc_len = stats.getNumDocs();
+        int doc_id = conjunctive ? get_doc_id(postings, compression) : getMinDocId(postings);
 
         // Initialize the posting lists.
         for (PostingIndex index : postings) {
@@ -115,7 +49,7 @@ public class DAAT {
         TopKPriorityQueue<Pair<Float, Integer>> topKPQ = new TopKPriorityQueue<>(k, Comparator.comparing(Pair::getValue0));
 
         // Determine the starting document ID based on the query type.
-        int doc_id = conjunctive ? get_doc_id(postings, compression) : getMinDocId(postings);
+
 
 
         // If there are no documents matching the query, return null.
@@ -124,7 +58,6 @@ public class DAAT {
         }
 
         // Process each document and calculate the score.
-        int doc_len = stats.getNumDocs();
 
         while (doc_id != doc_len) {
 
@@ -138,10 +71,10 @@ public class DAAT {
                 if (posting != null) {
                     if (posting.getDoc_id() == doc_id) {
                         score += Scorer.score(
-                                        posting,
-                                        postingIndex.getIdf(),
-                                        scoringFunction);
-                                        postingIndex.next(compression);
+                                posting,
+                                postingIndex.getIdf(),
+                                scoringFunction);
+                        postingIndex.next(compression);
                         //System.out.println(doc_id + " " + score);
                     }
                 } else if (conjunctive) {
@@ -166,24 +99,267 @@ public class DAAT {
         return topKPQ;
     }
 
+     */
+
+    public static TopKPriorityQueue<Pair<Float, Integer>> scoreQuery(
+            ArrayList<PostingIndex> postings, int k, String scoringFunction, boolean conjunctive, boolean compression) throws IOException {
+
+        int doc_len = stats.getNumDocs();
+        TopKPriorityQueue<Pair<Float, Integer>> topKPQ = new TopKPriorityQueue<>(k, Comparator.comparing(Pair::getValue0));
+
+        for (PostingIndex index : postings) {
+            index.openList();
+            index.next(compression);
+        }
+
+        if (!conjunctive) {
+            disjunctiveQ(topKPQ, postings, scoringFunction, compression);
+        }
+        else {
+            conjunctiveQ(topKPQ, postings, scoringFunction, compression);
+        }
+
+        return topKPQ;
+    }
+
+    /**
+     * Retrieves the minimum document ID from a list of PostingIndex by comparing the current min_doc with.
+     *
+     * @param postings List of PostingIndex objects.
+     * @return Minimum document ID.
+     */
+    protected static int getMinDocId(ArrayList<PostingIndex> postings) {
+
+        // Set the minDoc value to the maximum doc_id
+        int minDoc = stats.getNumDocs();
+
+        // Check each element in the postings list and update the minDoc value
+        for (PostingIndex postingIndex : postings) {
+            if (postingIndex.getCurrentPosting() != null) {
+                minDoc = Math.min(minDoc, postingIndex.getCurrentPosting().getDoc_id());
+            }
+            else {
+                return stats.getNumDocs(); //Check
+            }
+        }
+        return minDoc;
+    }
+
+    public static void disjunctiveQ(TopKPriorityQueue<Pair<Float, Integer>> topKPQ, ArrayList<PostingIndex> postings, String scoringFunction, boolean compression) throws IOException {
+        int minDoc = stats.getNumDocs();
+
+        // Check each element in the postings list and update the minDoc value
+        for (PostingIndex postingIndex : postings) {
+            if (postingIndex.getCurrentPosting() != null) {
+                minDoc = Math.min(minDoc, postingIndex.getCurrentPosting().getDoc_id());
+            }
+            else {
+                minDoc = stats.getNumDocs(); //Check
+            }
+        }
+
+        if (minDoc == stats.getNumDocs()) {
+            throw new IllegalArgumentException("The postingIndex list has a null value");
+        }
+
+        while (minDoc != stats.getNumDocs()) {
+
+            float score = 0.0F;
+
+            // Calculate the score for each posting in the list.
+            for (PostingIndex postingIndex : postings) {
+                Posting posting = postingIndex.getCurrentPosting();
+
+
+                if (posting != null) {
+                    if (posting.getDoc_id() == minDoc) {
+                        score += Scorer.score(
+                                posting,
+                                postingIndex.getIdf(),
+                                scoringFunction);
+                        postingIndex.next(compression);
+                    }
+                }
+            }
+
+            // Add the document ID and its score to the priority queue.
+            topKPQ.offer(new Pair<>(score, minDoc));
+
+            // Move to the next document based on the query type.
+            for (PostingIndex postingIndex : postings) {
+                if (postingIndex.getCurrentPosting() != null) {
+                    minDoc = Math.min(minDoc, postingIndex.getCurrentPosting().getDoc_id());
+                }
+                else {
+                    minDoc = stats.getNumDocs();
+                }
+            }
+
+            // If there are no more documents, exit the loop.
+            if (minDoc == -1) {
+                //System.out.println("I QUIT");
+                break;
+            }
+        }
+    }
+
+    /**
+     * Retrieves the maximum document ID from a list of PostingIndex objects.
+     *
+     * @param postingIndexes List of PostingIndex objects.
+     * @return Maximum document ID.
+     */
+    private static int getMaxDocId(ArrayList<PostingIndex> postingIndexes) {
+
+        // Set the inital value to -1
+        int maxDoc = -1;
+
+        // Check each element in the postings list and update the maxDoc value
+        for (PostingIndex postingIndex : postingIndexes) {
+            if (postingIndex.getCurrentPosting() != null) {
+                System.out.println((postingIndex.getCurrentPosting().getDoc_id()) + " line 220");
+                maxDoc = Math.max(maxDoc, postingIndex.getCurrentPosting().getDoc_id());
+            } else {
+                return -1;
+            }
+        }
+        return maxDoc;
+    }
+
+    private static boolean checkIfEquals(ArrayList<PostingIndex> postings){
+        if (postings.get(0).getCurrentPosting() == null) {return false;}
+        int trueDocId = postings.get(0).getCurrentPosting().getDoc_id();
+        for (int i = 1; i < postings.size(); i++){
+            if (postings.get(i).getCurrentPosting().getDoc_id() != trueDocId){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static int alignPostings(ArrayList<PostingIndex> postings, boolean compression, int maxId) {
+        int docId = maxId;
+        if (docId == 0) { return 0; }
+
+        for (int i = 0; i < postings.size(); i++) {
+            Posting currentPosting = postings.get(i).getCurrentPosting();
+
+            if (currentPosting == null) {return -1;} //throw new IllegalArgumentException("The posting is null");}
+
+            // Checks if all the postings have the same docId, and if true, returns the docId
+            boolean found = checkIfEquals(postings);
+            if (found) {return currentPosting.getDoc_id();}
+
+            // If the next docId
+            if (currentPosting.getDoc_id() > docId) {
+                docId = currentPosting.getDoc_id();
+                i = -1;
+                continue;
+            }
+            if (currentPosting.getDoc_id() < docId) {
+                //System.out.println("currentPosting.getDoc_id() < docId RESULT = " + docId);
+                Posting nextPostingGEQ = postings.get(i).nextGEQ(docId, compression);
+                if (nextPostingGEQ == null) {return -1;} //throw new IllegalArgumentException("nextGEQ returned a null value");}
+
+                int geqDocId = nextPostingGEQ.getDoc_id();
+                if (geqDocId > docId) {
+                    docId = geqDocId;
+                    i = -1;
+                    continue;
+                } else if (geqDocId == docId) {
+                    boolean foundGeq = checkIfEquals(postings);
+                    if (foundGeq) {
+                        return docId;
+                    }
+                    i = -1;
+                }
+            }
+        }
+        return -1;
+    }
+
+
+     public static void conjunctiveQ(TopKPriorityQueue<Pair<Float, Integer>> topKPQ, ArrayList<PostingIndex> postings, String scoringFunction, boolean compression) throws IOException {
+         int docId = alignPostings(postings, compression, getMaxDocId(postings));
+
+
+         while (docId != stats.getNumDocs()) {
+
+             if (docId == -1) {break;}
+
+             float score = 0.0F;
+
+             // Calculate the score for each posting in the list.
+             for (PostingIndex postingIndex : postings) {
+                 Posting posting = postingIndex.getCurrentPosting();
+
+
+                 if (posting != null) {
+                     if (posting.getDoc_id() == docId) {
+                         score += Scorer.score(
+                                 posting,
+                                 postingIndex.getIdf(),
+                                 scoringFunction);
+                         postingIndex.next(compression);
+                     }
+                 }
+
+                 topKPQ.offer(new Pair<>(score, docId));
+                 int maxId = getMaxDocId(postings);
+                 docId = alignPostings(postings, compression, maxId);
+
+                 if (docId == -1) {
+                     System.out.println(docId);
+                     break;
+                 }
+             }
+
+         }
+     }
+
+    /**
+     * Checks if the document IDs in a list of PostingIndex objects are equal.
+     *
+     * @param postingIndices List of PostingIndex objects.
+     * @return True if document IDs are equal, false otherwise.
+     */
+    private static boolean areEquals(ArrayList<PostingIndex> postingIndices) {
+
+        // postingIndices list is null
+        if (postingIndices.get(0).getCurrentPosting() == null) {
+            return false;
+        }
+
+        // Return the doc_id of the first element of the postingIndicesList
+        int doc_id = postingIndices.get(0).getCurrentPosting().getDoc_id();
+
+        for (int i = 1; i < postingIndices.size(); i++) {
+            Posting posting = postingIndices.get(i).getCurrentPosting();
+            if (posting == null || doc_id != posting.getDoc_id()) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     /**
      * Retrieves the document ID based on the maximum document ID in a list of PostingIndex objects.
      *
-     * @param postingIndices List of PostingIndex objects.
+     * @param postingIndexes List of PostingIndex objects.
      * @return Document ID.
      */
-    private static int get_doc_id(ArrayList<PostingIndex> postingIndices, Boolean compression) {
-        int doc_id = getMaxDocId(postingIndices);
+    private static int get_doc_id(ArrayList<PostingIndex> postingIndexes, Boolean compression) {
+        int doc_id = getMaxDocId(postingIndexes);
+
         if (doc_id == 0) {
             return 0;
         }
 
-        for (int i = 0; i < postingIndices.size(); i++) {
-            Posting currentPosting = postingIndices.get(i).getCurrentPosting();
+        for (int i = 0; i < postingIndexes.size(); i++) {
+            Posting currentPosting = postingIndexes.get(i).getCurrentPosting();
 
             // Check if all posting indices have equal docIds.
-            if (areEquals(postingIndices)) {
+            if (areEquals(postingIndexes)) {
                 return doc_id;
             }
 
@@ -203,7 +379,7 @@ public class DAAT {
 
             // Move to the next document ID if the current one is lower.
             if (currentDocId < doc_id) {
-                Posting geq = postingIndices.get(i).nextGEQ(doc_id, compression);
+                Posting geq = postingIndexes.get(i).nextGEQ(doc_id, compression);
 
                 // Check if posting is null
                 if (geq == null) {
@@ -216,7 +392,7 @@ public class DAAT {
                     doc_id = geqDocId;
                     i = -1;
                 } else if (geqDocId == doc_id) {
-                    if (areEquals(postingIndices)) {
+                    if (areEquals(postingIndexes)) {
                         return doc_id;
                     }
                     i = -1;
@@ -226,5 +402,4 @@ public class DAAT {
 
         return 0;
     }
-
 }

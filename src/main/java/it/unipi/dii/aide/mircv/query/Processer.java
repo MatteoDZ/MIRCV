@@ -72,10 +72,10 @@ public class Processer {
         }
 
         // Remove duplicates from the query terms.
-        Set<String> queryDistinctWords = new HashSet<>(cleaned);
+        Set<String> queryNoDuplicates = new HashSet<>(cleaned);
 
         // Retrieve posting lists for the query terms.
-        ArrayList<PostingIndex> queryPostings = getQueryPostingLists(new ArrayList<>(queryDistinctWords), conjunctive,scoringFun, pruning);
+        ArrayList<PostingIndex> queryPostings = getQueryPostingLists(new ArrayList<>(queryNoDuplicates), conjunctive,scoringFun, pruning);
 
         // Return null if no posting lists are retrieved.
         if (queryPostings == null || queryPostings.isEmpty()) {
@@ -90,7 +90,7 @@ public class Processer {
         if (pruning) {
             priorityQueue = MaxScoreDynamicPruning.maxScore(queryPostings,k,scoringFun,conjunctive, compression);
         } else {
-            priorityQueue = DAAT.scoreCollection(queryPostings, k, scoringFun, conjunctive, compression);
+            priorityQueue = DAAT.scoreQuery(queryPostings, k, scoringFun, conjunctive, compression);
         }
 
         assert priorityQueue != null;

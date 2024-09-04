@@ -43,27 +43,6 @@ public class LexiconData {
         return term;
     }
 
-    /*public int getUpperTF() {
-        return upperTF;
-    }
-
-    public void setUpperTF(int upperTF) {
-        this.upperTF = upperTF;
-    }
-
-    public void setTf(int tf) {
-        this.tf = tf;
-    }
-
-    public void setDf(int df) {this.df = df;}
-
-
-    public int getTf() {
-        return tf;
-    }
-
-    public int getDf() {return df;}*/
-
     public float getIdf() {
         return idf;
     }
@@ -122,9 +101,7 @@ public class LexiconData {
             byte[] termBytes = new byte[Lexicon.MAX_LEN_OF_TERM];
             mappedByteBuffer.get(termBytes);
             term = Lexicon.removePadding(new String(termBytes, StandardCharsets.UTF_8));
-            // df = (mappedByteBuffer.getInt());
             idf = (mappedByteBuffer.getFloat());
-            // upperTF = (mappedByteBuffer.getInt());
             upperTFIDF = (mappedByteBuffer.getFloat());
             upperBM25 = (mappedByteBuffer.getFloat());
             offset_skip_pointer = (mappedByteBuffer.getLong());
@@ -144,9 +121,7 @@ public class LexiconData {
         try {
             MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, fileChannel.size(), ENTRY_SIZE);
             mappedByteBuffer.put(Lexicon.padStringToLength(term).getBytes(StandardCharsets.UTF_8));
-            // mappedByteBuffer.putInt(df);
             mappedByteBuffer.putFloat(idf);
-            // mappedByteBuffer.putInt(upperTF);
             mappedByteBuffer.putFloat(upperTFIDF);
             mappedByteBuffer.putFloat(upperBM25);
             mappedByteBuffer.putLong(offset_skip_pointer);

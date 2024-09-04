@@ -170,11 +170,11 @@ public class PostingIndex {
      *
      * @return The next posting or null if the end is reached.
      */
-    public Posting next(Boolean compression) {
+    public void next(Boolean compression) {
         if (!postingIterator.hasNext()) {
             if (!skippingBlockIterator.hasNext()) {
                 currentPosting = null;
-                return null;
+                //return null;
             }
             skippingBlockActual = skippingBlockIterator.next();
             postings.clear();
@@ -184,7 +184,7 @@ public class PostingIndex {
         }
         currentPosting = postingIterator.next();
 
-        return currentPosting;
+        //return currentPosting;
     }
 
     /**

@@ -48,13 +48,9 @@ public class SkippingBlock {
      * @return True if writing is successful, false otherwise.
      */
     public boolean writeToDisk(FileChannel file_to_write) {
-        /*
-        if (file_to_write == null) {
-            return false;
-        }
 
-         */
         assert file_to_write!=null : "FileChannel is null";
+
         try {
             MappedByteBuffer mappedByteBuffer = file_to_write.map(FileChannel.MapMode.READ_WRITE, file_offset, size_of_element);
             if (mappedByteBuffer == null) {

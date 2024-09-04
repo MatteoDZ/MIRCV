@@ -53,7 +53,7 @@ public class Spimi {
                         }
                     }
                 }
-                if(!inv.getInvertedIndexBlock().isEmpty()){
+                if(!inv.getInvertedIndex().isEmpty()){
                     String pathBlockN = FileUtils.createPathFileBlockN(Objects.requireNonNull(Configuration.PATH_BLOCKS),blockNumber);
                     BinaryFile.writeBlock(inv, pathBlockN);
                     inv.clean();
