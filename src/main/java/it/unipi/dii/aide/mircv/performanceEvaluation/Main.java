@@ -120,7 +120,7 @@ public class Main {
                 Collections.reverse(pair);
                 pair.forEach(p -> {
                     try {
-                        bufferedWriter.write(qno + " Q0 " + p.getValue1() + " " + (pair.indexOf(p) + 1) + " " + p.getValue0() + " CHANG0" + "\n");
+                        bufferedWriter.write(qno + " Q0 " + p.getValue1() + " " + (pair.indexOf(p) + 1) + " " + p.getValue0() + "\n");
                     } catch (IOException e) {
                         throw new RuntimeException("Error to write the results to the file "+ bufferedWriter + ": " + e);
                     }

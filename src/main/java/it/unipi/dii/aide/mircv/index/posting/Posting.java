@@ -77,10 +77,8 @@ public class Posting implements Comparable<Posting>{
         if (this.doc_id > o.doc_id){
             return 1;
         }
-        else if (this.doc_id < o.doc_id){
-            return -1;
-        }
         else return 0;
+
          */
     }
 }

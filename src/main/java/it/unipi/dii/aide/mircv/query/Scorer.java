@@ -18,8 +18,6 @@ import java.nio.file.StandardOpenOption;
 public class Scorer {
 
     private static final FileChannel fc;
-    private static int doc = -1;
-    private static int docCount = 0;
     static Statistics stats = new Statistics();
 
     static {
@@ -69,8 +67,6 @@ public class Scorer {
      * @return The BM25 score.
      */
     public static float calculateBM25(Posting posting, float idf) throws IOException {
-        docCount++;
-        System.out.println(docCount);
         int doc_len = getDoc_len(posting.getDoc_id());
         float tf = (float) (1 + Math.log(posting.getFrequency()));
         return (float) ((tf * idf) / (tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (doc_len / stats.getAvgDocLen()))));
