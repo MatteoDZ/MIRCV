@@ -41,7 +41,7 @@ public class PostingIndex {
      * @return the list of document IDs
      */
     public List<Integer> getDocIds() {
-        return new ArrayList<>(postings.stream().map(Posting::getDoc_id).toList());
+        return new ArrayList<>(postings.stream().map(Posting::getDocId).toList());
     }
 
     public List<Integer> getFrequencies() {
@@ -117,14 +117,14 @@ public class PostingIndex {
      */
     public void addPosting(int documentId) {
         Posting existingPosting = postings.stream()
-                .filter(p -> p.getDoc_id() == documentId)
+                .filter(p -> p.getDocId() == documentId)
                 .findFirst()
                 .orElse(null);
 
         if (existingPosting != null) {
             existingPosting.incrementFrequency();
         } else {
-            postings.add(new Posting(documentId, 1));
+            postings.add(new Posting(documentId, 1, 1));
         }
     }
 
@@ -137,7 +137,7 @@ public class PostingIndex {
     public void appendList(PostingIndex intermediatePostingList) {
         //here we have to add the posting keeping the sorting in base of the docId
         this.postings.addAll(intermediatePostingList.postings);
-        this.postings.sort(Comparator.comparing(Posting::getDoc_id));
+        this.postings.sort(Comparator.comparing(Posting::getDocId));
     }
 
 
@@ -169,21 +169,6 @@ public class PostingIndex {
      * Moves to the next posting in the list.
      */
     public void next(Boolean compression) {
-        if (!postingIterator.hasNext()) {
-            if (!skippingBlockIterator.hasNext()) {
-                currentPosting = null;
-                return;
-            }
-            skippingBlockCurrent = skippingBlockIterator.next();
-            postings.clear();
-            postings.addAll(skippingBlockCurrent.getSkippingBlockPostings(compression));
-
-            postingIterator = postings.iterator();
-        }
-        currentPosting = postingIterator.next();
-    }
-
-    public void pointNext(Boolean compression) {
         if (postingIterator.hasNext()) {
             currentPosting = postingIterator.next();
         } else if (skippingBlockIterator.hasNext()) {
@@ -203,37 +188,6 @@ public class PostingIndex {
      * @param docId The document ID to compare.
      * @return The next posting with a document ID greater than or equal to doc_id, or null if not found.
      */
-
-    /*
-    public Posting nextGEQ(int docId, boolean compression) {
-        boolean nextBlock = false;
-        while (skippingBlockCurrent == null || skippingBlockCurrent.getDocIdMax() < docId) {
-            if (!skippingBlockIterator.hasNext()) {
-                currentPosting = null;
-                return null;
-            }
-            skippingBlockCurrent = skippingBlockIterator.next();
-            nextBlock = true;
-        }
-        if (nextBlock) {
-            postings.clear();
-            postings.addAll(skippingBlockCurrent.getSkippingBlockPostings(compression));
-            postingIterator = postings.iterator();
-        }
-        while (postingIterator.hasNext()) {
-            currentPosting = postingIterator.next();
-            if (currentPosting.getDoc_id() >= docId) {
-                return currentPosting;
-            }
-        }
-        currentPosting = null;
-        return null;
-    }
-
-
-     */
-
-
     public Posting nextGEQ(int docId, boolean compression) {
         boolean skip = false;
         while(skippingBlockCurrent == null || skippingBlockCurrent.getDocIdMax() < docId) {
@@ -250,12 +204,12 @@ public class PostingIndex {
             postings.addAll(skippingBlockCurrent.getSkippingBlockPostings(compression));
             postingIterator = postings.iterator();
         }
-        while (currentPosting.getDoc_id() < docId){
+        while (currentPosting.getDocId() < docId){
             if (postingIterator.hasNext()) {
                 currentPosting = postingIterator.next();
             }
         }
-        if (currentPosting.getDoc_id() >= docId) {
+        if (currentPosting.getDocId() >= docId) {
             return currentPosting;
         }
         else {

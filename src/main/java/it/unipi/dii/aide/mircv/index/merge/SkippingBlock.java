@@ -126,17 +126,17 @@ public class SkippingBlock {
             bufferDocId.get(doc_ids, 0, docIdSize);
             bufferFreq.get(freqs, 0, freqSize);
 
-            List<Short> freqs_decompressed = UnaryCompressor.integerArrayDecompression(freqs, numPostingOfBlock);
-            List<Integer> doc_ids_decompressed = VariableByteCompressor.decode(doc_ids);
+            List<Short> freqsDecompressed = UnaryCompressor.integerArrayDecompression(freqs, numPostingOfBlock);
+            List<Integer> docIdsDecompressed = VariableByteCompressor.decode(doc_ids);
 
 
             for (int i = 0; i < numPostingOfBlock; i++) {
-                Posting posting = new Posting(doc_ids_decompressed.get(i), freqs_decompressed.get(i));
+                Posting posting = new Posting(docIdsDecompressed.get(2*i), freqsDecompressed.get(i), docIdsDecompressed.get(2*i + 1));
                 postings.add(posting);
             }
         } else {
             for (int i = 0; i < numPostingOfBlock; i++) {
-                Posting posting = new Posting(bufferDocId.getInt(), bufferFreq.getShort());
+                Posting posting = new Posting(bufferDocId.getInt(), bufferFreq.getShort(), bufferDocId.getInt());
                 postings.add(posting);
             }
         }

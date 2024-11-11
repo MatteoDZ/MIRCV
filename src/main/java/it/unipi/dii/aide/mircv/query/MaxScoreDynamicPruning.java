@@ -59,9 +59,9 @@ public class MaxScoreDynamicPruning {
         //if (start + 1 == end || start.equals(end)) {return true;}
 
         if (postings.get(0).getCurrentPosting() == null) {return false;}
-        int trueDocId = postings.get(0).getCurrentPosting().getDoc_id();
+        int trueDocId = postings.get(0).getCurrentPosting().getDocId();
         for (int i = 1; i < postings.size(); i++){
-            if (postings.get(i).getCurrentPosting().getDoc_id() != trueDocId){
+            if (postings.get(i).getCurrentPosting().getDocId() != trueDocId){
                 return false;
             }
         }
@@ -79,19 +79,19 @@ public class MaxScoreDynamicPruning {
 
             // Checks if all the postings pointed have the same docId, and if true, returns the docId
             boolean found = checkIfEquals(postings);
-            if (found) {return currentPosting.getDoc_id();}
+            if (found) {return currentPosting.getDocId();}
 
             // If the next docId
-            if (currentPosting.getDoc_id() > maxDocId) {
-                maxDocId = currentPosting.getDoc_id();
+            if (currentPosting.getDocId() > maxDocId) {
+                maxDocId = currentPosting.getDocId();
                 i = -1;
                 continue;
             }
-            if (currentPosting.getDoc_id() < maxDocId) {
+            if (currentPosting.getDocId() < maxDocId) {
                 Posting nextPostingGEQ = postings.get(i).nextGEQ(maxDocId, compression);
                 if (nextPostingGEQ == null) {return 0;} //throw new IllegalArgumentException("nextGEQ returned a null value");}
 
-                int geqDocId = nextPostingGEQ.getDoc_id();
+                int geqDocId = nextPostingGEQ.getDocId();
                 if (geqDocId > maxDocId) {
                     maxDocId = geqDocId;
                     i = -1;
@@ -115,7 +115,7 @@ public class MaxScoreDynamicPruning {
 
         for (int i = 0; i < maxTerm; i++) {
             if (postingIndexes.get(i).getCurrentPosting() != null) {
-                maxDoc = Math.max(maxDoc, postingIndexes.get(i).getCurrentPosting().getDoc_id());
+                maxDoc = Math.max(maxDoc, postingIndexes.get(i).getCurrentPosting().getDocId());
             } else {
                 return 0;
             }
@@ -137,13 +137,13 @@ public class MaxScoreDynamicPruning {
             float score = 0.0f;
 
             Posting currentPosting = postings.get(postings.size()-1).getCurrentPosting();
-            if (currentPosting != null && currentPosting.getDoc_id() == highestDoc) {
+            if (currentPosting != null && currentPosting.getDocId() == highestDoc) {
                 score += Scorer.getScore(currentPosting, postings.get(postings.size()- 1).getIdf(), scoringFunction);
                 postings.get(postings.size()-1).next(compression);
 
                 for (int i = postings.size() - 2; i >= 0; i--) {
                     Posting notPrunedPosting = postings.get(i).getCurrentPosting();
-                    if (notPrunedPosting != null && notPrunedPosting.getDoc_id() == highestDoc) {
+                    if (notPrunedPosting != null && notPrunedPosting.getDocId() == highestDoc) {
                         float tempScore = Scorer.getScore(notPrunedPosting, postings.get(i).getIdf(), scoringFunction);
                         postings.get(i).next(compression);
                         if (score + upperBounds[i] < threshold) {
@@ -176,7 +176,7 @@ public class MaxScoreDynamicPruning {
 
         for (int term = 0; term < postings.size(); term++) {
             if (postings.get(term).getCurrentPosting() != null) {
-                int newMinDoc = Math.min(minDoc, postings.get(term).getCurrentPosting().getDoc_id());
+                int newMinDoc = Math.min(minDoc, postings.get(term).getCurrentPosting().getDocId());
                 if (newMinDoc < minDoc) {
                     minDoc = newMinDoc;
                     termId = term;
@@ -194,12 +194,12 @@ public class MaxScoreDynamicPruning {
 
             // Calculate the score for each posting in the list.
             Posting currentPosting = postings.get(termId).getCurrentPosting();
-            if (currentPosting.getDoc_id() == minDoc) {
+            if (currentPosting.getDocId() == minDoc) {
                 score += Scorer.getScore(currentPosting, postings.get(termId).getIdf(), scoringFunction);
                 postings.get(termId).next(compression);
 
                 for (int i = termId + 1; i < postings.size(); i++) {
-                    if (postings.get(i).getCurrentPosting() != null && postings.get(i).getCurrentPosting().getDoc_id() == minDoc) {
+                    if (postings.get(i).getCurrentPosting() != null && postings.get(i).getCurrentPosting().getDocId() == minDoc) {
                         Posting notPrunedPosting = postings.get(i).getCurrentPosting();
                         float tempScore = Scorer.getScore(notPrunedPosting, postings.get(i).getIdf(), scoringFunction);
                         postings.get(i).next(compression);
@@ -224,7 +224,7 @@ public class MaxScoreDynamicPruning {
             minDoc = stats.getNumDocs();
             for (int term = 0; term < postings.size(); term++) {
                 if (postings.get(term).getCurrentPosting() != null) {
-                    int newMinDoc = Math.min(minDoc, postings.get(term).getCurrentPosting().getDoc_id());
+                    int newMinDoc = Math.min(minDoc, postings.get(term).getCurrentPosting().getDocId());
                     if (newMinDoc < minDoc) {
                         minDoc = newMinDoc;
                         termId = term;

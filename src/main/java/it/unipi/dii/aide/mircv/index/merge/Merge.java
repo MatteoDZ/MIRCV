@@ -92,30 +92,38 @@ public class Merge {
 
             ArrayList<Integer> docIds;
             ArrayList<Integer> freqs;
+            ArrayList<Integer> docLengths;
 
-            // System.out.println("Size of minPosting: " + minPosting.getPostings().size() + " block_size: " + block_size + " num_blocks: " + num_blocks);
+            FileChannel fc = FileChannel.open(Path.of(Configuration.PATH_DOC_TERMS), StandardOpenOption.READ, StandardOpenOption.WRITE);
+            ArrayList<Integer> docLengthsNew = new ArrayList<>();
+            for (Integer documentId : docIdsNew) {
+                docLengthsNew.add(BinaryFile.readIntFromBuffer(fc, documentId*4L));
+            }
+            fc.close();
 
             lexiconWrite(minPosting, fcSkippingBlock.size(), lexicon, num_blocks);
 
             for (int currentBlock = 0; currentBlock < num_blocks; currentBlock++){
                 docIds = new ArrayList<>();
                 freqs = new ArrayList<>();
+                docLengths = new ArrayList<>();
 
                 for(int i = 0; i < block_size; i++) {
                     if(currentBlock * block_size + i < minPosting.getPostings().size()) {
                         docIds.add(docIdsNew.get(currentBlock * block_size + i));
                         freqs.add(freqsNew.get(currentBlock * block_size + i));
+                        docLengths.add(docLengthsNew.get(currentBlock * block_size + i));
                     }
                 }
 
-                Pair<Long, Integer> pair_docIds = docIdWriter.writeBlock(docIds, compress);
+                Pair<Long, Integer> pair_docIds = docIdWriter.writeBlock(docIds, docLengths, compress);
                 Pair<Long, Integer> pair_freqs = frequencyWriter.writeBlockP(freqs, compress);
 
                 SkippingBlock skippingBlock = new SkippingBlock();
                 skippingBlock.setDocIdOffset(pair_docIds.getValue0());
                 skippingBlock.setFreqOffset(pair_freqs.getValue0());
                 skippingBlock.setDocIdMax(docIds.get(docIds.size() - 1));
-                skippingBlock.setDocIdSize(compress ? pair_docIds.getValue1() : docIds.size());
+                skippingBlock.setDocIdSize(compress ? pair_docIds.getValue1() : (docIds.size() + docLengths.size()));
                 skippingBlock.setFreqSize(compress ? pair_freqs.getValue1() : freqs.size());
                 skippingBlock.setNumPostingOfBlock(docIds.size());
                 if(!skippingBlock.writeToDisk(fcSkippingBlock)) {
@@ -208,7 +216,7 @@ public class Merge {
     protected float calculateBM25(Posting posting, float idf){
         try {
             FileChannel fc = FileChannel.open(Path.of(Configuration.PATH_DOC_TERMS), StandardOpenOption.READ, StandardOpenOption.WRITE);
-            int docLen = BinaryFile.readIntFromBuffer(fc, posting.getDoc_id()*4L);
+            int docLen = BinaryFile.readIntFromBuffer(fc, posting.getDocId()*4L);
             fc.close();
             float tf = (float) (1 + Math.log(posting.getFrequency()));
             return (float) ((tf * idf) / (tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (docLen / stats.getAvgDocLen()))));

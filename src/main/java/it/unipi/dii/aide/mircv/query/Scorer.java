@@ -49,16 +49,6 @@ public class Scorer {
         return (float) -1.0;
     }
 
-    public static float getScore2(Posting posting, float idf, String scoringFunction, HashMap<Integer, Integer> docLengths) throws IOException {
-        if (scoringFunction.equals("tfidf")) {
-            return calculateTFIDF(posting.getFrequency(), idf);
-        } else if (scoringFunction.equals("bm25")) {
-            return calculateBM25R(posting, idf, docLengths);
-        }
-        System.out.println("Chosen scoring function not available");
-        return (float) -1.0;
-    }
-
     /**
      * Calculates the TFIDF score for a term in a document.
      *
@@ -78,15 +68,11 @@ public class Scorer {
      * @return        The BM25 score.
      */
     public static float calculateBM25(Posting posting, float idf) throws IOException {
-        int doc_len = getDoc_len(posting.getDoc_id());
+        //int doc_len = getDoc_len(posting.getDocId());
+        int docLen = posting.getDocLen();
         float tf = (float) (1 + Math.log(posting.getFrequency()));
-        return (float) ((tf * idf) / (tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (doc_len / stats.getAvgDocLen()))));
-    }
-
-    public static float calculateBM25R(Posting posting, float idf, HashMap<Integer, Integer> docLengths) throws IOException {
-        int doc_len = docLengths.get(posting.getDoc_id());
-        float tf = (float) (1 + Math.log(posting.getFrequency()));
-        return (float) ((tf * idf) / (tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (doc_len / stats.getAvgDocLen()))));
+        //return (float) ((tf * idf) / (tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (docLen / stats.getAvgDocLen()))));
+        return (float) (idf * (tf * (Configuration.BM25_K1 + 1))/(tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (docLen / stats.getAvgDocLen()))));
     }
 
     /**

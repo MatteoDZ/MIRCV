@@ -1,6 +1,5 @@
 package it.unipi.dii.aide.mircv.query;
 
-import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.posting.Posting;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
@@ -13,7 +12,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 
 public class DAAT {
 
@@ -55,7 +53,7 @@ public class DAAT {
         // Check each element in the postings list and update the minDoc value
         for (PostingIndex postingIndex : postings) {
             if (postingIndex.getCurrentPosting() != null) {
-                minDoc = Math.min(minDoc, postingIndex.getCurrentPosting().getDoc_id());
+                minDoc = Math.min(minDoc, postingIndex.getCurrentPosting().getDocId());
             }
             else {
                 minDoc = stats.getNumDocs(); //Check
@@ -76,7 +74,7 @@ public class DAAT {
 
 
                 if (posting != null) {
-                    if (posting.getDoc_id() == minDoc) {
+                    if (posting.getDocId() == minDoc) {
                         score += Scorer.getScore(
                                 posting,
                                 postingIndex.getIdf(),
@@ -92,7 +90,7 @@ public class DAAT {
             minDoc = stats.getNumDocs();
             for (PostingIndex postingIndex : postings) {
                 if (postingIndex.getCurrentPosting() != null) {
-                    minDoc = Math.min(minDoc, postingIndex.getCurrentPosting().getDoc_id());
+                    minDoc = Math.min(minDoc, postingIndex.getCurrentPosting().getDocId());
                 }
                 else {
                     minDoc = stats.getNumDocs();
@@ -109,9 +107,9 @@ public class DAAT {
 
     private static boolean checkIfEquals(ArrayList<PostingIndex> postings){
         if (postings.get(0).getCurrentPosting() == null) {return false;}
-        int trueDocId = postings.get(0).getCurrentPosting().getDoc_id();
+        int trueDocId = postings.get(0).getCurrentPosting().getDocId();
         for (int i = 1; i < postings.size(); i++){
-            if (postings.get(i).getCurrentPosting().getDoc_id() != trueDocId){
+            if (postings.get(i).getCurrentPosting().getDocId() != trueDocId){
                 return false;
             }
         }
@@ -129,19 +127,19 @@ public class DAAT {
 
             // Checks if all the postings pointed have the same docId, and if true, returns the docId
             boolean found = checkIfEquals(postings);
-            if (found) {return currentPosting.getDoc_id();}
+            if (found) {return currentPosting.getDocId();}
 
             // If the next docId
-            if (currentPosting.getDoc_id() > docId) {
-                docId = currentPosting.getDoc_id();
+            if (currentPosting.getDocId() > docId) {
+                docId = currentPosting.getDocId();
                 i = -1;
                 continue;
             }
-            if (currentPosting.getDoc_id() < docId) {
+            if (currentPosting.getDocId() < docId) {
                 Posting nextPostingGEQ = postings.get(i).nextGEQ(docId, compression);
                 if (nextPostingGEQ == null) {return 0;}
 
-                int geqDocId = nextPostingGEQ.getDoc_id();
+                int geqDocId = nextPostingGEQ.getDocId();
                 if (geqDocId > docId) {
                     docId = geqDocId;
                     i = -1;
@@ -173,7 +171,7 @@ public class DAAT {
         for (PostingIndex postingIndex : postingIndexes) {
             if (postingIndex.getCurrentPosting() != null) {
                 //System.out.println((postingIndex.getCurrentPosting().getDoc_id()) + " line 220");
-                maxDoc = Math.max(maxDoc, postingIndex.getCurrentPosting().getDoc_id());
+                maxDoc = Math.max(maxDoc, postingIndex.getCurrentPosting().getDocId());
             } else {
                 return 0;
             }
@@ -196,7 +194,7 @@ public class DAAT {
 
 
                 if (posting != null) {
-                    if (posting.getDoc_id() == docId) {
+                    if (posting.getDocId() == docId) {
                         score += Scorer.getScore(
                                 posting,
                                 postingIndex.getIdf(),

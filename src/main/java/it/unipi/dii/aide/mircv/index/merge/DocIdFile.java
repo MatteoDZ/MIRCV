@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,12 +38,32 @@ public class DocIdFile {
      * @return           the size of the file before writing the block
      * @throws IOException if an I/O error occurs
      */
-    public Pair<Long, Integer> writeBlock(List<Integer> block, boolean compression) throws IOException {
+    public Pair<Long, Integer> writeBlock(List<Integer> block, List<Integer> lenghts, boolean compression) throws IOException {
         long fc_size = fc.size();
         if (!compression) {
-            BinaryFile.writeIntListToBuffer(fc, block);
+            if (block.size() == lenghts.size()) {
+                for (int i = 0; i < block.size(); i++) {
+                    BinaryFile.writeIntToBuffer(fc, block.get(i));
+                    BinaryFile.writeIntToBuffer(fc, lenghts.get(i));
+                }
+            }
+            else{
+                throw new IOException("Different lenghts");
+            }
+            //BinaryFile.writeIntListToBuffer(fc, block);
         } else {
-            BinaryFile.writeArrayByteToBuffer(fc, VariableByteCompressor.encode(block));
+            if (block.size() == lenghts.size()) {
+                List<Integer> toBeWritten = new ArrayList<>();
+                for (int i = 0; i < block.size(); i++) {
+                    toBeWritten.add(block.get(i));
+                    toBeWritten.add(lenghts.get(i));
+                }
+                BinaryFile.writeArrayByteToBuffer(fc, VariableByteCompressor.encode(toBeWritten));
+            }
+            else{
+                throw new IOException("Different lenghts");
+            }
+            //BinaryFile.writeArrayByteToBuffer(fc, VariableByteCompressor.encode(block));
         }
         return Pair.with(fc_size, Math.toIntExact((int) fc.size() - fc_size));
     }
