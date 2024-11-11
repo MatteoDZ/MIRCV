@@ -16,7 +16,7 @@ public class PostingIndex {
     private Iterator<Posting> postingIterator;  // Iterator for postings
     private float upperBound;
     private float idf;
-    private SkippingBlock skippingBlockActual;  // Currently active skipping block
+    private SkippingBlock skippingBlockCurrent;  // Currently active skipping block
     private Iterator<SkippingBlock> skippingBlockIterator;  // Iterator for skipping blocks
 
     public float getUpperBound() {
@@ -174,44 +174,93 @@ public class PostingIndex {
                 currentPosting = null;
                 return;
             }
-            skippingBlockActual = skippingBlockIterator.next();
+            skippingBlockCurrent = skippingBlockIterator.next();
             postings.clear();
-            postings.addAll(skippingBlockActual.getSkippingBlockPostings(compression));
+            postings.addAll(skippingBlockCurrent.getSkippingBlockPostings(compression));
 
             postingIterator = postings.iterator();
         }
         currentPosting = postingIterator.next();
+    }
 
+    public void pointNext(Boolean compression) {
+        if (postingIterator.hasNext()) {
+            currentPosting = postingIterator.next();
+        } else if (skippingBlockIterator.hasNext()) {
+            skippingBlockCurrent = skippingBlockIterator.next();
+            postings.clear();
+            postings.addAll(skippingBlockCurrent.getSkippingBlockPostings(compression));
+            postingIterator = postings.iterator();
+            currentPosting = postingIterator.next();
+        } else {
+            currentPosting = null;
+        }
     }
 
     /**
      * Moves to the next posting with a document ID greater than or equal to the specified value.
      *
-     * @param doc_id The document ID to compare.
+     * @param docId The document ID to compare.
      * @return The next posting with a document ID greater than or equal to doc_id, or null if not found.
      */
-    public Posting nextGEQ(int doc_id, boolean compression) {
+
+    /*
+    public Posting nextGEQ(int docId, boolean compression) {
         boolean nextBlock = false;
-        while (skippingBlockActual == null || skippingBlockActual.getDoc_id_max() < doc_id) {
+        while (skippingBlockCurrent == null || skippingBlockCurrent.getDocIdMax() < docId) {
             if (!skippingBlockIterator.hasNext()) {
                 currentPosting = null;
                 return null;
             }
-            skippingBlockActual = skippingBlockIterator.next();
+            skippingBlockCurrent = skippingBlockIterator.next();
             nextBlock = true;
         }
         if (nextBlock) {
             postings.clear();
-            postings.addAll(skippingBlockActual.getSkippingBlockPostings(compression));
+            postings.addAll(skippingBlockCurrent.getSkippingBlockPostings(compression));
             postingIterator = postings.iterator();
         }
         while (postingIterator.hasNext()) {
             currentPosting = postingIterator.next();
-            if (currentPosting.getDoc_id() >= doc_id) {
+            if (currentPosting.getDoc_id() >= docId) {
                 return currentPosting;
             }
         }
         currentPosting = null;
         return null;
+    }
+
+
+     */
+
+
+    public Posting nextGEQ(int docId, boolean compression) {
+        boolean skip = false;
+        while(skippingBlockCurrent == null || skippingBlockCurrent.getDocIdMax() < docId) {
+            if (skippingBlockIterator.hasNext()) {
+                skippingBlockCurrent = skippingBlockIterator.next();
+                skip = true;
+            } else {
+                currentPosting = null;
+                return null;
+            }
+        }
+        if (skip) {
+            postings.clear();
+            postings.addAll(skippingBlockCurrent.getSkippingBlockPostings(compression));
+            postingIterator = postings.iterator();
+        }
+        while (currentPosting.getDoc_id() < docId){
+            if (postingIterator.hasNext()) {
+                currentPosting = postingIterator.next();
+            }
+        }
+        if (currentPosting.getDoc_id() >= docId) {
+            return currentPosting;
+        }
+        else {
+            currentPosting = null;
+            return null;
+        }
     }
 }

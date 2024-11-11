@@ -5,6 +5,7 @@ import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 import org.javatuples.Pair;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Scanner;
 
 public class Main {
@@ -22,8 +23,7 @@ public class Main {
 
         Scanner scanner = new Scanner(System.in);
         long timerStart, timerEnd;
-        TopKPriorityQueue<Pair<Float,Integer>> topKPriorityQueue;
-        ArrayList<Integer> queryResult;
+        TopKPriorityQueue<Pair<Float,Integer>> topKPQ;
         String query, scoringFunction, dynamicPruning, typeOfQuery;
 
 
@@ -60,21 +60,59 @@ public class Main {
             }
 
             timerStart = System.currentTimeMillis();
-            topKPriorityQueue = (Processer.processQuery(query, 10, typeOfQuery.equals("C"), scoringFunction, Configuration.COMPRESSION, dynamicPruning.equals("DP")));
+            topKPQ = (Processer.processQuery(query, 10, typeOfQuery.equals("C"), scoringFunction, Configuration.COMPRESSION, dynamicPruning.equals("DP")));
             timerEnd = System.currentTimeMillis();
-            queryResult=Processer.getRankedQuery(topKPriorityQueue);
+            //queryResult=Processer.getRankedQuery(topKPQ);
 
-            if (queryResult == null) {
-                System.out.println("No documents were found for this query.");
-            } else {
-                System.out.print("Results of document numbers: ");
-                for (int i : queryResult) {
-                    System.out.print(i + " ");
-                }
-                System.out.println("with execution time: " + (timerEnd - timerStart) + "ms");
+            // Return null if the priority queue is null.
+            if (topKPQ == null) {
+                System.out.println("No documents were found for this query");
+                continue;
             }
 
+            // Retrieve the document IDs from the priority queue.
+            ArrayList<Integer> queryResult = new ArrayList<>();
+            while (!topKPQ.isEmpty()) {
+                queryResult.add(topKPQ.poll().getValue1());
+            }
+
+            // Reverse the list to get the top-K results in descending order.
+            Collections.reverse(queryResult);
+            System.out.print("Results of document numbers: ");
+            for (int i : queryResult) {
+                System.out.print(i + " ");
+            }
+            System.out.println("with execution time: " + (timerEnd - timerStart) + "ms");
+
         } while (true);
+
+        /*
+
+        timerStart = System.currentTimeMillis();
+        for (int i = 0; i < 1000; i++) {
+            topKPQ = (Processer.processQuery("Rolling stones concert London", 10, true, "tfidf", Configuration.COMPRESSION, false));
+
+            if (topKPQ == null) {
+                System.out.println("No documents were found for this query");
+                continue;
+            }
+
+            ArrayList<Integer> queryResult = new ArrayList<>();
+            while (!topKPQ.isEmpty()) {
+                queryResult.add(topKPQ.poll().getValue1());
+            }
+
+            Collections.reverse(queryResult);
+            //System.out.print("Results of document numbers: ");
+            for (int j : queryResult) {
+                //System.out.print(j + " ");
+            }
+            System.out.println(i);
+        }
+        timerEnd = System.currentTimeMillis();
+        System.out.println((timerEnd - timerStart));
+
+         */
 
         scanner.close();
     }

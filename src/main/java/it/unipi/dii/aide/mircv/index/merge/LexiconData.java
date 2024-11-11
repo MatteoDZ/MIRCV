@@ -140,18 +140,18 @@ public class LexiconData {
 
         try {
             ArrayList<SkippingBlock> blocks = new ArrayList<>();
-            MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, offset_skip_pointer, (long) numBlocks * SkippingBlock.size_of_element);
+            MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, offset_skip_pointer, (long) numBlocks * SkippingBlock.SIZE_OF_ELEMENT);
             if (mappedByteBuffer == null) {
                 return null;
             }
             for (int i = 0; i < numBlocks; i++) {
                 SkippingBlock skippingBlock = new SkippingBlock();
-                skippingBlock.setDoc_id_offset(mappedByteBuffer.getLong());
-                skippingBlock.setDoc_id_size(mappedByteBuffer.getInt());
-                skippingBlock.setFreq_offset(mappedByteBuffer.getLong());
-                skippingBlock.setFreq_size(mappedByteBuffer.getInt());
-                skippingBlock.setDoc_id_max(mappedByteBuffer.getInt());
-                skippingBlock.setNum_posting_of_block(mappedByteBuffer.getInt());
+                skippingBlock.setDocIdOffset(mappedByteBuffer.getLong());
+                skippingBlock.setDocIdSize(mappedByteBuffer.getInt());
+                skippingBlock.setFreqOffset(mappedByteBuffer.getLong());
+                skippingBlock.setFreqSize(mappedByteBuffer.getInt());
+                skippingBlock.setDocIdMax(mappedByteBuffer.getInt());
+                skippingBlock.setNumPostingOfBlock(mappedByteBuffer.getInt());
                 blocks.add(skippingBlock);
             }
             return blocks;
@@ -171,8 +171,6 @@ public class LexiconData {
     @Override
     public String toString() {
         return "Term: " + term + " " +
-                // "Upper TF: " + upperTF + " " +
-                // "DF: " + df + " " +
                 "IDF: " + idf + " " +
                 "Upper TF-IDF: " + upperTFIDF + " " +
                 "Upper BM25: " + upperBM25 + " " +

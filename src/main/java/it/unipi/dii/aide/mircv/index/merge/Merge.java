@@ -42,10 +42,6 @@ public class Merge {
         FrequencyFile frequencyWriter = new FrequencyFile();
         DocIdFile docIdWriter = new DocIdFile();
 
-        long docIds_offset;
-        long freqs_offset;
-        long docIds_offset_old=0L;
-
         while (!readerLines.isEmpty()) {
 
             if (lexSize % 100000 == 0)
@@ -54,7 +50,6 @@ public class Merge {
             lexSize++;
 
             String minTerm = findMinTerm(readerLines);
-            // System.out.println("minTerm: " + minTerm);
 
             PostingIndex minPosting = new PostingIndex(minTerm);
             Iterator<Map.Entry<BlockReader, PostingIndex>> iterator = readerLines.entrySet().iterator();
@@ -63,15 +58,12 @@ public class Merge {
                 Map.Entry<BlockReader, PostingIndex> entry = iterator.next();
                 PostingIndex postingList = entry.getValue();
 
-
-
                 if (postingList.getTerm().equals(minTerm)) {
                     //we are inside a reader with the min term
                     minPosting.appendList(postingList);
 
                     BlockReader reader = entry.getKey();
                     String line = reader.readTerm();
-
 
                     if (line != null) {
                         List<Integer> docIds = reader.readNumbers();
@@ -85,8 +77,6 @@ public class Merge {
 
             List<Integer> docIdsNew = minPosting.getDocIds();
             List<Integer> freqsNew = minPosting.getFrequencies();
-            int docId;
-
 
             int block_size;
             int num_blocks;
@@ -122,12 +112,12 @@ public class Merge {
                 Pair<Long, Integer> pair_freqs = frequencyWriter.writeBlockP(freqs, compress);
 
                 SkippingBlock skippingBlock = new SkippingBlock();
-                skippingBlock.setDoc_id_offset(pair_docIds.getValue0());
-                skippingBlock.setFreq_offset(pair_freqs.getValue0());
-                skippingBlock.setDoc_id_max(docIds.get(docIds.size() - 1));
-                skippingBlock.setDoc_id_size(compress ? pair_docIds.getValue1() : docIds.size());
-                skippingBlock.setFreq_size(compress ? pair_freqs.getValue1() : freqs.size());
-                skippingBlock.setNum_posting_of_block(docIds.size());
+                skippingBlock.setDocIdOffset(pair_docIds.getValue0());
+                skippingBlock.setFreqOffset(pair_freqs.getValue0());
+                skippingBlock.setDocIdMax(docIds.get(docIds.size() - 1));
+                skippingBlock.setDocIdSize(compress ? pair_docIds.getValue1() : docIds.size());
+                skippingBlock.setFreqSize(compress ? pair_freqs.getValue1() : freqs.size());
+                skippingBlock.setNumPostingOfBlock(docIds.size());
                 if(!skippingBlock.writeToDisk(fcSkippingBlock)) {
                     System.out.println("Problems with writing the block of postings to disk.");
                 }
@@ -186,45 +176,44 @@ public class Merge {
      * @throws IOException If an I/O error occurs.
      */
     protected void lexiconWrite(PostingIndex pi, Long offset, Lexicon lexicon, Integer numBlock) throws IOException {
-        float BM25Upper = 0F;
-        float actualBM25;
-        int  tf  = 0;
-
+        float BM25UpperBound = 0.0f;
+        float currentBM25;
+        int  maxTf  = 0;
         int df = pi.getPostings().size();
+        float idf = (float) Math.log10((double) stats.getNumDocs() /df);
 
         for (Posting posting : pi.getPostings()) {
-            actualBM25 = calculateBM25(tf, posting.getDoc_id());
+            currentBM25 = calculateBM25(posting, idf);
 
-            if (actualBM25 != -1 && actualBM25 > BM25Upper){
-                BM25Upper = actualBM25;
+            if (currentBM25 > BM25UpperBound){
+                BM25UpperBound = currentBM25;
             }
 
-            if (tf < posting.getFrequency()) {
-                tf = posting.getFrequency();
+            if (maxTf < posting.getFrequency()) {
+                maxTf = posting.getFrequency();
             }
         }
-        lexicon.write(pi.getTerm(), offset, df, (double) stats.getNumDocs(), tf, BM25Upper, numBlock);
+        lexicon.write(pi.getTerm(), offset, df, (double) stats.getNumDocs(), maxTf, BM25UpperBound, numBlock);
     }
 
     /**
      * Calculates the BM25 score for a specific term in a document given the term frequency (tf) and the document ID.
      * Utilizes the BM25 configuration parameters defined in the Configuration class.
      *
-     * @param tf The term frequency (tf) in the document.
-     * @param doc_id The ID of the document.
+     * @param posting The term frequency (tf) in the document.
+     * @param idf The ID of the document.
      * @return The calculated BM25 score for the term in the specified document.
      * @throws RuntimeException If an error occurs while reading from the document terms file.
      */
-    protected float calculateBM25(Integer tf, Integer doc_id){
+    protected float calculateBM25(Posting posting, float idf){
         try {
             FileChannel fc = FileChannel.open(Path.of(Configuration.PATH_DOC_TERMS), StandardOpenOption.READ, StandardOpenOption.WRITE);
-            int doc_len = BinaryFile.readIntFromBuffer(fc, doc_id*4L);
+            int docLen = BinaryFile.readIntFromBuffer(fc, posting.getDoc_id()*4L);
             fc.close();
-            return (float) ((tf / (tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (doc_len / stats.getAvgDocLen())))));
+            float tf = (float) (1 + Math.log(posting.getFrequency()));
+            return (float) ((tf * idf) / (tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (docLen / stats.getAvgDocLen()))));
         } catch (IOException e) {
             throw new RuntimeException("An error occurred while reading from the " + Configuration.PATH_DOC_TERMS + " file.");
         }
     }
-
-
 }

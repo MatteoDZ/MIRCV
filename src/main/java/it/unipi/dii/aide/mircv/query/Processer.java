@@ -3,6 +3,7 @@ package it.unipi.dii.aide.mircv.query;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.merge.Lexicon;
 import it.unipi.dii.aide.mircv.index.merge.LexiconData;
+import it.unipi.dii.aide.mircv.index.posting.Posting;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
 import it.unipi.dii.aide.mircv.index.preprocess.Preprocess;
 import org.javatuples.Pair;
@@ -16,39 +17,40 @@ import java.util.*;
 public class Processer {
 
     /**
-     * Retrieves the posting lists for the terms in the query.
+     * Retrieve the posting lists for each term of the passed query.
      *
-     * @param query      List of query terms.
-     * @param conjunctive Boolean flag indicating conjunctive (AND) or disjunctive (OR) operation.
-     * @return ArrayList of PostingIndex objects representing the posting lists of the query terms.
+     * @param query         ArrayList of strings containing each term of the query.
+     * @param conjunctive   Boolean flag to check if the query is conjunctive or disjunctive.
+     * @param TFIDForBM25   String value to determine the scoring method between TFIDF and BM25.
+     * @param pruning       Boolean flag to check whether to apply DynamicPruning or not.
+     * @return              ArrayList containing the postingIndexes retrieved.
+     * @throws IOException
      */
-    public static ArrayList<PostingIndex> getQueryPostingLists(ArrayList<String> query, boolean conjunctive, String scoringFun, boolean pruning) throws IOException {
-        ArrayList<PostingIndex> postingOfQuery = new ArrayList<>();
-        PostingIndex postingIndex;
+    public static ArrayList<PostingIndex> retrievePostingLists(ArrayList<String> query, boolean conjunctive, String TFIDForBM25, boolean pruning) throws IOException {
+        ArrayList<PostingIndex> retrievedPostings  = new ArrayList<>();
+        Lexicon lexicon = Lexicon.getInstance();
         for (String term : query) {
-            LexiconData lexiconEntry = Lexicon.getInstance().get(term);
-            if (lexiconEntry == null) {
-                if (conjunctive) {
-                    return null;
-                }
+            LexiconData lexiconData = lexicon.get(term);
+            if (lexiconData == null && conjunctive) {
+                return null;
+            }
+            else if (lexiconData == null) {
                 continue;
             }
-            postingIndex=new PostingIndex(lexiconEntry.getTerm());
-            postingIndex.setIdf(lexiconEntry.getIdf());
-            if(pruning){
-                if(scoringFun.equals("tfidf")){
-                    postingIndex.setUpperBound(lexiconEntry.getUpperTFIDF());
-                }else{
-                    postingIndex.setUpperBound(lexiconEntry.getUpperBM25());
+
+            PostingIndex postingIndex = new PostingIndex(term);
+            postingIndex.setIdf(lexiconData.getIdf());
+            if (pruning){
+                if (TFIDForBM25.equals("tfidf")) {
+                    postingIndex.setUpperBound(lexiconData.getUpperTFIDF());
+                }
+                else {
+                    postingIndex.setUpperBound(lexiconData.getUpperBM25());
                 }
             }
-            postingOfQuery.add(postingIndex);
+            retrievedPostings.add(postingIndex);
         }
-
-        return postingOfQuery;
-
-
-
+        return retrievedPostings;
     }
 
     /**
@@ -61,61 +63,53 @@ public class Processer {
      * @return ArrayList of document IDs matching the query.
      */
     public static TopKPriorityQueue<Pair<Float,Integer>> processQuery(String query, Integer k, Boolean conjunctive, String scoringFun, Boolean compression, Boolean pruning) throws IOException {
-        // Clean and preprocess the query.
-        List<String> cleaned = Preprocess.processText(query, Configuration.STEMMING_AND_STOPWORDS);
-        System.out.println(cleaned);
 
-        // Check if the query is empty after preprocessing.
+        // Clean and preprocess the query.
+        List<String> processed = Preprocess.processText(query, Configuration.STEMMING_AND_STOPWORDS);
+        Set<String> queryNoDuplicates = new HashSet<>(processed);
+        ArrayList<String> cleaned = new ArrayList<>(queryNoDuplicates);
         if (cleaned.isEmpty()) {
-            System.out.println("empty query");
+            System.out.println("The query has no searchable terms");
             return null;
         }
+        System.out.println(cleaned);
 
-        // Remove duplicates from the query terms.
-        Set<String> queryNoDuplicates = new HashSet<>(cleaned);
-
-        // Retrieve posting lists for the query terms.
-        ArrayList<PostingIndex> queryPostings = getQueryPostingLists(new ArrayList<>(queryNoDuplicates), conjunctive,scoringFun, pruning);
+        // Retrieve posting list for each query term.
+        ArrayList<PostingIndex> queryPostings = retrievePostingLists(cleaned, conjunctive,scoringFun, pruning);
 
         // Return null if no posting lists are retrieved.
         if (queryPostings == null || queryPostings.isEmpty()) {
             return null;
         }
 
-
-        // Initialize a priority queue for the top-K results.
-        TopKPriorityQueue<Pair<Float, Integer>> priorityQueue;
-
-        // Choose between dynamic pruning and DAAT scoring based on the flag.
+        // Initialize a priority queue for the top-K results and gets the score.
+        TopKPriorityQueue<Pair<Float, Integer>> topKPQ;
         if (pruning) {
-            priorityQueue = MaxScoreDynamicPruning.maxScore(queryPostings,k,scoringFun,conjunctive, compression);
+            topKPQ = MaxScoreDynamicPruning.maxScore(queryPostings,k,scoringFun,conjunctive, compression);
         } else {
-            priorityQueue = DAAT.scoreQuery(queryPostings, k, scoringFun, conjunctive, compression);
+            topKPQ = DAAT.scoreQuery(queryPostings, k, scoringFun, conjunctive, compression);
         }
 
-        assert priorityQueue != null;
-
-        return priorityQueue;
+        return topKPQ;
 
     }
 
     /**
      * Retrieves the ranked query from the given priority queue.
      *
-     * @param  priorityQueue  the priority queue containing the query results
+     * @param  topKPQ  the priority queue containing the query results
      * @return                an ArrayList of integers representing the ranked query
      */
-    public static ArrayList<Integer> getRankedQuery(TopKPriorityQueue<Pair<Float,Integer>>priorityQueue){
+    public static ArrayList<Integer> getRankedQuery(TopKPriorityQueue<Pair<Float,Integer>> topKPQ){
         // Return null if the priority queue is null.
-        if (priorityQueue == null) {
+        if (topKPQ == null) {
             return null;
         }
 
         // Retrieve the document IDs from the priority queue.
         ArrayList<Integer> list = new ArrayList<>();
-        while (!priorityQueue.isEmpty()) {
-            Pair<Float, Integer> pair = priorityQueue.poll();
-            list.add(pair.getValue1());
+        while (!topKPQ.isEmpty()) {
+            list.add(topKPQ.poll().getValue1());
         }
 
         // Reverse the list to get the top-K results in descending order.

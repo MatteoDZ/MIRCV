@@ -1,31 +1,37 @@
 package it.unipi.dii.aide.mircv.query;
 
+import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
+import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.posting.Posting;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
 import it.unipi.dii.aide.mircv.index.utils.Statistics;
 import org.javatuples.Pair;
 
 import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 
 public class DAAT {
 
     private static final Statistics stats;
+    private static final FileChannel fc;
 
     static {
         stats = new Statistics();
         try {
             stats.readFromDisk();
+            fc = FileChannel.open(Path.of(Configuration.PATH_DOC_TERMS), StandardOpenOption.READ, StandardOpenOption.WRITE);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static TopKPriorityQueue<Pair<Float, Integer>> scoreQuery(
-            ArrayList<PostingIndex> postings, int k, String scoringFunction, boolean conjunctive, boolean compression) throws IOException {
+    public static TopKPriorityQueue<Pair<Float, Integer>> scoreQuery(ArrayList<PostingIndex> postings, int k, String scoringFunction, boolean conjunctive, boolean compression) throws IOException {
 
-        int doc_len = stats.getNumDocs();
         TopKPriorityQueue<Pair<Float, Integer>> topKPQ = new TopKPriorityQueue<>(k, Comparator.comparing(Pair::getValue0));
 
         for (PostingIndex index : postings) {
@@ -71,7 +77,7 @@ public class DAAT {
 
                 if (posting != null) {
                     if (posting.getDoc_id() == minDoc) {
-                        score += Scorer.score(
+                        score += Scorer.getScore(
                                 posting,
                                 postingIndex.getIdf(),
                                 scoringFunction);
@@ -132,9 +138,8 @@ public class DAAT {
                 continue;
             }
             if (currentPosting.getDoc_id() < docId) {
-                //System.out.println("currentPosting.getDoc_id() < docId RESULT = " + docId);
                 Posting nextPostingGEQ = postings.get(i).nextGEQ(docId, compression);
-                if (nextPostingGEQ == null) {return 0;} //throw new IllegalArgumentException("nextGEQ returned a null value");}
+                if (nextPostingGEQ == null) {return 0;}
 
                 int geqDocId = nextPostingGEQ.getDoc_id();
                 if (geqDocId > docId) {
@@ -159,10 +164,10 @@ public class DAAT {
      * @param postingIndexes List of PostingIndex objects.
      * @return Maximum document ID.
      */
-    private static int getMaxDocId(ArrayList<PostingIndex> postingIndexes) {
+    private static int getHighestDocId(ArrayList<PostingIndex> postingIndexes) {
 
         // Set the inital value to -1
-        int maxDoc = 0;
+        int maxDoc = -1;
 
         // Check each element in the postings list and update the maxDoc value
         for (PostingIndex postingIndex : postingIndexes) {
@@ -178,13 +183,10 @@ public class DAAT {
 
 
     public static void conjunctiveQ(TopKPriorityQueue<Pair<Float, Integer>> topKPQ, ArrayList<PostingIndex> postings, String scoringFunction, boolean compression) throws IOException {
-        int docId = alignPostings(postings, compression, getMaxDocId(postings));
+        int docId = alignPostings(postings, compression, getHighestDocId(postings));
         boolean exit = false;
 
-
-        while (docId != stats.getNumDocs() && !exit) {
-
-            //if (docId == -1) {break;}
+        while (docId != 0) {
 
             float score = 0.0F;
 
@@ -195,7 +197,7 @@ public class DAAT {
 
                 if (posting != null) {
                     if (posting.getDoc_id() == docId) {
-                        score += Scorer.score(
+                        score += Scorer.getScore(
                                 posting,
                                 postingIndex.getIdf(),
                                 scoringFunction);
@@ -203,16 +205,11 @@ public class DAAT {
                     }
                 }
 
-                topKPQ.offer(new Pair<>(score, docId));
-                int maxId = getMaxDocId(postings);
-                docId = alignPostings(postings, compression, maxId);
-
-                if (docId == 0) {
-                    //System.out.println(docId);
-                    exit = true;
-                    break;
-                }
             }
+
+            topKPQ.offer(new Pair<>(score, docId));
+            int maxId = getHighestDocId(postings);
+            docId = alignPostings(postings, compression, maxId);
 
         }
     }

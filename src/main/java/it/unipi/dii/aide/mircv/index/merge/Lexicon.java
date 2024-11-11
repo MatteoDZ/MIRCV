@@ -113,12 +113,12 @@ public class Lexicon {
         if (lfuCache.containsKey(term)) {
             return lfuCache.get(term);
         }
-        LexiconData lexiconEntry = findTerm(term);
-        if (lexiconEntry == null) {
+        LexiconData lexiconData = findTerm(term);
+        if (lexiconData == null) {
             return null;
         }
-        lfuCache.put(term, lexiconEntry);
-        return lexiconEntry;
+        lfuCache.put(term, lexiconData);
+        return lexiconData;
     }
 
     /**

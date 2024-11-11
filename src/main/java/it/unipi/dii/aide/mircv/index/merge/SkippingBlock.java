@@ -32,37 +32,37 @@ public class SkippingBlock {
             System.out.println("Error while opening the file channel");
         }
     }
-    private long doc_id_offset;
-    private int doc_id_size;
-    private long freq_offset;
-    private int freq_size;
-    private int doc_id_max;
-    private int num_posting_of_block;
-    private static long file_offset = 0;
-    public static final int size_of_element = 8 * 2 + 4 * 4; //4bytes * (n_int) + 8bytes * (n_long)
+    private long docIdOffset;
+    private int docIdSize;
+    private long freqOffset;
+    private int freqSize;
+    private int docIdMax;
+    private int numPostingOfBlock;
+    private static long fileOffset = 0;
+    public static final int SIZE_OF_ELEMENT = 8 * 2 + 4 * 4; //4bytes * (n_int) + 8bytes * (n_long)
 
     /**
      * Writes the skipping block information to disk.
      *
-     * @param file_to_write The file channel to write the skipping block information.
+     * @param fileToWrite The file channel to write the skipping block information.
      * @return True if writing is successful, false otherwise.
      */
-    public boolean writeToDisk(FileChannel file_to_write) {
+    public boolean writeToDisk(FileChannel fileToWrite) {
 
-        assert file_to_write!=null : "FileChannel is null";
+        assert fileToWrite!=null : "FileChannel is null";
 
         try {
-            MappedByteBuffer mappedByteBuffer = file_to_write.map(FileChannel.MapMode.READ_WRITE, file_offset, size_of_element);
+            MappedByteBuffer mappedByteBuffer = fileToWrite.map(FileChannel.MapMode.READ_WRITE, fileOffset, SIZE_OF_ELEMENT);
             if (mappedByteBuffer == null) {
                 return false;
             }
-            mappedByteBuffer.putLong(doc_id_offset);
-            mappedByteBuffer.putInt(doc_id_size);
-            mappedByteBuffer.putLong(freq_offset);
-            mappedByteBuffer.putInt(freq_size);
-            mappedByteBuffer.putInt(doc_id_max);
-            mappedByteBuffer.putInt(num_posting_of_block);
-            file_offset += size_of_element;
+            mappedByteBuffer.putLong(docIdOffset);
+            mappedByteBuffer.putInt(docIdSize);
+            mappedByteBuffer.putLong(freqOffset);
+            mappedByteBuffer.putInt(freqSize);
+            mappedByteBuffer.putInt(docIdMax);
+            mappedByteBuffer.putInt(numPostingOfBlock);
+            fileOffset += SIZE_OF_ELEMENT;
             return true;
         } catch (IOException e) {
             System.out.println("Error while writing the postings to disk.");
@@ -72,41 +72,41 @@ public class SkippingBlock {
 
     // Getters and setters...
 
-    public void setDoc_id_offset(long doc_id_offset) {
-        this.doc_id_offset = doc_id_offset;
+    public void setDocIdOffset(long docIdOffset) {
+        this.docIdOffset = docIdOffset;
     }
 
-    public void setDoc_id_size(int doc_id_size) {
-        this.doc_id_size = doc_id_size;
-    }
-
-
-    public void setFreq_offset(long freq_offset) {
-        this.freq_offset = freq_offset;
+    public void setDocIdSize(int docIdSize) {
+        this.docIdSize = docIdSize;
     }
 
 
-    public void setFreq_size(int freq_size) {
-        this.freq_size = freq_size;
-    }
-
-    public int getDoc_id_max() {
-        return doc_id_max;
-    }
-
-    public void setDoc_id_max(int doc_id_max) {
-        this.doc_id_max = doc_id_max;
+    public void setFreqOffset(long freqOffset) {
+        this.freqOffset = freqOffset;
     }
 
 
-    public void setNum_posting_of_block(int num_posting_of_block) {
-        this.num_posting_of_block = num_posting_of_block;
+    public void setFreqSize(int freqSize) {
+        this.freqSize = freqSize;
+    }
+
+    public int getDocIdMax() {
+        return docIdMax;
+    }
+
+    public void setDocIdMax(int docIdMax) {
+        this.docIdMax = docIdMax;
+    }
+
+
+    public void setNumPostingOfBlock(int numPostingOfBlock) {
+        this.numPostingOfBlock = numPostingOfBlock;
     }
 
     /**
      * Reads the postings from the disk based on the skipping block information.
      *
-     * @param compression indicates if the data is compressed or not
+     * @param compression Boolean flag that indicates if the data is compressed or not.
      * @return ArrayList of Posting objects representing the postings in the skipping block.
      */
     public ArrayList<Posting> getSkippingBlockPostings(Boolean compression) {
@@ -114,28 +114,28 @@ public class SkippingBlock {
         assert bufferDocId != null : "Error with the DocID MappedByteBuffer";
         assert bufferFreq != null : "Error with the Frequency MappedByteBuffer";
 
-        bufferDocId.position((int) doc_id_offset);
-        bufferFreq.position((int) freq_offset);
+        bufferDocId.position((int) docIdOffset);
+        bufferFreq.position((int) freqOffset);
 
         ArrayList<Posting> postings = new ArrayList<>();
 
         if (compression) {
-            byte[] doc_ids = new byte[doc_id_size];
-            byte[] freqs = new byte[freq_size];
+            byte[] doc_ids = new byte[docIdSize];
+            byte[] freqs = new byte[freqSize];
 
-            bufferDocId.get(doc_ids, 0, doc_id_size);
-            bufferFreq.get(freqs, 0, freq_size);
+            bufferDocId.get(doc_ids, 0, docIdSize);
+            bufferFreq.get(freqs, 0, freqSize);
 
-            List<Short> freqs_decompressed = UnaryCompressor.integerArrayDecompression(freqs, num_posting_of_block);
+            List<Short> freqs_decompressed = UnaryCompressor.integerArrayDecompression(freqs, numPostingOfBlock);
             List<Integer> doc_ids_decompressed = VariableByteCompressor.decode(doc_ids);
 
 
-            for (int i = 0; i < num_posting_of_block; i++) {
+            for (int i = 0; i < numPostingOfBlock; i++) {
                 Posting posting = new Posting(doc_ids_decompressed.get(i), freqs_decompressed.get(i));
                 postings.add(posting);
             }
         } else {
-            for (int i = 0; i < num_posting_of_block; i++) {
+            for (int i = 0; i < numPostingOfBlock; i++) {
                 Posting posting = new Posting(bufferDocId.getInt(), bufferFreq.getShort());
                 postings.add(posting);
             }
@@ -147,13 +147,13 @@ public class SkippingBlock {
     @Override
     public String toString() {
         return "SkippingBlock{" +
-                "doc_id_offset=" + doc_id_offset +
-                ", doc_id_size=" + doc_id_size +
-                ", freq_offset=" + freq_offset +
-                ", freq_size=" + freq_size +
-                ", doc_id_max=" + doc_id_max +
-                ", num_posting_of_block=" + num_posting_of_block +
-                ", file_offset=" + file_offset +
+                "docIdOffset: " + docIdOffset +
+                ", docIdSize: " + docIdSize +
+                ", freqOffset: " + freqOffset +
+                ", freqSize: " + freqSize +
+                ", docIdMax: " + docIdMax +
+                ", numPostingOfBlock: " + numPostingOfBlock +
+                ", fileOffset: " + fileOffset +
                 '}';
     }
 }
