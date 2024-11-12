@@ -50,7 +50,6 @@ public class DocIdFile {
             else{
                 throw new IOException("Different lenghts");
             }
-            //BinaryFile.writeIntListToBuffer(fc, block);
         } else {
             if (block.size() == lenghts.size()) {
                 List<Integer> toBeWritten = new ArrayList<>();
@@ -63,7 +62,6 @@ public class DocIdFile {
             else{
                 throw new IOException("Different lenghts");
             }
-            //BinaryFile.writeArrayByteToBuffer(fc, VariableByteCompressor.encode(block));
         }
         return Pair.with(fc_size, Math.toIntExact((int) fc.size() - fc_size));
     }

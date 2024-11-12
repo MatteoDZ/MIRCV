@@ -28,12 +28,23 @@ public class DAAT {
         }
     }
 
+    /**
+     * Function that to calculate the score of a query.
+     *
+     * @param postings          ArrayList of PostingIndex objects to be scored.
+     * @param k                 Integer number of top documents to be found in the PriorityQueue.
+     * @param scoringFunction   String to indicate which scoring function to use (TFIDF or BM25).
+     * @param conjunctive       Boolean flag to indicate if the query is conjunctive or disjunctive.
+     * @param compression       Boolean flag to indicate if the data is compressed.
+     * @return                  TopKPriorityQueue of Pair<Float, Integer> objects containing the top k documents and their scores sorted in ascending order.
+     * @throws IOException
+     */
     public static TopKPriorityQueue<Pair<Float, Integer>> scoreQuery(ArrayList<PostingIndex> postings, int k, String scoringFunction, boolean conjunctive, boolean compression) throws IOException {
 
         TopKPriorityQueue<Pair<Float, Integer>> topKPQ = new TopKPriorityQueue<>(k, Comparator.comparing(Pair::getValue0));
 
         for (PostingIndex index : postings) {
-            index.openList();
+            index.getBlocks();
             index.next(compression);
         }
 
@@ -47,6 +58,15 @@ public class DAAT {
         return topKPQ;
     }
 
+    /**
+     * Function to calculate the score of a disjunctive query.
+     *
+     * @param topKPQ            TopKPriorityQueue of Pair<Float, Integer> objects to store the top k documents and their scores.
+     * @param postings          ArrayList of PostingIndex objects each containing the posting for a query term.
+     * @param scoringFunction   String to indicate which scoring function to use (TFIDF or BM25).
+     * @param compression       Boolean flag to indicate if the data is compressed.
+     * @throws IOException
+     */
     public static void disjunctiveQ(TopKPriorityQueue<Pair<Float, Integer>> topKPQ, ArrayList<PostingIndex> postings, String scoringFunction, boolean compression) throws IOException {
         int minDoc = stats.getNumDocs();
 
@@ -56,7 +76,7 @@ public class DAAT {
                 minDoc = Math.min(minDoc, postingIndex.getCurrentPosting().getDocId());
             }
             else {
-                minDoc = stats.getNumDocs(); //Check
+                minDoc = stats.getNumDocs();
             }
         }
 
@@ -64,6 +84,7 @@ public class DAAT {
             throw new IllegalArgumentException("The postingIndex list has a null value");
         }
 
+        // Loop through the postings list and calculate the score for each posting
         while (minDoc != stats.getNumDocs()) {
 
             float score = 0.0F;
@@ -72,13 +93,10 @@ public class DAAT {
             for (PostingIndex postingIndex : postings) {
                 Posting posting = postingIndex.getCurrentPosting();
 
-
+                // If the posting is not null and the docId is equal to the minDoc, calculate the score
                 if (posting != null) {
                     if (posting.getDocId() == minDoc) {
-                        score += Scorer.getScore(
-                                posting,
-                                postingIndex.getIdf(),
-                                scoringFunction);
+                        score += Scorer.getScore(posting, postingIndex.getIdf(), scoringFunction);
                         postingIndex.next(compression);
                     }
                 }
@@ -87,6 +105,7 @@ public class DAAT {
             // Add the document ID and its score to the priority queue.
             topKPQ.offer(new Pair<>(score, minDoc));
 
+            // Get the next posting with the minimum docId
             minDoc = stats.getNumDocs();
             for (PostingIndex postingIndex : postings) {
                 if (postingIndex.getCurrentPosting() != null) {
@@ -99,12 +118,17 @@ public class DAAT {
 
             // If there are no more documents, exit the loop.
             if (minDoc == stats.getNumDocs()) {
-                //System.out.println("I QUIT");
                 break;
             }
         }
     }
 
+    /**
+     * Function to check if all the postings points to the same docId.
+     *
+     * @param postings  ArrayList of PostingIndex objects each containing the posting for a query term.
+     * @return          Boolean flag indicating if all the postings have the same docId.
+     */
     private static boolean checkIfEquals(ArrayList<PostingIndex> postings){
         if (postings.get(0).getCurrentPosting() == null) {return false;}
         int trueDocId = postings.get(0).getCurrentPosting().getDocId();
@@ -116,25 +140,36 @@ public class DAAT {
         return true;
     }
 
+    /**
+     * Function to align each PostingIndex in postings to the same docId.
+     *
+     * @param postings      ArrayList of PostingIndex objects each containing the posting for a query term.
+     * @param compression   Boolean flag to indicate if the data is compressed.
+     * @param maxId         Integer value of the maximum docId currently pointed by the postings.
+     * @return              Integer value of the docId to which the postings are aligned.
+     */
     public static int alignPostings(ArrayList<PostingIndex> postings, boolean compression, int maxId) {
         int docId = maxId;
         if (docId == 0) { return 0; }
 
+        // Loop through the postings list
         for (int i = 0; i < postings.size(); i++) {
             Posting currentPosting = postings.get(i).getCurrentPosting();
 
-            if (currentPosting == null) {return 0;} //throw new IllegalArgumentException("The posting is null");}
+            if (currentPosting == null) {return 0;}
 
             // Checks if all the postings pointed have the same docId, and if true, returns the docId
             boolean found = checkIfEquals(postings);
             if (found) {return currentPosting.getDocId();}
 
-            // If the next docId
+            // If the docId pointed is higher change docId
             if (currentPosting.getDocId() > docId) {
                 docId = currentPosting.getDocId();
                 i = -1;
                 continue;
             }
+
+            // If the docId pointed is lower, get the next docId greater or equal to the current docId through nextGEQ
             if (currentPosting.getDocId() < docId) {
                 Posting nextPostingGEQ = postings.get(i).nextGEQ(docId, compression);
                 if (nextPostingGEQ == null) {return 0;}
@@ -143,7 +178,6 @@ public class DAAT {
                 if (geqDocId > docId) {
                     docId = geqDocId;
                     i = -1;
-                    continue;
                 } else if (geqDocId == docId) {
                     boolean foundGeq = checkIfEquals(postings);
                     if (foundGeq) {
@@ -157,7 +191,7 @@ public class DAAT {
     }
 
     /**
-     * Retrieves the maximum document ID from a list of PostingIndex objects.
+     * Function to retrieve the maximum document ID from a list of PostingIndex objects.
      *
      * @param postingIndexes List of PostingIndex objects.
      * @return Maximum document ID.
@@ -170,7 +204,6 @@ public class DAAT {
         // Check each element in the postings list and update the maxDoc value
         for (PostingIndex postingIndex : postingIndexes) {
             if (postingIndex.getCurrentPosting() != null) {
-                //System.out.println((postingIndex.getCurrentPosting().getDoc_id()) + " line 220");
                 maxDoc = Math.max(maxDoc, postingIndex.getCurrentPosting().getDocId());
             } else {
                 return 0;
@@ -179,10 +212,17 @@ public class DAAT {
         return maxDoc;
     }
 
-
+    /**
+     * Function to calculate the score of a conjunctive query.
+     *
+     * @param topKPQ            TopKPriorityQueue of Pair<Float, Integer> objects to store the top k documents and their scores.
+     * @param postings          ArrayList of PostingIndex objects each containing the posting for a query term.
+     * @param scoringFunction   String to indicate which scoring function to use (TFIDF or BM25).
+     * @param compression       Boolean flag to indicate if the data is compressed.
+     * @throws IOException
+     */
     public static void conjunctiveQ(TopKPriorityQueue<Pair<Float, Integer>> topKPQ, ArrayList<PostingIndex> postings, String scoringFunction, boolean compression) throws IOException {
         int docId = alignPostings(postings, compression, getHighestDocId(postings));
-        boolean exit = false;
 
         while (docId != 0) {
 
@@ -192,21 +232,21 @@ public class DAAT {
             for (PostingIndex postingIndex : postings) {
                 Posting posting = postingIndex.getCurrentPosting();
 
-
+                // If the posting is not null and the docId is equal to the minDoc, calculate the score
                 if (posting != null) {
                     if (posting.getDocId() == docId) {
-                        score += Scorer.getScore(
-                                posting,
-                                postingIndex.getIdf(),
-                                scoringFunction);
+                        score += Scorer.getScore(posting, postingIndex.getIdf(), scoringFunction);
                         postingIndex.next(compression);
                     }
                 }
 
             }
 
+            // Add the document ID and its score to the priority queue if the score is higher than the lowest on the priority queue.
             topKPQ.offer(new Pair<>(score, docId));
+            // Get the next posting with the highest docId of the currently pointed.
             int maxId = getHighestDocId(postings);
+            // Align the postings to the same docId.
             docId = alignPostings(postings, compression, maxId);
 
         }

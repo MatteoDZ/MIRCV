@@ -3,7 +3,6 @@ package it.unipi.dii.aide.mircv.query;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.merge.Lexicon;
 import it.unipi.dii.aide.mircv.index.merge.LexiconData;
-import it.unipi.dii.aide.mircv.index.posting.Posting;
 import it.unipi.dii.aide.mircv.index.posting.PostingIndex;
 import it.unipi.dii.aide.mircv.index.preprocess.Preprocess;
 import org.javatuples.Pair;
@@ -85,7 +84,7 @@ public class Processer {
         // Initialize a priority queue for the top-K results and gets the score.
         TopKPriorityQueue<Pair<Float, Integer>> topKPQ;
         if (pruning) {
-            topKPQ = MaxScoreDynamicPruning.maxScore(queryPostings,k,scoringFun,conjunctive, compression);
+            topKPQ = DynamicPruning.maxScore(queryPostings,k,scoringFun,conjunctive, compression);
         } else {
             topKPQ = DAAT.scoreQuery(queryPostings, k, scoringFun, conjunctive, compression);
         }
@@ -97,8 +96,8 @@ public class Processer {
     /**
      * Retrieves the ranked query from the given priority queue.
      *
-     * @param  topKPQ  the priority queue containing the query results
-     * @return                an ArrayList of integers representing the ranked query
+     * @param  topKPQ  The priority queue containing the query results.
+     * @return         ArrayList of integers representing the ranked query.
      */
     public static ArrayList<Integer> getRankedQuery(TopKPriorityQueue<Pair<Float,Integer>> topKPQ){
         // Return null if the priority queue is null.

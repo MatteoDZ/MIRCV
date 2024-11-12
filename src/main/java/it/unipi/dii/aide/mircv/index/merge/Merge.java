@@ -42,6 +42,14 @@ public class Merge {
         FrequencyFile frequencyWriter = new FrequencyFile();
         DocIdFile docIdWriter = new DocIdFile();
 
+        ArrayList<Integer> docLens = new ArrayList<>();
+
+        FileChannel fc = FileChannel.open(Path.of(Configuration.PATH_DOC_TERMS), StandardOpenOption.READ, StandardOpenOption.WRITE);
+        for (int documentId = 0; documentId < stats.getNumDocs(); documentId++) {
+            docLens.add(BinaryFile.readIntFromBuffer(fc, documentId*4L));
+        }
+        fc.close();
+
         while (!readerLines.isEmpty()) {
 
             if (lexSize % 100000 == 0)
@@ -77,6 +85,7 @@ public class Merge {
 
             List<Integer> docIdsNew = minPosting.getDocIds();
             List<Integer> freqsNew = minPosting.getFrequencies();
+            ArrayList<Integer> docLengthsNew = new ArrayList<>();
 
             int block_size;
             int num_blocks;
@@ -94,14 +103,11 @@ public class Merge {
             ArrayList<Integer> freqs;
             ArrayList<Integer> docLengths;
 
-            FileChannel fc = FileChannel.open(Path.of(Configuration.PATH_DOC_TERMS), StandardOpenOption.READ, StandardOpenOption.WRITE);
-            ArrayList<Integer> docLengthsNew = new ArrayList<>();
-            for (Integer documentId : docIdsNew) {
-                docLengthsNew.add(BinaryFile.readIntFromBuffer(fc, documentId*4L));
+            for (Integer docId : docIdsNew) {
+                docLengthsNew.add(docLens.get(docId));
             }
-            fc.close();
 
-            lexiconWrite(minPosting, fcSkippingBlock.size(), lexicon, num_blocks);
+            lexiconWrite(minPosting, fcSkippingBlock.size(), lexicon, num_blocks, docLens);
 
             for (int currentBlock = 0; currentBlock < num_blocks; currentBlock++){
                 docIds = new ArrayList<>();
@@ -138,7 +144,6 @@ public class Merge {
         statistics.setTerms(lexSize);
         statistics.writeMergeToDisk();
     }
-
 
 
     /**
@@ -183,7 +188,7 @@ public class Merge {
      * @param numBlock The number of blocks.
      * @throws IOException If an I/O error occurs.
      */
-    protected void lexiconWrite(PostingIndex pi, Long offset, Lexicon lexicon, Integer numBlock) throws IOException {
+    protected void lexiconWrite(PostingIndex pi, Long offset, Lexicon lexicon, Integer numBlock, ArrayList<Integer> docLengths) throws IOException {
         float BM25UpperBound = 0.0f;
         float currentBM25;
         int  maxTf  = 0;
@@ -191,7 +196,7 @@ public class Merge {
         float idf = (float) Math.log10((double) stats.getNumDocs() /df);
 
         for (Posting posting : pi.getPostings()) {
-            currentBM25 = calculateBM25(posting, idf);
+            currentBM25 = calculateBM25(posting, docLengths.get(posting.getDocId()), idf);
 
             if (currentBM25 > BM25UpperBound){
                 BM25UpperBound = currentBM25;
@@ -213,15 +218,14 @@ public class Merge {
      * @return The calculated BM25 score for the term in the specified document.
      * @throws RuntimeException If an error occurs while reading from the document terms file.
      */
-    protected float calculateBM25(Posting posting, float idf){
-        try {
-            FileChannel fc = FileChannel.open(Path.of(Configuration.PATH_DOC_TERMS), StandardOpenOption.READ, StandardOpenOption.WRITE);
-            int docLen = BinaryFile.readIntFromBuffer(fc, posting.getDocId()*4L);
-            fc.close();
-            float tf = (float) (1 + Math.log(posting.getFrequency()));
-            return (float) ((tf * idf) / (tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (docLen / stats.getAvgDocLen()))));
-        } catch (IOException e) {
-            throw new RuntimeException("An error occurred while reading from the " + Configuration.PATH_DOC_TERMS + " file.");
+    protected float calculateBM25(Posting posting, Integer docLen, float idf) {
+        if (docLen == null || docLen == 0) {
+            throw new RuntimeException("Document length is null or zero.");
         }
+        //FileChannel fc = FileChannel.open(Path.of(Configuration.PATH_DOC_TERMS), StandardOpenOption.READ, StandardOpenOption.WRITE);
+        //int docLen2 = BinaryFile.readIntFromBuffer(fc, posting.getDocId()*4L);
+        //fc.close();
+        float tf = (float) (1 + Math.log(posting.getFrequency()));
+        return (float) (idf * (tf * (Configuration.BM25_K1 + 1))/(tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (docLen / stats.getAvgDocLen()))));
     }
 }

@@ -68,10 +68,8 @@ public class Scorer {
      * @return        The BM25 score.
      */
     public static float calculateBM25(Posting posting, float idf) throws IOException {
-        //int doc_len = getDoc_len(posting.getDocId());
         int docLen = posting.getDocLen();
         float tf = (float) (1 + Math.log(posting.getFrequency()));
-        //return (float) ((tf * idf) / (tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (docLen / stats.getAvgDocLen()))));
         return (float) (idf * (tf * (Configuration.BM25_K1 + 1))/(tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (docLen / stats.getAvgDocLen()))));
     }
 

@@ -11,6 +11,7 @@ import java.util.PriorityQueue;
  * @param <T> Type of elements in the priority queue.
  */
 public class TopKPriorityQueue<T> extends PriorityQueue<T> {
+
     private final int size;
 
     /**
@@ -30,27 +31,6 @@ public class TopKPriorityQueue<T> extends PriorityQueue<T> {
      * @param e The element to be added.
      * @return True if the element is added, false otherwise.
      */
-    /*
-    @Override
-    public boolean offer(T e) {
-        // If the priority queue size is smaller than maxSize directly add the element
-        if (size() < size) {
-            return super.offer(e);
-        }
-        // Else check if the element e is better than the worst element present in the priority queue
-        else {
-            T top = peek();
-            // If the new element is better than the worst element, replace the worst element with the new one.
-            if (comparator().compare(e, top) > 0) {
-                poll();
-                return super.offer(e); // Element added
-            }
-            return false; // Element not added.
-        }
-    }
-
-     */
-
     @Override
     public boolean offer(T e) {
         if (this.size() >= size) {

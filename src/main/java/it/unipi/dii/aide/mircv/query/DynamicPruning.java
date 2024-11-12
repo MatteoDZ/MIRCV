@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 
-public class MaxScoreDynamicPruning {
+public class DynamicPruning {
 
     private static final Statistics stats;
 
@@ -22,12 +22,23 @@ public class MaxScoreDynamicPruning {
         }
     }
 
+    /**
+     * Function to calculate the top k documents for a query using dynamic pruning with max score.
+     *
+     * @param postings     ArrayList of PostingIndex objects each containing the posting for a query term.
+     * @param k            Integer value of the maximum size of the priority queue.
+     * @param TFIDForBM25  String to indicate which scoring function to use (TFIDF or BM25).
+     * @param conjunctive  Boolean flag to indicate if the query is conjunctive.
+     * @param compression  Boolean flag to indicate if the data is compressed.
+     * @return             TopKPriorityQueue of Pair<Float, Integer> objects containing the top k documents and their scores.
+     * @throws IOException
+     */
     public static TopKPriorityQueue<Pair<Float, Integer>> maxScore(ArrayList<PostingIndex> postings, Integer k, String TFIDForBM25, Boolean conjunctive, Boolean compression) throws IOException {
         TopKPriorityQueue<Pair<Float, Integer>> topK = new TopKPriorityQueue<>(k, Comparator.comparing(Pair::getValue0));
         float[] upperBounds = new float[postings.size()];
 
         for (PostingIndex posting : postings) {
-            posting.openList();
+            posting.getBlocks();
             posting.next(compression);
         }
 
@@ -50,10 +61,21 @@ public class MaxScoreDynamicPruning {
         return topK;
     }
 
+    /**
+     * Function to sort the postings based on the upper bound of the postings.
+     *
+     * @param postings  ArrayList of PostingIndex objects each containing the posting for a query term.
+     */
     public static void sortPostings(ArrayList<PostingIndex> postings) {
         postings.sort(Comparator.comparing(PostingIndex::getUpperBound));
     }
 
+    /**
+     * Function to check if all the postings points to the same docId.
+     *
+     * @param postings  ArrayList of PostingIndex objects each containing the posting for a query term.
+     * @return          Boolean flag indicating if all the postings have the same docId.
+     */
     private static boolean checkIfEquals(ArrayList<PostingIndex> postings){
 
         //if (start + 1 == end || start.equals(end)) {return true;}
@@ -68,6 +90,13 @@ public class MaxScoreDynamicPruning {
         return true;
     }
 
+    /**
+     * Function to align each PostingIndex in postings to the same docId.
+     *
+     * @param postings      ArrayList of PostingIndex objects each containing the posting for a query term.
+     * @param compression   Boolean flag to indicate if the data is compressed.
+     * @return              Integer value of the docId to which the postings are aligned.
+     */
     public static int alignPostings(ArrayList<PostingIndex> postings, boolean compression) {
         int maxDocId = getHighestDocId(postings, postings.size());
         if (maxDocId == 0) { return 0; }
@@ -81,21 +110,22 @@ public class MaxScoreDynamicPruning {
             boolean found = checkIfEquals(postings);
             if (found) {return currentPosting.getDocId();}
 
-            // If the next docId
+            // If the next docId is greater than the current maxDocId, update the maxDocId and reset the loop
             if (currentPosting.getDocId() > maxDocId) {
                 maxDocId = currentPosting.getDocId();
                 i = -1;
                 continue;
             }
+
+            // If the docId pointed is lower, get the next docId greater or equal to the current docId through nextGEQ
             if (currentPosting.getDocId() < maxDocId) {
                 Posting nextPostingGEQ = postings.get(i).nextGEQ(maxDocId, compression);
-                if (nextPostingGEQ == null) {return 0;} //throw new IllegalArgumentException("nextGEQ returned a null value");}
+                if (nextPostingGEQ == null) {return 0;}
 
                 int geqDocId = nextPostingGEQ.getDocId();
                 if (geqDocId > maxDocId) {
                     maxDocId = geqDocId;
                     i = -1;
-                    continue;
                 } else if (geqDocId == maxDocId) {
                     boolean foundGeq = checkIfEquals(postings);
                     if (foundGeq) {
@@ -108,6 +138,12 @@ public class MaxScoreDynamicPruning {
         return 0;
     }
 
+    /**
+     * Function to retrieve the maximum document ID from a list of PostingIndex objects.
+     *
+     * @param postingIndexes List of PostingIndex objects.
+     * @return Maximum document ID.
+     */
     private static int getHighestDocId(ArrayList<PostingIndex> postingIndexes, Integer maxTerm) {
 
         // Set the inital value to -1
@@ -123,6 +159,17 @@ public class MaxScoreDynamicPruning {
         return maxDoc;
     }
 
+    /**
+     * Function to calculate the score of a conjunctive query using dynamic pruning.
+     *
+     * @param topKPQ            TopKPriorityQueue of Pair<Float, Integer> objects to store the top k documents and their scores.
+     * @param postings          ArrayList of PostingIndex objects each containing the posting for a query term.
+     * @param scoringFunction   String to indicate which scoring function to use (TFIDF or BM25).
+     * @param compression       Boolean flag to indicate if the data is compressed.
+     * @param upperBounds       Array of floats containing the upper bounds of the query terms.
+     * @param k                 Integer value of the maximum size of the priority queue.
+     * @throws IOException
+     */
     public static void conjunctiveDPQ(TopKPriorityQueue<Pair<Float, Integer>> topKPQ, ArrayList<PostingIndex> postings, String scoringFunction, boolean compression, float[] upperBounds, int k) throws IOException {
         float threshold = 0.0f;
         int highestDoc = alignPostings(postings, compression);
@@ -136,21 +183,23 @@ public class MaxScoreDynamicPruning {
             boolean exit = false;
             float score = 0.0f;
 
+            // Calculate the score for the last posting in the list.
             Posting currentPosting = postings.get(postings.size()-1).getCurrentPosting();
             if (currentPosting != null && currentPosting.getDocId() == highestDoc) {
                 score += Scorer.getScore(currentPosting, postings.get(postings.size()- 1).getIdf(), scoringFunction);
                 postings.get(postings.size()-1).next(compression);
 
+                // Calculate the score for the rest of the postings in the list and update the score if current score + upperbound > threshold .
                 for (int i = postings.size() - 2; i >= 0; i--) {
                     Posting notPrunedPosting = postings.get(i).getCurrentPosting();
                     if (notPrunedPosting != null && notPrunedPosting.getDocId() == highestDoc) {
-                        float tempScore = Scorer.getScore(notPrunedPosting, postings.get(i).getIdf(), scoringFunction);
-                        postings.get(i).next(compression);
                         if (score + upperBounds[i] < threshold) {
+                            postings.get(i).next(compression);
                             exit = true;
                             break;
                         }
-                        score += tempScore;
+                        score += Scorer.getScore(notPrunedPosting, postings.get(i).getIdf(), scoringFunction);
+                        postings.get(i).next(compression);
                     }
                 }
 
@@ -158,16 +207,29 @@ public class MaxScoreDynamicPruning {
                 return;
             }
 
+            // If the score + upper bound is greater than the threshold, try to add the document to the priority queue.
             if(!exit) {
                 if (topKPQ.offer(new Pair<>(score, highestDoc)) && topKPQ.size() == k) {
                     assert topKPQ.peek() != null;
                     threshold = topKPQ.peek().getValue0();
                 }
             }
+            // Align the postings to the next document.
             highestDoc = alignPostings(postings, compression);
         }
     }
 
+    /**
+     * Function to calculate the score of a disjunctive query.
+     *
+     * @param topKPQ            TopKPriorityQueue of Pair<Float, Integer> objects to store the top k documents and their scores.
+     * @param postings          ArrayList of PostingIndex objects each containing the posting for a query term.
+     * @param scoringFunction   String to indicate which scoring function to use (TFIDF or BM25).
+     * @param compression       Boolean flag to indicate if the data is compressed.
+     * @param upperBounds       Array of floats containing the upper bounds of the query terms.
+     * @param k                 Integer value of the maximum size of the priority queue.
+     * @throws IOException
+     */
     public static void disjunctiveDPQ(TopKPriorityQueue<Pair<Float, Integer>> topKPQ, ArrayList<PostingIndex> postings, String scoringFunction, boolean compression, float[] upperBounds, int k) throws IOException {
         int minDoc = stats.getNumDocs();
         int termId = 0;
@@ -198,7 +260,7 @@ public class MaxScoreDynamicPruning {
                 score += Scorer.getScore(currentPosting, postings.get(termId).getIdf(), scoringFunction);
                 postings.get(termId).next(compression);
 
-                for (int i = termId + 1; i < postings.size(); i++) {
+                for (int i = postings.size()-1; i > 0; i--) {
                     if (postings.get(i).getCurrentPosting() != null && postings.get(i).getCurrentPosting().getDocId() == minDoc) {
                         Posting notPrunedPosting = postings.get(i).getCurrentPosting();
                         float tempScore = Scorer.getScore(notPrunedPosting, postings.get(i).getIdf(), scoringFunction);

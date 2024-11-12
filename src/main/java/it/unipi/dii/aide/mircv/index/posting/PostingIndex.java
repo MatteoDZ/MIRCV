@@ -152,17 +152,20 @@ public class PostingIndex {
 
 
     /**
-     * Opens the posting list by reading associated skipping blocks from the lexicon.
+     * Opens the posting list by reading associated skipping blocks from the lexicon and creates the iterators.
      */
-    public void openList() throws IOException {
+    public void getBlocks() throws IOException {
         // List of skipping blocks for efficient iteration
         ArrayList<SkippingBlock> blocks = Lexicon.getInstance().get(term).readBlocks();
 
-        if (blocks == null) {
+        if (blocks != null) {
+            skippingBlockIterator = blocks.iterator();
+            postingIterator = postings.iterator();
+        }
+        else {
             return;
         }
-        skippingBlockIterator = blocks.iterator();
-        postingIterator = postings.iterator();
+
     }
 
     /**
