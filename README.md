@@ -9,7 +9,7 @@ The project involves the creation of an information retrieval system designed to
 ## Indexing execution
 
 To execute this project download the collection.tar.gz file found at https://microsoft.github.io/msmarco/TREC-Deep-Learning-2020 and place it into the [data](data) folder.
-In order to perform the indexing operation, running the main method in [IndexingMain.java](src/main/java/it/unipi/dii/aide/mircv/index/IndexingMain.java).
+In order to perform the indexing operation, running the main method in [IndexingMain.java](src/main/java/it/unipi/dii/aide/mircv/index/IndexingMain.java), to create all files needed to execute queries.
 
 ## Performing queries
 
