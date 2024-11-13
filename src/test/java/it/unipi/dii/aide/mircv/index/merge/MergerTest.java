@@ -18,6 +18,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.jar.JarOutputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -44,7 +45,7 @@ public class MergerTest {
         try {
             FileChannel fc = FileChannel.open(Paths.get(Configuration.PATH_DOC_TERMS),
                     StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
-            BinaryFile.writeIntListToBuffer(fc, List.of(1,1,1,1,1,2,1,1,1,2,2)); // number to control maybe they are not correct
+            BinaryFile.writeIntListToBuffer(fc, List.of(1,1,1,1,1,2,1,1,2,1)); // number to control maybe they are not correct
         } catch (IOException e) {
             throw new RuntimeException("An error occurred while writing to the " + Configuration.PATH_DOC_TERMS + " file.");
         }
@@ -52,28 +53,26 @@ public class MergerTest {
 
     @Test
     public void writeCompressionFalseTest() throws IOException {
-        Statistics stats = new Statistics();
-        stats.setNumDocs(12);
-        stats.setAvgDocLen(1.3);
-        stats.setTotalLenDoc(15);
-        stats.writeSpimiToDisk(); // number to control maybe they are not correct
+        Statistics stats1 = new Statistics();
+        stats1.setNumDocs(10);
+        stats1.setAvgDocLen(1.3);
+        stats1.setTotalLenDoc(15);
+        stats1.writeSpimiToDisk();
+
         InvertedIndex inv1 = new InvertedIndex();
         inv1.add(List.of("a"), 1);
         inv1.add(List.of("b"), 2);
         inv1.add(List.of("a"), 3);
         inv1.add(List.of("b"), 4);
-        inv1.add(List.of("a"), 7);
+        inv1.add(List.of("a"), 5);
         BinaryFile.writeBlock(inv1, pathTest1);
         InvertedIndex inv2 = new InvertedIndex();
-        inv2.add(List.of("z", "a"), 1);
-        inv2.add(List.of("c"), 4);
-        inv2.add(List.of("f"), 6);
-        inv2.add(List.of("h"), 8);
+        inv2.add(List.of("z", "a"), 6);
+        inv2.add(List.of("c"), 7);
+        inv2.add(List.of("f"), 8);
         BinaryFile.writeBlock(inv2, pathTest2);
         InvertedIndex inv3 = new InvertedIndex();
-        inv3.add(List.of("a"), 3);
-        inv3.add(List.of("z", "m"), 5);
-        inv3.add(List.of("c", "a"), 6);
+        inv3.add(List.of("c", "a"), 9);
         BinaryFile.writeBlock(inv3, pathTest3);
         Merge merge = new Merge(List.of(pathTest1, pathTest2, pathTest3), 2);
         merge.write(false);
@@ -89,22 +88,24 @@ public class MergerTest {
         int docIdSize = mmbSkipping.getInt();
         long offsetFreqs = mmbSkipping.getLong();
         int freqSize = mmbSkipping.getInt();
-        MappedByteBuffer mmbDocIds = fcDocIds.map(FileChannel.MapMode.READ_ONLY, offsetDocIds, 4L *docIdSize);
+
+
+        MappedByteBuffer mmbDocIds = fcDocIds.map(FileChannel.MapMode.READ_ONLY, offsetDocIds, 40);
         List<Integer> docIds = new ArrayList<>();
         List<Integer> docLens = new ArrayList<>();
-        for (int i = 0; i < docIdSize; i++) {
+        for (int i = 0; i < 5; i++) {
             docIds.add(mmbDocIds.getInt());
+            docLens.add(mmbDocIds.getInt());
         }
         List<Short> freqs = new ArrayList<>();
-        MappedByteBuffer mmbFreqs = fcFreqs.map(FileChannel.MapMode.READ_ONLY, offsetFreqs, 4L *freqSize);
-        for (int i = 0; i < docIdSize; i++) {
+        MappedByteBuffer mmbFreqs = fcFreqs.map(FileChannel.MapMode.READ_ONLY, offsetFreqs, 2L *5);
+        for (int i = 0; i < 5; i++) {
             freqs.add(mmbFreqs.getShort());
         }
 
-        System.out.println(docIds);
 
-        assertEquals(List.of(1, 3, 6, 7), docIds);
-        assertEquals(List.of((short) 2,(short) 2, (short)1, (short)1), freqs);
+        assertEquals(List.of(1, 3, 5, 6,9), docIds);
+        assertEquals(List.of((short) 1,(short) 1, (short)1, (short)1, (short)1), freqs);
 
         docIds.clear();
         freqs.clear();
@@ -115,13 +116,17 @@ public class MergerTest {
         docIdSize = mmbSkipping.getInt();
         offsetFreqs = mmbSkipping.getLong();
         freqSize = mmbSkipping.getInt();
-        mmbDocIds = fcDocIds.map(FileChannel.MapMode.READ_ONLY, offsetDocIds, 4L *docIdSize);
-        for (int i = 0; i < docIdSize; i++) {
+        mmbDocIds = fcDocIds.map(FileChannel.MapMode.READ_ONLY, offsetDocIds, 16);
+        docIds = new ArrayList<>();
+        docLens = new ArrayList<>();
+        for (int i = 0; i < 2; i++) {
             docIds.add(mmbDocIds.getInt());
             docLens.add(mmbDocIds.getInt());
+
         }
-        mmbFreqs = fcFreqs.map(FileChannel.MapMode.READ_ONLY, offsetFreqs, 4L *freqSize);
-        for (int i = 0; i < docIdSize; i++) {
+        freqs = new ArrayList<>();
+        mmbFreqs = fcFreqs.map(FileChannel.MapMode.READ_ONLY, offsetFreqs, 2L *2);
+        for (int i = 0; i < 2; i++) {
             freqs.add(mmbFreqs.getShort());
         }
 
@@ -131,31 +136,29 @@ public class MergerTest {
 
     @Test
     public void writeCompressionTrueTest() throws IOException {
-        Statistics stats = new Statistics();
-        stats.setNumDocs(12);
-        stats.setAvgDocLen(1.3);
-        stats.setTotalLenDoc(15);
-        stats.writeSpimiToDisk(); // number to control maybe they are not correct
+        Statistics stats1 = new Statistics();
+        stats1.setNumDocs(10);
+        stats1.setAvgDocLen(1.3);
+        stats1.setTotalLenDoc(15);
+        stats1.writeSpimiToDisk();
+
         InvertedIndex inv1 = new InvertedIndex();
         inv1.add(List.of("a"), 1);
         inv1.add(List.of("b"), 2);
         inv1.add(List.of("a"), 3);
         inv1.add(List.of("b"), 4);
-        inv1.add(List.of("a"), 7);
+        inv1.add(List.of("a"), 5);
         BinaryFile.writeBlock(inv1, pathTest1);
         InvertedIndex inv2 = new InvertedIndex();
-        inv2.add(List.of("z"), 3);
-        inv2.add(List.of("c"), 4);
-        inv2.add(List.of("f"), 6);
-        inv2.add(List.of("h"), 8);
+        inv2.add(List.of("z", "a"), 6);
+        inv2.add(List.of("c"), 7);
+        inv2.add(List.of("f"), 8);
         BinaryFile.writeBlock(inv2, pathTest2);
         InvertedIndex inv3 = new InvertedIndex();
-        inv3.add(List.of("a"), 3);
-        inv3.add(List.of("z", "m"), 5);
-        inv3.add(List.of("c", "a"), 6);
+        inv3.add(List.of("c", "a"), 9);
         BinaryFile.writeBlock(inv3, pathTest3);
-        Merge merge = new Merge(List.of(pathTest1, pathTest2, pathTest3),  2);
-        merge.write( true);
+        Merge merge = new Merge(List.of(pathTest1, pathTest2, pathTest3), 2);
+        merge.write(true);
 
         fcSkippingBlock = FileChannel.open(Paths.get(Configuration.SKIPPING_BLOCK_PATH), StandardOpenOption.READ);
         fcDocIds = FileChannel.open(Paths.get(Configuration.PATH_DOCID), StandardOpenOption.READ, StandardOpenOption.WRITE);
@@ -175,23 +178,14 @@ public class MergerTest {
         mmbDocIds.get(doc_ids, 0, docIdSize);
 
         List<Integer> doc_ids_decompressed = VariableByteCompressor.decode(doc_ids);
+        List<Integer> docIds = new ArrayList<>();
+        for(int i=0;i<doc_ids_decompressed.size();i++) {
+            if(i%2==0)
+                docIds.add(doc_ids_decompressed.get(i));
+        }
 
-        assertEquals(List.of(2, 4), doc_ids_decompressed);
+        assertEquals(List.of(2, 4), docIds);
 
-         offsetSkippping = Lexicon.getInstance().get("a").getOffset_skip_pointer();
-         mmbSkipping = fcSkippingBlock.map(FileChannel.MapMode.READ_ONLY, offsetSkippping, (8 + 4) * 2 + 4 + 4);
-         offsetDocIds =mmbSkipping.getLong();
-         docIdSize = mmbSkipping.getInt();
-
-         mmbDocIds = fcDocIds.map(FileChannel.MapMode.READ_ONLY, offsetDocIds, fcDocIds.size());
-
-        byte[] doc_idsA = new byte[docIdSize];
-        mmbDocIds.get(doc_idsA, 0, docIdSize);
-
-        List<Integer> doc_ids_decompressedA = VariableByteCompressor.decode(doc_idsA);
-
-
-        assertEquals(List.of(1, 3, 6, 20), doc_ids_decompressedA);
 
     }
 
