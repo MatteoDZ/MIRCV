@@ -22,7 +22,7 @@ import java.util.zip.GZIPInputStream;
 
 
 
-public class Main {
+public class PerformanceEvaluationMain {
 
     /**
      * Executes the performance evaluation of search engine queries.

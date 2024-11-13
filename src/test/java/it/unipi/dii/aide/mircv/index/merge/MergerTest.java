@@ -52,6 +52,7 @@ public class MergerTest {
 
     @Test
     public void writeCompressionFalseTest() throws IOException {
+        Statistics stats = new Statistics();
         stats.setNumDocs(12);
         stats.setAvgDocLen(1.3);
         stats.setTotalLenDoc(15);
@@ -61,13 +62,13 @@ public class MergerTest {
         inv1.add(List.of("b"), 2);
         inv1.add(List.of("a"), 3);
         inv1.add(List.of("b"), 4);
-        inv1.add(List.of("a"), 20);
+        inv1.add(List.of("a"), 7);
         BinaryFile.writeBlock(inv1, pathTest1);
         InvertedIndex inv2 = new InvertedIndex();
         inv2.add(List.of("z", "a"), 1);
         inv2.add(List.of("c"), 4);
         inv2.add(List.of("f"), 6);
-        inv2.add(List.of("h"), 9);
+        inv2.add(List.of("h"), 8);
         BinaryFile.writeBlock(inv2, pathTest2);
         InvertedIndex inv3 = new InvertedIndex();
         inv3.add(List.of("a"), 3);
@@ -90,6 +91,7 @@ public class MergerTest {
         int freqSize = mmbSkipping.getInt();
         MappedByteBuffer mmbDocIds = fcDocIds.map(FileChannel.MapMode.READ_ONLY, offsetDocIds, 4L *docIdSize);
         List<Integer> docIds = new ArrayList<>();
+        List<Integer> docLens = new ArrayList<>();
         for (int i = 0; i < docIdSize; i++) {
             docIds.add(mmbDocIds.getInt());
         }
@@ -99,7 +101,9 @@ public class MergerTest {
             freqs.add(mmbFreqs.getShort());
         }
 
-        assertEquals(List.of(1, 3, 6, 20), docIds);
+        System.out.println(docIds);
+
+        assertEquals(List.of(1, 3, 6, 7), docIds);
         assertEquals(List.of((short) 2,(short) 2, (short)1, (short)1), freqs);
 
         docIds.clear();
@@ -114,6 +118,7 @@ public class MergerTest {
         mmbDocIds = fcDocIds.map(FileChannel.MapMode.READ_ONLY, offsetDocIds, 4L *docIdSize);
         for (int i = 0; i < docIdSize; i++) {
             docIds.add(mmbDocIds.getInt());
+            docLens.add(mmbDocIds.getInt());
         }
         mmbFreqs = fcFreqs.map(FileChannel.MapMode.READ_ONLY, offsetFreqs, 4L *freqSize);
         for (int i = 0; i < docIdSize; i++) {
@@ -126,6 +131,7 @@ public class MergerTest {
 
     @Test
     public void writeCompressionTrueTest() throws IOException {
+        Statistics stats = new Statistics();
         stats.setNumDocs(12);
         stats.setAvgDocLen(1.3);
         stats.setTotalLenDoc(15);
@@ -135,13 +141,13 @@ public class MergerTest {
         inv1.add(List.of("b"), 2);
         inv1.add(List.of("a"), 3);
         inv1.add(List.of("b"), 4);
-        inv1.add(List.of("a"), 20);
+        inv1.add(List.of("a"), 7);
         BinaryFile.writeBlock(inv1, pathTest1);
         InvertedIndex inv2 = new InvertedIndex();
         inv2.add(List.of("z"), 3);
         inv2.add(List.of("c"), 4);
         inv2.add(List.of("f"), 6);
-        inv2.add(List.of("h"), 9);
+        inv2.add(List.of("h"), 8);
         BinaryFile.writeBlock(inv2, pathTest2);
         InvertedIndex inv3 = new InvertedIndex();
         inv3.add(List.of("a"), 3);

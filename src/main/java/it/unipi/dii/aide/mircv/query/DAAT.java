@@ -16,13 +16,11 @@ import java.util.Comparator;
 public class DAAT {
 
     private static final Statistics stats;
-    private static final FileChannel fc;
 
     static {
         stats = new Statistics();
         try {
             stats.readFromDisk();
-            fc = FileChannel.open(Path.of(Configuration.PATH_DOC_TERMS), StandardOpenOption.READ, StandardOpenOption.WRITE);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

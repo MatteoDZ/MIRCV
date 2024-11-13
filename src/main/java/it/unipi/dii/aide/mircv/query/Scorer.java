@@ -20,6 +20,14 @@ public class Scorer {
 
     static Statistics stats = new Statistics();
 
+    static {
+        try {
+            stats.readFromDisk();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private static final LFUCache<Integer, Integer> lfuCache = new LFUCache<>(Configuration.DOC_TERMS_CACHE_SIZE);
 
     /**

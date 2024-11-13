@@ -12,7 +12,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class MainTest {
+public class QueryPerformanceEvaluationMainTest {
     @BeforeAll
     static void setUp() {
         Configuration.setUpPathTest();

@@ -143,17 +143,4 @@ public class SkippingBlock {
 
         return postings;
     }
-
-    @Override
-    public String toString() {
-        return "SkippingBlock{" +
-                "docIdOffset: " + docIdOffset +
-                ", docIdSize: " + docIdSize +
-                ", freqOffset: " + freqOffset +
-                ", freqSize: " + freqSize +
-                ", docIdMax: " + docIdMax +
-                ", numPostingOfBlock: " + numPostingOfBlock +
-                ", fileOffset: " + fileOffset +
-                '}';
-    }
 }

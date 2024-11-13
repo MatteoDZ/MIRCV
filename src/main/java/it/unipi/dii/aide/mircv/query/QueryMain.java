@@ -6,9 +6,10 @@ import org.javatuples.Pair;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Scanner;
 
-public class Main {
+public class QueryMain {
 
     /**
      * Reads lines from a TAR.GZ file, processes each line, and writes the results to a new file.
@@ -28,7 +29,7 @@ public class Main {
 
 
         do {
-            System.out.print("Enter the query: ");
+            System.out.print("Enter the query or write exit to close: ");
             query = scanner.nextLine();
             if (query.trim().isEmpty()) {
                 System.out.println("The query is empty. Please enter a valid query.");
@@ -40,6 +41,7 @@ public class Main {
 
             System.out.print("Select between DAAT and DynamicPruning (DP): ");
             dynamicPruning = scanner.nextLine();
+            dynamicPruning = dynamicPruning.toUpperCase(Locale.ROOT);
             if (!dynamicPruning.equals("DAAT") && !dynamicPruning.equals("DP")) {
                 System.out.println("Something went wrong, please repeat last input");
                 continue;
@@ -47,6 +49,7 @@ public class Main {
 
             System.out.print("Select Conjunctive (C) or Disjunctive(D): ");
             typeOfQuery = scanner.nextLine();
+            typeOfQuery = typeOfQuery.toUpperCase(Locale.ROOT);
             if (!typeOfQuery.equals("C") && !typeOfQuery.equals("D")) {
                 System.out.println("Something went wrong, please repeat last input");
                 continue;
@@ -54,6 +57,7 @@ public class Main {
 
             System.out.print("Select the scoring function bm25 or tfidf: ");
             scoringFunction = scanner.nextLine();
+            scoringFunction = scoringFunction.toLowerCase(Locale.ROOT);
             if (!scoringFunction.equals("bm25") && !scoringFunction.equals("tfidf")) {
                 System.out.println("Something went wrong, please repeat last input");
                 continue;
@@ -62,7 +66,6 @@ public class Main {
             timerStart = System.currentTimeMillis();
             topKPQ = (Processer.processQuery(query, 10, typeOfQuery.equals("C"), scoringFunction, Configuration.COMPRESSION, dynamicPruning.equals("DP")));
             timerEnd = System.currentTimeMillis();
-            //queryResult=Processer.getRankedQuery(topKPQ);
 
             // Return null if the priority queue is null.
             if (topKPQ == null) {
@@ -85,34 +88,6 @@ public class Main {
             System.out.println("with execution time: " + (timerEnd - timerStart) + "ms");
 
         } while (true);
-
-        /*
-
-        timerStart = System.currentTimeMillis();
-        for (int i = 0; i < 1000; i++) {
-            topKPQ = (Processer.processQuery("Rolling stones concert London", 10, true, "tfidf", Configuration.COMPRESSION, false));
-
-            if (topKPQ == null) {
-                System.out.println("No documents were found for this query");
-                continue;
-            }
-
-            ArrayList<Integer> queryResult = new ArrayList<>();
-            while (!topKPQ.isEmpty()) {
-                queryResult.add(topKPQ.poll().getValue1());
-            }
-
-            Collections.reverse(queryResult);
-            //System.out.print("Results of document numbers: ");
-            for (int j : queryResult) {
-                //System.out.print(j + " ");
-            }
-            System.out.println(i);
-        }
-        timerEnd = System.currentTimeMillis();
-        System.out.println((timerEnd - timerStart));
-
-         */
 
         scanner.close();
     }

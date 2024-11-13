@@ -14,7 +14,7 @@ import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 
-public class IndexingMainTest {
+public class IndexingQueryPerformanceEvaluationMainTest {
     @BeforeAll
     static void setUp() {
         Configuration.setUpPathTest();
