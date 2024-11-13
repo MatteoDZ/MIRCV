@@ -33,37 +33,31 @@ public class DocIdFile {
     /**
      * Writes a block of integers to the file.
      *
-     * @param  block     the list of integers to be written
+     * @param  block     the list of docIds to be written
+     * @param lenghts    the list of lengths of the docIds to be written
      * @param  compression  whether to compress the block or not
-     * @return           the size of the file before writing the block
+     * @return A Pair with the initial file channel size and the number of bytes written.
      * @throws IOException if an I/O error occurs
      */
-    public Pair<Long, Integer> writeBlock(List<Integer> block, List<Integer> lenghts, boolean compression) throws IOException {
+    public Pair<Long, Integer> writeBlock(List<Integer> block, List<Integer> lenghts, Boolean compression) throws IOException {
         long fc_size = fc.size();
-        if (!compression) {
-            if (block.size() == lenghts.size()) {
-                for (int i = 0; i < block.size(); i++) {
-                    BinaryFile.writeIntToBuffer(fc, block.get(i));
-                    BinaryFile.writeIntToBuffer(fc, lenghts.get(i));
-                }
-            }
-            else{
-                throw new IOException("Different lenghts");
-            }
-        } else {
-            if (block.size() == lenghts.size()) {
-                List<Integer> toBeWritten = new ArrayList<>();
-                for (int i = 0; i < block.size(); i++) {
-                    toBeWritten.add(block.get(i));
-                    toBeWritten.add(lenghts.get(i));
-                }
-                BinaryFile.writeArrayByteToBuffer(fc, VariableByteCompressor.encode(toBeWritten));
-            }
-            else{
-                throw new IOException("Different lenghts");
-            }
+        if (block.size() != lenghts.size()) {
+            throw new IOException("Different lengths");
         }
-        return Pair.with(fc_size, Math.toIntExact((int) fc.size() - fc_size));
+
+        List<Integer> toBeWritten = new ArrayList<>();
+        for (int i = 0; i < block.size(); i++) {
+            toBeWritten.add(block.get(i));
+            toBeWritten.add(lenghts.get(i));
+        }
+
+        if (!compression) {
+            BinaryFile.writeIntListToBuffer(fc, toBeWritten);
+        } else {
+            BinaryFile.writeArrayByteToBuffer(fc, VariableByteCompressor.encode(toBeWritten));
+        }
+
+        return Pair.with(fc_size, Math.toIntExact((int) (fc.size() - fc_size)));
     }
 
 }
