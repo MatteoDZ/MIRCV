@@ -34,7 +34,7 @@ public class FrequencyFile {
      *
      * @param  block     the list of integers to be written
      * @param  compress  whether to compress the block or not
-     * @return           the size of the file before writing the block
+     * @return A Pair with the initial file channel size and the number of bytes written.
      * @throws IOException if an I/O error occurs
      */
     public Pair<Long, Integer> writeBlockP(List<Integer> block, boolean compress) throws IOException {

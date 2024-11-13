@@ -31,7 +31,13 @@ public class Merge {
         stats.readSpimiFromDisk();
     }
 
-    public void write(boolean compress) throws IOException {
+    /**
+     * Writes the merged data to the files
+     *
+     * @param compress A boolean indicating whether compression is used.
+     * @throws IOException If there is an issue writing to the files.
+     */
+    public void write(Boolean compress) throws IOException {
         long lexSize = 0L;
 
         Lexicon lexicon = new Lexicon();
@@ -145,22 +151,6 @@ public class Merge {
         statistics.writeMergeToDisk();
     }
 
-
-    /**
-     * Finds the first duplicate element in a given list of integers.
-     *
-     * @param  listContainingDuplicates  the list of integers to search for duplicates
-     * @return                          the index of the first duplicate element in the list
-     */
-    protected static Integer findDuplicate (List<Integer> listContainingDuplicates) {
-        final Set<Integer> set1 = new HashSet<>();
-        for (Integer yourInt : listContainingDuplicates) {
-            if (!set1.add(yourInt)) {
-                return listContainingDuplicates.indexOf(yourInt);
-            }
-        }
-        return -1;
-    }
 
 
     /**

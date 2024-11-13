@@ -190,12 +190,6 @@ public class MergerTest {
 
     }
 
-    @Test
-    public void findDuplicateTest() {
-        assertEquals(3, Merge.findDuplicate(List.of(1,2,3,4,4)));
-        assertEquals(0, Merge.findDuplicate(List.of(1,1,2)));
-        assertEquals(-1, Merge.findDuplicate(List.of(1,2,3)));
-    }
 
     @Test
     public void findMinTermTest() throws IOException {

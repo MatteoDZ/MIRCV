@@ -23,7 +23,6 @@ public class Processer {
      * @param TFIDForBM25   String value to determine the scoring method between TFIDF and BM25.
      * @param pruning       Boolean flag to check whether to apply DynamicPruning or not.
      * @return              ArrayList containing the postingIndexes retrieved.
-     * @throws IOException
      */
     public static ArrayList<PostingIndex> retrievePostingLists(ArrayList<String> query, boolean conjunctive, String TFIDForBM25, boolean pruning) throws IOException {
         ArrayList<PostingIndex> retrievedPostings  = new ArrayList<>();
@@ -71,7 +70,6 @@ public class Processer {
             System.out.println("The query has no searchable terms");
             return null;
         }
-        System.out.println(cleaned);
 
         // Retrieve posting list for each query term.
         ArrayList<PostingIndex> queryPostings = retrievePostingLists(cleaned, conjunctive,scoringFun, pruning);

@@ -31,7 +31,6 @@ public class DynamicPruning {
      * @param conjunctive  Boolean flag to indicate if the query is conjunctive.
      * @param compression  Boolean flag to indicate if the data is compressed.
      * @return             TopKPriorityQueue of Pair<Float, Integer> objects containing the top k documents and their scores.
-     * @throws IOException
      */
     public static TopKPriorityQueue<Pair<Float, Integer>> maxScore(ArrayList<PostingIndex> postings, Integer k, String TFIDForBM25, Boolean conjunctive, Boolean compression) throws IOException {
         TopKPriorityQueue<Pair<Float, Integer>> topK = new TopKPriorityQueue<>(k, Comparator.comparing(Pair::getValue0));
@@ -168,7 +167,6 @@ public class DynamicPruning {
      * @param compression       Boolean flag to indicate if the data is compressed.
      * @param upperBounds       Array of floats containing the upper bounds of the query terms.
      * @param k                 Integer value of the maximum size of the priority queue.
-     * @throws IOException
      */
     public static void conjunctiveDPQ(TopKPriorityQueue<Pair<Float, Integer>> topKPQ, ArrayList<PostingIndex> postings, String scoringFunction, boolean compression, float[] upperBounds, int k) throws IOException {
         float threshold = 0.0f;
@@ -228,7 +226,6 @@ public class DynamicPruning {
      * @param compression       Boolean flag to indicate if the data is compressed.
      * @param upperBounds       Array of floats containing the upper bounds of the query terms.
      * @param k                 Integer value of the maximum size of the priority queue.
-     * @throws IOException
      */
     public static void disjunctiveDPQ(TopKPriorityQueue<Pair<Float, Integer>> topKPQ, ArrayList<PostingIndex> postings, String scoringFunction, boolean compression, float[] upperBounds, int k) throws IOException {
         int minDoc = stats.getNumDocs();
