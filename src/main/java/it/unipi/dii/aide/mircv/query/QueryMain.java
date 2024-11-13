@@ -3,6 +3,7 @@ package it.unipi.dii.aide.mircv.query;
 import it.unipi.dii.aide.mircv.index.IndexingMain;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
+import it.unipi.dii.aide.mircv.performanceEvaluation.PerformanceEvaluationMain;
 import org.javatuples.Pair;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,6 +42,13 @@ public class QueryMain {
                 continue;
             }
             else if(query.trim().equals("exit")) {
+                break;
+            } else if (query.trim().equals("execute_performance_evaluation")) {
+                try {
+                    PerformanceEvaluationMain.main(new String[0]);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 break;
             }
 
