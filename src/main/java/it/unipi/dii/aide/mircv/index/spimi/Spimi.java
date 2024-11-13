@@ -22,7 +22,6 @@ public class Spimi {
 
     public static void spimi(String pathCollection) throws IOException {
         final FileChannel fc;
-        ArrayList<Integer> lengths = new ArrayList<>();
         try {
             fc = FileChannel.open(Paths.get(Configuration.PATH_DOC_TERMS),
                     StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
@@ -41,7 +40,7 @@ public class Spimi {
                     List<String> term = Preprocess.processText(parts[1], Configuration.STEMMING_AND_STOPWORDS);
                     term.removeAll(List.of("", " "));
                     total_length += term.size();
-                    lengths.add(term.size());
+                    BinaryFile.writeIntToBuffer(fc, term.size());
                     if (!parts[1].trim().isEmpty() || !term.isEmpty()) {
                         inv.add(term, Integer.parseInt(parts[0]));
                         if (numDocs % 1000000 == 0) {
@@ -63,7 +62,6 @@ public class Spimi {
                     inv.clean();
                     System.gc();
                 }
-                BinaryFile.writeIntListToBuffer(fc, lengths);
                 fc.close();
                 statistics.setTotalLenDoc(total_length);
                 statistics.setNumDocs(numDocs);
