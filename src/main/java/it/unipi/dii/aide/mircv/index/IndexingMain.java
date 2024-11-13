@@ -6,7 +6,9 @@ import it.unipi.dii.aide.mircv.index.spimi.Spimi;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
 
 import java.io.*;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.Scanner;
 
 public class IndexingMain {
 
@@ -16,6 +18,29 @@ public class IndexingMain {
      * @throws IOException If an I/O error occurs while reading or writing files.
      */
     public static void main(String[] args) throws IOException {
+
+        Scanner scanner = new Scanner(System.in);
+        Configuration.COMPRESSION = true;
+        Configuration.STEMMING_AND_STOPWORDS = true;
+        Configuration.PATH_DOCUMENTS = "data/collection.tar.gz";
+
+        String compresison, stopwords, path;
+
+        System.out.print("Perform the indexing with compression? [Y/n]: ");
+        compresison = scanner.nextLine();
+        compresison = compresison.toUpperCase(Locale.ROOT);
+        Configuration.COMPRESSION = !compresison.equals("N");
+
+        System.out.println("Perform the indexing with stemming and stopwords removal? [Y/n]: ");
+        stopwords = scanner.nextLine();
+        stopwords = stopwords.toUpperCase(Locale.ROOT);
+        Configuration.STEMMING_AND_STOPWORDS = !stopwords.equals("N");
+
+        System.out.print("Enter the path of the documents, to use the default one leave empty: ");
+        path = scanner.nextLine();
+        if (!path.trim().isEmpty()) {
+            Configuration.PATH_DOCUMENTS = path;
+        }
 
         if (!FileUtils.searchIfExists(Configuration.DIRECTORY_TEMP_FILES)) {
             FileUtils.createDirectory(Configuration.DIRECTORY_TEMP_FILES);
