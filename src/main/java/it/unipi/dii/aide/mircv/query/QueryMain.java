@@ -1,7 +1,9 @@
 package it.unipi.dii.aide.mircv.query;
 
+import it.unipi.dii.aide.mircv.index.IndexingMain;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
+import it.unipi.dii.aide.mircv.performanceEvaluation.PerformanceEvaluationMain;
 import org.javatuples.Pair;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,7 +20,11 @@ public class QueryMain {
      */
     public static void main(String[] args) throws IOException {
         if(!FileUtils.filesExist(Configuration.SKIPPING_BLOCK_PATH, Configuration.PATH_DOCID, Configuration.PATH_FREQ, Configuration.PATH_LEXICON)){
-            throw new RuntimeException("The index data files does not exist, run the indexing main first");
+            try {
+                IndexingMain.main(new String[0]);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
 
@@ -36,6 +42,13 @@ public class QueryMain {
                 continue;
             }
             else if(query.trim().equals("exit")) {
+                break;
+            } else if (query.trim().equals("execute_performance_evaluation")) {
+                try {
+                    PerformanceEvaluationMain.main(new String[0]);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 break;
             }
 

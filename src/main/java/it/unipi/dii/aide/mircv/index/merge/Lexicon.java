@@ -4,6 +4,7 @@ import it.unipi.dii.aide.mircv.index.config.Configuration;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Objects;
@@ -19,7 +20,7 @@ public class Lexicon {
     public Lexicon() {
         lexicon = new LexiconData();
         try {
-            fc = FileChannel.open(Paths.get(Objects.requireNonNull(Configuration.PATH_LEXICON)),
+            fc = FileChannel.open(Path.of(Paths.get(Objects.requireNonNull(Configuration.PATH_LEXICON)).toUri()),
                     StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         } catch (IOException e) {
             throw new RuntimeException("An error occurred while writing to the " + Configuration.PATH_LEXICON + " file.");

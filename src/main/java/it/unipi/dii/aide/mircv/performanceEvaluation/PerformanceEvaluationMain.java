@@ -1,5 +1,6 @@
 package it.unipi.dii.aide.mircv.performanceEvaluation;
 
+import it.unipi.dii.aide.mircv.index.IndexingMain;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.merge.Lexicon;
 import it.unipi.dii.aide.mircv.index.utils.FileUtils;
@@ -28,6 +29,15 @@ public class PerformanceEvaluationMain {
      * Executes the performance evaluation of search engine queries.
      */
     public static void main(String[] args) throws IOException {
+
+        if(!FileUtils.filesExist(Configuration.SKIPPING_BLOCK_PATH, Configuration.PATH_DOCID, Configuration.PATH_FREQ, Configuration.PATH_LEXICON)){
+            try {
+                IndexingMain.main(new String[0]);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         Statistics statistics = new Statistics();
         statistics.readFromDisk();
 
