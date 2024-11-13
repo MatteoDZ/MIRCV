@@ -105,7 +105,6 @@ public class MergerTest {
         docIds.clear();
         freqs.clear();
 
-
         offsetSkippping = Lexicon.getInstance().get("b").getOffset_skip_pointer();
         mmbSkipping = fcSkippingBlock.map(FileChannel.MapMode.READ_ONLY, offsetSkippping, (8 + 4) * 2 + 4 + 4);
         offsetDocIds =mmbSkipping.getLong();

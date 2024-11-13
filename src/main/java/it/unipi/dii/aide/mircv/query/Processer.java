@@ -90,27 +90,4 @@ public class Processer {
         return topKPQ;
 
     }
-
-    /**
-     * Retrieves the ranked query from the given priority queue.
-     *
-     * @param  topKPQ  The priority queue containing the query results.
-     * @return         ArrayList of integers representing the ranked query.
-     */
-    public static ArrayList<Integer> getRankedQuery(TopKPriorityQueue<Pair<Float,Integer>> topKPQ){
-        // Return null if the priority queue is null.
-        if (topKPQ == null) {
-            return null;
-        }
-
-        // Retrieve the document IDs from the priority queue.
-        ArrayList<Integer> list = new ArrayList<>();
-        while (!topKPQ.isEmpty()) {
-            list.add(topKPQ.poll().getValue1());
-        }
-
-        // Reverse the list to get the top-K results in descending order.
-        Collections.reverse(list);
-        return list;
-    }
 }

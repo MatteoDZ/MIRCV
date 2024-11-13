@@ -18,17 +18,8 @@ import java.util.HashMap;
  */
 public class Scorer {
 
-    private static final FileChannel fc;
     static Statistics stats = new Statistics();
 
-    static {
-        try {
-            fc = FileChannel.open(Path.of(Configuration.PATH_DOC_TERMS), StandardOpenOption.READ, StandardOpenOption.WRITE);
-            stats.readFromDisk();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
     private static final LFUCache<Integer, Integer> lfuCache = new LFUCache<>(Configuration.DOC_TERMS_CACHE_SIZE);
 
     /**
@@ -71,19 +62,6 @@ public class Scorer {
         int docLen = posting.getDocLen();
         float tf = (float) (1 + Math.log(posting.getFrequency()));
         return (float) (idf * (tf * (Configuration.BM25_K1 + 1))/(tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (docLen / stats.getAvgDocLen()))));
-    }
-
-    /**
-     * Return the lenght of a document.
-     *
-     * @param docId The doc_id to get.
-     * @return The length of the document corresponding to the docId
-     */
-    public static Integer getDoc_len(int docId) throws IOException {
-        if (lfuCache.containsKey(docId)) {return lfuCache.get(docId);}
-        int doc_len = BinaryFile.readIntFromBuffer(fc, docId*4L);
-        lfuCache.put(docId, doc_len);
-        return doc_len;
     }
 
     /**

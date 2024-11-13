@@ -1,6 +1,7 @@
 package it.unipi.dii.aide.mircv.index.spimi;
 
 import it.unipi.dii.aide.mircv.index.binary.BinaryFile;
+import it.unipi.dii.aide.mircv.index.compression.VariableByteCompressor;
 import it.unipi.dii.aide.mircv.index.config.Configuration;
 import it.unipi.dii.aide.mircv.index.posting.InvertedIndex;
 import it.unipi.dii.aide.mircv.index.preprocess.Preprocess;
@@ -13,6 +14,7 @@ import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -20,6 +22,7 @@ public class Spimi {
 
     public static void spimi(String pathCollection) throws IOException {
         final FileChannel fc;
+        ArrayList<Integer> lengths = new ArrayList<>();
         try {
             fc = FileChannel.open(Paths.get(Configuration.PATH_DOC_TERMS),
                     StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
@@ -38,7 +41,7 @@ public class Spimi {
                     List<String> term = Preprocess.processText(parts[1], Configuration.STEMMING_AND_STOPWORDS);
                     term.removeAll(List.of("", " "));
                     total_length += term.size();
-                    BinaryFile.writeIntToBuffer(fc, term.size());
+                    lengths.add(term.size());
                     if (!parts[1].trim().isEmpty() || !term.isEmpty()) {
                         inv.add(term, Integer.parseInt(parts[0]));
                         if (numDocs % 1000000 == 0) {
@@ -60,6 +63,8 @@ public class Spimi {
                     inv.clean();
                     System.gc();
                 }
+                BinaryFile.writeIntListToBuffer(fc, lengths);
+                fc.close();
                 statistics.setTotalLenDoc(total_length);
                 statistics.setNumDocs(numDocs);
                 statistics.setAvgDocLen((double)total_length / numDocs);

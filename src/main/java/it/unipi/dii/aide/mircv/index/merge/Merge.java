@@ -42,6 +42,7 @@ public class Merge {
 
         Lexicon lexicon = new Lexicon();
 
+        // Open the file channel for the skipping block file
         FileChannel fcSkippingBlock = FileChannel.open(Paths.get(Configuration.SKIPPING_BLOCK_PATH),
                 StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
 
@@ -50,12 +51,14 @@ public class Merge {
 
         ArrayList<Integer> docLens = new ArrayList<>();
 
+        // Open the file channel for the document lengths file
         FileChannel fc = FileChannel.open(Path.of(Configuration.PATH_DOC_TERMS), StandardOpenOption.READ, StandardOpenOption.WRITE);
         for (int documentId = 0; documentId < stats.getNumDocs(); documentId++) {
             docLens.add(BinaryFile.readIntFromBuffer(fc, documentId*4L));
         }
         fc.close();
 
+        // While there are still lines to read
         while (!readerLines.isEmpty()) {
 
             if (lexSize % 100000 == 0)
@@ -63,17 +66,19 @@ public class Merge {
 
             lexSize++;
 
+            // Find the minimum term
             String minTerm = findMinTerm(readerLines);
 
+            // Create a new PostingIndex for the minimum term
             PostingIndex minPosting = new PostingIndex(minTerm);
             Iterator<Map.Entry<BlockReader, PostingIndex>> iterator = readerLines.entrySet().iterator();
 
+            // Iterate through the readers
             while (iterator.hasNext()) {
                 Map.Entry<BlockReader, PostingIndex> entry = iterator.next();
                 PostingIndex postingList = entry.getValue();
 
                 if (postingList.getTerm().equals(minTerm)) {
-                    //we are inside a reader with the min term
                     minPosting.appendList(postingList);
 
                     BlockReader reader = entry.getKey();
@@ -84,11 +89,12 @@ public class Merge {
                         List<Integer> freqs = reader.readNumbers();
                         readerLines.put(reader, new PostingIndex(line, docIds, freqs));
                     } else {
-                        iterator.remove(); // Remove the current reader from the list
+                        iterator.remove();
                     }
                 }
             }
 
+            // Create structures for the new postings
             List<Integer> docIdsNew = minPosting.getDocIds();
             List<Integer> freqsNew = minPosting.getFrequencies();
             ArrayList<Integer> docLengthsNew = new ArrayList<>();
@@ -96,6 +102,7 @@ public class Merge {
             int block_size;
             int num_blocks;
 
+            // Calculate the block size and number of blocks
             if (minPosting.getPostings().size() <= this.blockSize) {
                 block_size = minPosting.getPostings().size();
                 num_blocks = 1;
@@ -113,8 +120,10 @@ public class Merge {
                 docLengthsNew.add(docLens.get(docId));
             }
 
+            // Write the lexicon entry for the term
             lexiconWrite(minPosting, fcSkippingBlock.size(), lexicon, num_blocks, docLens);
 
+            // Write the blocks of postings to disk
             for (int currentBlock = 0; currentBlock < num_blocks; currentBlock++){
                 docIds = new ArrayList<>();
                 freqs = new ArrayList<>();
@@ -128,9 +137,11 @@ public class Merge {
                     }
                 }
 
+                // Retrieve offset and size for docIds and frequencies
                 Pair<Long, Integer> pair_docIds = docIdWriter.writeBlock(docIds, docLengths, compress);
                 Pair<Long, Integer> pair_freqs = frequencyWriter.writeBlockP(freqs, compress);
 
+                // Write the skipping block to disk
                 SkippingBlock skippingBlock = new SkippingBlock();
                 skippingBlock.setDocIdOffset(pair_docIds.getValue0());
                 skippingBlock.setFreqOffset(pair_freqs.getValue0());
@@ -146,6 +157,7 @@ public class Merge {
         }
         fcSkippingBlock.close();
 
+        // Compute statistics and write them to disk
         Statistics statistics = new Statistics();
         statistics.setTerms(lexSize);
         statistics.writeMergeToDisk();
@@ -212,9 +224,6 @@ public class Merge {
         if (docLen == null || docLen == 0) {
             throw new RuntimeException("Document length is null or zero.");
         }
-        //FileChannel fc = FileChannel.open(Path.of(Configuration.PATH_DOC_TERMS), StandardOpenOption.READ, StandardOpenOption.WRITE);
-        //int docLen2 = BinaryFile.readIntFromBuffer(fc, posting.getDocId()*4L);
-        //fc.close();
         float tf = (float) (1 + Math.log(posting.getFrequency()));
         return (float) (idf * (tf * (Configuration.BM25_K1 + 1))/(tf + Configuration.BM25_K1 * (1 - Configuration.BM25_B + Configuration.BM25_B * (docLen / stats.getAvgDocLen()))));
     }
